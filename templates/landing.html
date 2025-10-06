@@ -1,17 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="landing-box">
-    <h2>{{ t("Bienvenido a WS","Welcome to WS","歡迎來到WS") }}</h2>
-    <p>{{ t("Conecta productores, exportadores y clientes internacionales en una sola plataforma.",
-            "Connect producers, exporters and international clients in one platform.",
-            "連接生產者、出口商和國際客戶的一站式平台") }}</p>
-    {% if not session.get("user") %}
-        <div class="actions">
-            <a href="{{ url_for('login') }}" class="btn">{{ t("Inicia sesión","Login","登入") }}</a>
-            <a href="{{ url_for('register_router') }}" class="btn">{{ t("Regístrate","Register","註冊") }}</a>
+
+<section class="landing-container">
+    <div class="landing-card">
+        <h1 class="landing-title">Bienvenido a <span class="highlight">WS</span></h1>
+        <p class="landing-subtitle">
+            Conectamos <strong>productores, exportadores y clientes internacionales</strong> en una sola plataforma.  
+            Simplifica tus operaciones de compra, venta y servicios dentro del mercado global de frutas y alimentos.
+        </p>
+
+        <div class="landing-buttons">
+            {% if 'user_id' in session %}
+                <a href="{{ url_for('panel') }}" class="btn-primary">Ir a mi Panel</a>
+                <a href="{{ url_for('perfil') }}" class="btn-secondary">Ver mi Perfil</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-primary">Iniciar Sesión</a>
+                <a href="{{ url_for('register') }}" class="btn-secondary">Registrarse</a>
+            {% endif %}
         </div>
-    {% else %}
-        <a href="{{ url_for('dashboard') }}" class="btn big">{{ t("Ir a mi panel","Go to dashboard","前往控制台") }}</a>
-    {% endif %}
-</div>
+    </div>
+</section>
+
 {% endblock %}
