@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="profile-box">
+    <h2>{{ t("Panel de Usuario","User Dashboard","用戶面板") }}</h2>
+    <p><strong>{{ usuario }}</strong> - {{ rol }}</p>
+
+    <h3>{{ t("Mi empresa/perfil","My company/profile","我的公司/檔案") }}</h3>
+    <p>{{ my_company.descripcion }}</p>
+    <ul>
+    {% for i in my_company.items %}
+        <li>{{ i }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}
