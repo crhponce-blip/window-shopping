@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card float">
+  <h2>🇨🇱 {{ t("Registro Nacional", "National Registration", "本地注册") }}</h2>
+  <p class="muted">{{ t("Adjunta RUT (SII) en PDF. La visibilidad de roles se ajusta según tu ámbito.", "Attach RUT (SII) PDF. Roles are filtered by scope.", "请上传RUT (SII) 的PDF。角色将按范围过滤。") }}</p>
+  <form method="POST" enctype="multipart/form-data">
+    <label>Empresa</label>
+    <input name="company" required>
+    <label>Correo</label>
+    <input type="email" name="email" required>
+    <label>RUT (SII)</label>
+    <input name="rut" required placeholder="11.111.111-1">
+    <label>PDF RUT (SII)</label>
+    <input type="file" name="rut_pdf" accept="application/pdf" required>
+
+    <label>{{ t("Rol", "Role", "角色") }}</label>
+    <select name="rol" required>
+      {% if scope != 'services' %}
+      <option>Productor</option>
+      <option>Planta</option>
+      <option>Packing</option>
+      <option>Frigorífico</option>
+      <option>Exportador</option>
+      {% endif %}
+      {% if scope != 'sell' and scope != 'buy' %}
+      <option>Transporte</option>
+      <option>Agencia de aduana</option>
+      <option>Extraportuario</option>
+      {% endif %}
+    </select>
+
+    <button class="btn" type="submit">{{ t('register') }}</button>
+  </form>
+</div>
+{% endblock %}
