@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ t("Bienvenido a WS","Welcome to WS","歡迎來到WS") }}</h2>
+<p>{{ t("Conecta productores, exportadores y clientes internacionales en una sola plataforma.",
+        "Connect producers, exporters and international clients in one platform.",
+        "連接生產者、出口商和國際客戶的一站式平台") }}</p>
+
+{% if not session.get("user") %}
+    <p>
+        <a href="{{ url_for('login') }}" class="btn">{{ t("Inicia sesión","Login","登入") }}</a>
+        <a href="{{ url_for('register_router') }}" class="btn">{{ t("Regístrate","Register","註冊") }}</a>
+    </p>
+{% else %}
+    <p>
+        <a href="{{ url_for('dashboard') }}" class="btn">{{ t("Ir a mi panel","Go to dashboard","前往控制台") }}</a>
+    </p>
+{% endif %}
+{% endblock %}
