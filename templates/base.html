@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>WS - Window Shopping</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+    <div class="logo">
+        <img src="{{ url_for('static', filename='uploads/687B2521-2792-49C5-BD7A-1BEC52D410EE.jpeg') }}" alt="Logo WS">
+    </div>
+    <nav class="main-nav">
+        <a href="{{ url_for('home') }}">{{ t("Inicio","Home","首頁") }}</a>
+        {% if session.get("user") %}
+            <a href="{{ url_for('dashboard') }}">{{ t("Mi Panel","Dashboard","控制台") }}</a>
+            <a href="{{ url_for('perfil') }}">{{ t("Perfil","Profile","個人資料") }}</a>
+            <a href="{{ url_for('carrito') }}">{{ t("Carrito","Cart","購物車") }}</a>
+            <a href="{{ url_for('logout') }}">{{ t("Salir","Logout","登出") }}</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">{{ t("Ingresar","Login","登入") }}</a>
+            <a href="{{ url_for('register_router') }}">{{ t("Registrarse","Register","註冊") }}</a>
+        {% endif %}
+        <a href="{{ url_for('clientes') }}">{{ t("Clientes","Clients","客戶") }}</a>
+        <a href="{{ url_for('ayuda') }}">{{ t("Ayuda","Help","幫助") }}</a>
+    </nav>
+    <div class="lang-select">
+        <a href="{{ url_for('set_lang','es') }}">ES</a> |
+        <a href="{{ url_for('set_lang','en') }}">EN</a> |
+        <a href="{{ url_for('set_lang','zh') }}">中文</a>
+    </div>
+</header>
+
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</div>
+
+<footer>
+    &copy; 2025 WS - Window Shopping
+</footer>
+</body>
+</html>
+
+
+Landing
+
+{% extends "base.html" %}
+{% block content %}
+<div class="landing-box">
+    <h2>{{ t("Bienvenido a WS","Welcome to WS","歡迎來到WS") }}</h2>
+    <p>{{ t("Conecta productores, exportadores y clientes internacionales en una sola plataforma.",
+            "Connect producers, exporters and international clients in one platform.",
+            "連接生產者、出口商和國際客戶的一站式平台") }}</p>
+    {% if not session.get("user") %}
+        <div class="actions">
+            <a href="{{ url_for('login') }}" class="btn">{{ t("Inicia sesión","Login","登入") }}</a>
+            <a href="{{ url_for('register_router') }}" class="btn">{{ t("Regístrate","Register","註冊") }}</a>
+        </div>
+    {% else %}
+        <a href="{{ url_for('dashboard') }}" class="btn big">{{ t("Ir a mi panel","Go to dashboard","前往控制台") }}</a>
+    {% endif %}
+</div>
+{% endblock %}
