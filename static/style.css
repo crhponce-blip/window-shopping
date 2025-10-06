@@ -1,177 +1,231 @@
-/* Fondo principal con degradado */
-body {
+/* ============================================================
+   ESTILO GLOBAL WINDOW SHOPPING (WS)
+   ============================================================ */
+
+/* ---- Reset básico ---- */
+* {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #0a1a33, #1e3a5f);
-    color: #ffffff;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", Arial, sans-serif;
+}
+
+/* ---- Fondo general ---- */
+body {
+    background: linear-gradient(135deg, #001f3f, #005fa3);
+    color: #f0f0f0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Header */
+/* ---- Header / Barra superior ---- */
 header {
-    background: rgba(0,0,0,0.6);
-    padding: 15px 30px;
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
 
-/* Logo */
 header .logo img {
-    height: 50px;
-    width: auto;
-    display: block;
+    height: 60px;
+    border-radius: 8px;
 }
 
-/* Menú principal */
-nav {
-    flex-grow: 1;
+/* ---- Navegación ---- */
+.main-nav {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 20px;
 }
 
-nav ul {
-    list-style: none;
-    display: flex;
-    padding: 0;
-    margin: 0;
-}
-
-nav ul.left {
-    justify-content: flex-start;
-}
-
-nav ul.right {
-    justify-content: flex-end;
-}
-
-nav li {
-    margin: 0 10px;
-}
-
-nav a {
+.main-nav a {
     color: #fff;
     text-decoration: none;
-    font-weight: bold;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: background 0.3s;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-nav a:hover {
-    background: rgba(255, 255, 255, 0.2);
+.main-nav a:hover {
+    color: #00c3ff;
+    transform: translateY(-2px);
 }
 
-/* Sección principal */
-main {
-    flex-grow: 1;
-    padding: 20px;
+/* ---- Idiomas ---- */
+.lang-select {
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.lang-select a {
+    color: #ccc;
+    margin: 0 4px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.lang-select a:hover {
+    color: #00c3ff;
+}
+
+/* ---- Contenedor principal ---- */
+.container {
+    flex: 1;
+    padding: 40px;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
 }
 
-/* Recuadros flotantes */
-.card {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: 20px;
-    margin: 15px;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.4);
-    backdrop-filter: blur(8px);
+/* ---- Cuadro principal de landing ---- */
+.landing-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 60px 80px;
+    max-width: 700px;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 1s ease-in-out;
+}
+
+.landing-box h2 {
+    font-size: 2.2em;
     color: #fff;
-    width: 100%;
-    max-width: 600px;
+    margin-bottom: 20px;
 }
 
-/* Formularios */
-form input, form select, form textarea {
-    width: 100%;
+.landing-box p {
+    font-size: 1.1em;
+    color: #dcdcdc;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* ---- Botones ---- */
+.btn {
+    background: #0074d9;
+    color: white;
+    padding: 12px 30px;
+    margin: 5px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: #00c3ff;
+    transform: scale(1.05);
+}
+
+.btn.big {
+    padding: 14px 40px;
+    font-size: 1.1em;
+}
+
+/* ---- Flash messages ---- */
+.flash {
+    background: rgba(0, 195, 255, 0.15);
+    border: 1px solid #00c3ff;
     padding: 10px;
-    margin: 8px 0;
-    border: none;
+    border-radius: 8px;
+    text-align: center;
+    color: #00c3ff;
+    margin-bottom: 20px;
+}
+
+/* ---- Formularios ---- */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(255,255,255,0.08);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}
+
+form input, form select, form textarea {
+    padding: 12px;
     border-radius: 6px;
+    border: none;
+    outline: none;
     background: rgba(255,255,255,0.15);
     color: #fff;
+    font-size: 1em;
 }
 
-form button {
-    background: #0a84ff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 6px;
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s;
+form input::placeholder, form textarea::placeholder {
+    color: #ccc;
 }
 
-form button:hover {
-    background: #005fcc;
-}
-
-/* Tablas */
+/* ---- Tablas ---- */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
     background: rgba(255,255,255,0.05);
     border-radius: 8px;
     overflow: hidden;
+    margin-top: 20px;
 }
 
-table th, table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-table th {
-    background: rgba(0,0,0,0.5);
-}
-
-/* Botones en tablas */
-.table-btn {
-    background: #0a84ff;
-    padding: 6px 10px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: #fff;
-    font-size: 0.9em;
-    transition: background 0.3s;
-}
-
-.table-btn:hover {
-    background: #005fcc;
-}
-
-/* Footer */
-footer {
-    background: rgba(0,0,0,0.7);
-    text-align: center;
-    padding: 12px;
-    margin-top: auto;
-    font-size: 0.9em;
-}
-
-/* Botón flotante de Ayuda */
-.help-float {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #0a84ff;
-    color: #fff;
+th, td {
     padding: 12px 16px;
-    border-radius: 50px;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
-    font-weight: bold;
-    text-decoration: none;
-    transition: background 0.3s;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
 }
 
-.help-float:hover {
-    background: #005fcc;
+th {
+    background: rgba(0, 0, 0, 0.3);
+    text-align: left;
+}
+
+tr:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+/* ---- Footer ---- */
+footer {
+    text-align: center;
+    padding: 15px;
+    background: rgba(0,0,0,0.4);
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+/* ---- Animaciones ---- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .main-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .landing-box {
+        padding: 40px 20px;
+    }
+
+    .landing-box h2 {
+        font-size: 1.6em;
+    }
+
+    .btn {
+        display: inline-block;
+        width: 80%;
+        margin: 8px auto;
+    }
 }
