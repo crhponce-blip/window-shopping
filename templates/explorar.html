@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Explorar Mercado</h2>
+
+<form method="GET" class="card form">
+  <label>Búsqueda</label>
+  <input type="text" name="q" value="{{ values.get('q','') }}" placeholder="producto, variedad, empresa, ciudad...">
+  <div class="row">
+    <div>
+      <label>Rol empresa</label>
+      <select name="role">
+        <option value="">Todos</option>
+        {% for r in roles %}
+          <option value="{{ r }}" {% if values.get('role')==r %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Medida</label>
+      <select name="measure">
+        <option value="">Todas</option>
+        {% for m in ['kg','tons','boxes','units'] %}
+          <option value="{{ m }}" {% if values.get('measure')==m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Precio min</label>
+      <input type="number" name="min_price" value="{{ values.get('min_price','') }}">
+    </div>
+    <div>
+      <label>Precio max</label>
+      <input type="number" name="max_price" value="{{ values.get('max_price','') }}">
+    </div>
+  </div>
+  <button class="btn btn-primary" type="submit">Filtrar</button>
+</form>
+
+<section class="card">
+  {% if items %}
+  <table>
+    <thead>
+      <tr>
+        <th>Empresa</th><th>Rol</th><th>Producto</th><th>Variedad</th>
+        <th>Cant</th><th>Medida</th><th>Precio</th><th>Ubicación</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td>{{ it['company_name'] }}</td>
+        <td>{{ it['company_role'] }}</td>
+        <td>{{ it['name'] }}</td>
+        <td>{{ it['variety'] }}</td>
+        <td>{{ it['quantity'] }}</td>
+        <td>{{ it['measure'] }}</td>
+        <td>${{ '%.0f'|format(it['price']) }}</td>
+        <td>{{ it['city'] }}, {{ it['country'] }}</td>
+        <td><a class="btn" href="{{ url_for('detalle', item_id=it['id']) }}">Ver</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No hay resultados con esos filtros.</p>
+  {% endif %}
+</section>
+{% endblock %}
