@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2>🛒 {{ t("Carrito", "Cart") }}</h2>
+  {% if not cart %}
+    <p>{{ t("Tu carrito está vacío.", "Your cart is empty.") }}</p>
+  {% else %}
+    <ul class="list-group mb-3">
+      {% for item in cart %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ item.name }} – {{ item.quantity }} ({{ item.notes }})
+        <form method="post" style="display:inline;">
+          <button class="btn btn-sm btn-danger" name="action" value="remove:{{ loop.index0 }}">❌</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    <form method="post">
+      <button class="btn btn-warning me-2" name="action" value="clear">🗑️ {{ t("Vaciar", "Clear") }}</button>
+      <button class="btn btn-success" name="action" value="checkout">✅ {{ t("Finalizar", "Checkout") }}</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
