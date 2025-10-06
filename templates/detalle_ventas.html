@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ t("Ofertas de Ventas","Sales Offers","銷售供應") }}</h2>
+{% for c in data %}
+<div class="card-box">
+    <h3>{{ c.nombre }}</h3>
+    <table>
+        <tr><th>Producto</th><th>Cantidad</th><th>Origen</th><th>Precio</th><th></th></tr>
+        {% for it in c.items if it.tipo=='oferta' %}
+        <tr>
+          <td>{{ it.producto }}</td>
+          <td>{{ it.cantidad }}</td>
+          <td>{{ it.origen }}</td>
+          <td>{{ it.precio }}</td>
+          <td>
+            <form method="post" action="{{ url_for('cart_add') }}">
+                <input type="hidden" name="empresa" value="{{ c.nombre }}">
+                <input type="hidden" name="producto" value="{{ it.producto }}">
+                <button class="table-btn add-btn">{{ t("Agregar","Add","加入") }}</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endfor %}
+{% endblock %}
