@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-box">
+    <h2>{{ t("Ingresar","Login","登入") }}</h2>
+    {% if error %}<div class="mensaje">{{ error }}</div>{% endif %}
+    <form method="post">
+        <input type="text" name="username" placeholder="Email">
+        <input type="password" name="password" placeholder="Password">
+        <button type="submit">{{ t("Ingresar","Login","登入") }}</button>
+    </form>
+    <p><a href="{{ url_for('forgot') }}">{{ t("¿Olvidaste tu contraseña?","Forgot password?","忘記密碼？") }}</a></p>
+</div>
+{% endblock %}
