@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card float">
+  <h2>📝 {{ t('register_choice') }}</h2>
+  <form method="POST" class="grid-2">
+    <div>
+      <label>{{ t("Ámbito", "Scope", "范围") }}</label>
+      <select name="scope" required>
+        <option value="services">{{ t('services') }}</option>
+        <option value="buy">{{ t('buy') }}</option>
+        <option value="sell">{{ t('sell') }}</option>
+      </select>
+    </div>
+    <div>
+      <label>{{ t("Tipo", "Type", "类型") }}</label>
+      <select name="kind" required>
+        <option value="national">{{ t('national') }}</option>
+        <option value="foreign">{{ t('foreign') }}</option>
+      </select>
+    </div>
+    <div class="grid-span-2">
+      <button class="btn" type="submit">{{ t('register') }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
