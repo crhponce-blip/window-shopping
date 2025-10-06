@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-box">
+    <h2>{{ t("Formulario de Registro","Register Form","註冊表單") }}</h2>
+    {% if error %}<div class="mensaje">{{ error }}</div>{% endif %}
+    <form method="post" enctype="multipart/form-data">
+        <label>Email/Usuario</label>
+        <input type="text" name="username" placeholder="user@example.com">
+
+        <label>Password</label>
+        <input type="password" name="password">
+
+        <label>Rol</label>
+        <select name="rol">
+            {% if nacionalidad == 'extranjero' %}
+                <option value="Cliente extranjero">Cliente extranjero</option>
+            {% else %}
+                {% for r in roles_cv if perfil_tipo == 'compra_venta' %}
+                    <option value="{{ r }}">{{ r }}</option>
+                {% endfor %}
+                {% for r in roles_srv if perfil_tipo == 'servicios' %}
+                    <option value="{{ r }}">{{ r }}</option>
+                {% endfor %}
+            {% endif %}
+        </select>
+
+        {% if nacionalidad == 'extranjero' %}
+            <label>USC ID</label><input type="text" name="usci">
+            <label>Tax ID</label><input type="text" name="tax_id">
+            <label>EORI</label><input type="text" name="eori">
+            <label>Otros ID</label><input type="text" name="otros_id">
+        {% else %}
+            <label>RUT</label><input type="text" name="rut">
+            <label>Documento RUT</label><input type="file" name="rut_file">
+        {% endif %}
+
+        <label>País</label>
+        <input type="text" name="pais" value="{{ 'CL' if nacionalidad=='nacional' else 'US' }}">
+
+        <label>Teléfono</label><input type="text" name="phone">
+        <label>Dirección</label><input type="text" name="address">
+
+        <button type="submit">{{ t("Registrar","Register","註冊") }}</button>
+    </form>
+</div>
+{% endblock %}
