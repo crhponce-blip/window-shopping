@@ -1,0 +1,177 @@
+/* Fondo principal con degradado */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0a1a33, #1e3a5f);
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    background: rgba(0,0,0,0.6);
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Logo */
+header .logo img {
+    height: 50px;
+    width: auto;
+    display: block;
+}
+
+/* Menú principal */
+nav {
+    flex-grow: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+nav ul.left {
+    justify-content: flex-start;
+}
+
+nav ul.right {
+    justify-content: flex-end;
+}
+
+nav li {
+    margin: 0 10px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+nav a:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Sección principal */
+main {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Recuadros flotantes */
+.card {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.4);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Formularios */
+form input, form select, form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+}
+
+form button {
+    background: #0a84ff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+form button:hover {
+    background: #005fcc;
+}
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+table th {
+    background: rgba(0,0,0,0.5);
+}
+
+/* Botones en tablas */
+.table-btn {
+    background: #0a84ff;
+    padding: 6px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 0.9em;
+    transition: background 0.3s;
+}
+
+.table-btn:hover {
+    background: #005fcc;
+}
+
+/* Footer */
+footer {
+    background: rgba(0,0,0,0.7);
+    text-align: center;
+    padding: 12px;
+    margin-top: auto;
+    font-size: 0.9em;
+}
+
+/* Botón flotante de Ayuda */
+.help-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #0a84ff;
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 50px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.help-float:hover {
+    background: #005fcc;
+}
