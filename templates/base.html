@@ -1,39 +1,53 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Window Shopping - WS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WS - Window Shopping</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo_ws.png') }}">
 </head>
-
 <body>
-    <!-- Encabezado -->
+    <!-- Encabezado Principal -->
     <header>
         <div class="logo">
             <a href="{{ url_for('home') }}">
-                <h1>WS</h1>
+                <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="Logo WS" class="logo-img">
             </a>
         </div>
+
+        <!-- Menú principal -->
         <nav>
-            <ul>
+            <ul class="menu">
                 <li><a href="{{ url_for('home') }}">Inicio</a></li>
-                <li><a href="{{ url_for('productos') }}">Productos</a></li>
-                <li><a href="{{ url_for('servicios') }}">Servicios</a></li>
-                <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
-                {% if 'user' in session %}
-                    <li><a href="{{ url_for('perfil') }}">Mi Perfil</a></li>
-                    <li><a href="{{ url_for('logout') }}">Cerrar sesión</a></li>
+
+                <!-- Menú desplegable de Productos -->
+                <li class="dropdown">
+                    <a href="#">Productos ▼</a>
+                    <ul class="dropdown-content">
+                        <li><a href="{{ url_for('accesos', tipo='ventas') }}">Ventas</a></li>
+                        <li><a href="{{ url_for('accesos', tipo='compras') }}">Compras</a></li>
+                        <li><a href="{{ url_for('accesos', tipo='servicios') }}">Servicios</a></li>
+                    </ul>
+                </li>
+
+                <li><a href="{{ url_for('clientes') }}">Clientes</a></li>
+                <li><a href="{{ url_for('ayuda') }}">Ayuda</a></li>
+
+                {% if 'user_id' in session %}
+                    <li><a href="{{ url_for('panel') }}">Mi Panel</a></li>
+                    <li><a href="{{ url_for('perfil') }}">Perfil</a></li>
+                    <li><a href="{{ url_for('ver_carrito') }}">Carrito</a></li>
+                    <li><a href="{{ url_for('logout') }}">Salir</a></li>
                 {% else %}
-                    <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
-                    <li><a href="{{ url_for('register') }}">Registrarse</a></li>
+                    <li><a href="{{ url_for('login') }}">Iniciar Sesión</a></li>
+                    <li><a href="{{ url_for('registro') }}">Registrarse</a></li>
                 {% endif %}
             </ul>
         </nav>
     </header>
 
-    <!-- Contenido dinámico -->
+    <!-- Contenido principal -->
     <main>
         {% block content %}
         {% endblock %}
@@ -41,7 +55,7 @@
 
     <!-- Pie de página -->
     <footer>
-        <p>© 2025 Window Shopping (WS) — Plataforma para exportadores y compradores internacionales.</p>
+        <p>© 2025 Window Shopping (WS). Todos los derechos reservados.</p>
     </footer>
 </body>
 </html>
