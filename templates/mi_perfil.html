@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow-lg p-4">
+    <h2>⚙️ {{ t("Mi Perfil", "My Profile") }}</h2>
+    <form method="post">
+      <input type="text" class="form-control mb-2" name="name" value="{{ company.name }}" placeholder="Nombre Empresa">
+      <input type="text" class="form-control mb-2" name="city" value="{{ company.city }}" placeholder="Ciudad">
+      <input type="text" class="form-control mb-2" name="country" value="{{ company.country }}" placeholder="País">
+      <input type="text" class="form-control mb-2" name="phone" value="{{ company.phone }}" placeholder="Teléfono">
+      <input type="email" class="form-control mb-2" name="email" value="{{ company.email }}" placeholder="Email">
+
+      {% if company.role in ["Productor","Planta","Packing","Frigorífico","Exportador"] %}
+        <input type="text" class="form-control mb-2" name="fruit" value="{{ company.fruit }}" placeholder="Fruta">
+        <input type="text" class="form-control mb-2" name="variety" value="{{ company.variety }}" placeholder="Variedad">
+        <input type="number" step="any" class="form-control mb-2" name="volume_tons" value="{{ company.volume_tons }}" placeholder="Volumen (ton)">
+        <input type="number" step="any" class="form-control mb-2" name="price_box" value="{{ company.price_box }}" placeholder="Precio caja">
+        <input type="number" step="any" class="form-control mb-2" name="price_kg" value="{{ company.price_kg }}" placeholder="Precio kg">
+      {% endif %}
+
+      {% if company.role == "Cliente extranjero" %}
+        <input type="text" class="form-control mb-2" name="product_requested" value="{{ company.product_requested }}" placeholder="Producto solicitado">
+        <input type="text" class="form-control mb-2" name="variety_requested" value="{{ company.variety_requested }}" placeholder="Variedad solicitada">
+        <input type="number" step="any" class="form-control mb-2" name="volume_requested_tons" value="{{ company.volume_requested_tons }}" placeholder="Volumen solicitado (ton)">
+      {% endif %}
+
+      {% if company.role in ["Transporte","Agencia de aduana","Extraportuario"] %}
+        <input type="text" class="form-control mb-2" name="service" value="{{ company.service }}" placeholder="Servicio">
+      {% endif %}
+
+      <button class="btn btn-primary">💾 {{ t("Guardar", "Save") }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
