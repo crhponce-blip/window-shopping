@@ -1,33 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ t("Demandas de Compras","Purchase Demands","採購需求") }}</h2>
-{% for c in data %}
-<div class="card-box">
-    <h3>{{ c.nombre }}</h3>
-    <table>
+<div class="card">
+  <h2>{{ t("Detalle de Compras","Purchases Detail","採購明細") }}</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>{{ t("Empresa","Company","公司") }}</th>
+        <th>{{ t("Rol","Role","角色") }}</th>
+        <th>{{ t("Demanda","Demand","需求") }}</th>
+        <th>{{ t("Cant.","Qty","數量") }}</th>
+        <th>{{ t("Origen","Origin","來源") }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in data %}
+        {% for it in c.items if it.tipo == 'demanda' %}
         <tr>
-          <th>{{ t("Producto","Product","產品") }}</th>
-          <th>{{ t("Cantidad","Quantity","數量") }}</th>
-          <th>{{ t("Origen","Origin","來源") }}</th>
-          <th>{{ t("Precio","Price","價格") }}</th>
-          <th></th>
-        </tr>
-        {% for it in c.items if it.tipo=='demanda' %}
-        <tr>
-          <td>{{ it.producto }}</td>
-          <td>{{ it.cantidad }}</td>
+          <td>{{ c.nombre or c.empresa }}</td>
+          <td>{{ c.rol }}</td>
+          <td>{{ it.producto }} {% if it.variedad %}({{ it.variedad }}){% endif %}</td>
+          <td>{{ it.cantidad }} {{ it.bulto }}</td>
           <td>{{ it.origen }}</td>
-          <td>{{ it.precio }}</td>
           <td>
             <form method="post" action="{{ url_for('cart_add') }}">
-                <input type="hidden" name="empresa" value="{{ c.nombre }}">
-                <input type="hidden" name="producto" value="{{ it.producto }}">
-                <button class="table-btn add-btn">{{ t("Agregar","Add","加入") }}</button>
+              <input type="hidden" name="empresa" value="{{ c.nombre or c.empresa }}">
+              <input type="hidden" name="tipo" value="compra">
+              <input type="hidden" name="producto" value="{{ it.producto }}">
+              <input type="hidden" name="variedad" value="{{ it.variedad }}">
+              <input type="hidden" name="cantidad" value="{{ it.cantidad }}">
+              <input type="hidden" name="bulto" value="{{ it.bulto }}">
+              <input type="hidden" name="origen" value="{{ it.origen }}">
+              <button class="btn" type="submit">{{ t("Agregar","Add","加入") }}</button>
             </form>
           </td>
         </tr>
         {% endfor %}
-    </table>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-{% endfor %}
 {% endblock %}
