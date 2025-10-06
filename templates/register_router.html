@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-box">
+    <h2>{{ t("Registro","Register","註冊") }}</h2>
+    <p>{{ t("Elige cómo registrarte:","Choose how to register:","選擇註冊方式:") }}</p>
+    <ul>
+        <li><a href="{{ url_for('register', nac='nacional', tipo='compra_venta') }}">{{ t("Nacional - Compra/Venta","National - Trade","國內 - 買賣") }}</a></li>
+        <li><a href="{{ url_for('register', nac='nacional', tipo='servicios') }}">{{ t("Nacional - Servicios","National - Services","國內 - 服務") }}</a></li>
+        <li><a href="{{ url_for('register', nac='extranjero', tipo='compra_venta') }}">{{ t("Extranjero - Cliente","Foreign - Client","國外 - 客戶") }}</a></li>
+    </ul>
+</div>
+{% endblock %}
