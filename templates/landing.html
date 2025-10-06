@@ -1,24 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
+<section class="landing-wrap">
+  <div class="landing-card">
+    <h1 class="landing-title">
+      {{ t("Bienvenido a","Welcome to","歡迎來到") }}
+      <span class="hl">WS</span>
+    </h1>
 
-<section class="landing-container">
-    <div class="landing-card">
-        <h1 class="landing-title">Bienvenido a <span class="highlight">WS</span></h1>
-        <p class="landing-subtitle">
-            Conectamos <strong>productores, exportadores y clientes internacionales</strong> en una sola plataforma.  
-            Simplifica tus operaciones de compra, venta y servicios dentro del mercado global de frutas y alimentos.
-        </p>
+    <p class="landing-sub">
+      {{ t(
+        "Conectamos productores, exportadores y clientes internacionales en una sola plataforma.",
+        "We connect producers, exporters and international clients on a single platform.",
+        "連接生產者、出口商與國際客戶的一站式平台"
+      ) }}
+    </p>
 
-        <div class="landing-buttons">
-            {% if 'user_id' in session %}
-                <a href="{{ url_for('panel') }}" class="btn-primary">Ir a mi Panel</a>
-                <a href="{{ url_for('perfil') }}" class="btn-secondary">Ver mi Perfil</a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="btn-primary">Iniciar Sesión</a>
-                <a href="{{ url_for('register') }}" class="btn-secondary">Registrarse</a>
-            {% endif %}
-        </div>
+    <div class="btns">
+      {% if not session.get("user") %}
+        <a class="btn" href="{{ url_for('login') }}">{{ t("Iniciar sesión","Login","登入") }}</a>
+        <a class="btn-outline" href="{{ url_for('register_router') }}">{{ t("Registrarse","Register","註冊") }}</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('dashboard') }}">{{ t("Ir a mi panel","Go to dashboard","前往控制台") }}</a>
+        <a class="btn-outline" href="{{ url_for('perfil') }}">{{ t("Ver mi perfil","My profile","我的資料") }}</a>
+      {% endif %}
     </div>
+  </div>
 </section>
-
 {% endblock %}
