@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card float">
+  <h2>🌍 {{ t("Registro Extranjero (solo compra)", "Foreign Registration (buy only)", "海外注册（仅采购）") }}</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <label>Company</label>
+    <input name="company" required>
+    <label>Email</label>
+    <input type="email" name="email" required>
+    <label>Country</label>
+    <input name="country" required>
+    <label>{{ t("ID Fiscal", "Tax ID", "税号") }}</label>
+    <input name="taxid" required placeholder="TAX ID / USCI / EORI / ...">
+    <label>{{ t("Documento ID Fiscal (PDF)", "Tax ID document (PDF)", "税号证明（PDF）") }}</label>
+    <input type="file" name="taxid_pdf" accept="application/pdf" required>
+    <button class="btn" type="submit">{{ t('register') }}</button>
+  </form>
+</div>
+{% endblock %}
