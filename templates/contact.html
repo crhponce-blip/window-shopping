@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card float">
+  <h2>📧 {{ t('contact') }}</h2>
+  <form method="POST">
+    <label>Email</label>
+    <input type="email" name="email" required>
+    <label>{{ t("Teléfono", "Phone", "电话") }}</label>
+    <input name="phone">
+    <label>{{ t("Motivo/Detalle", "Reason/Details", "原因/详情") }}</label>
+    <textarea name="message" rows="4" required></textarea>
+    <button class="btn" type="submit">{{ t("Enviar", "Send", "发送") }}</button>
+  </form>
+  {% if tickets %}
+    <h3 style="margin-top:16px;">{{ t("Últimos tickets", "Latest tickets", "最近工单") }}</h3>
+    <ul class="tickets">
+      {% for tk in tickets %}
+        <li>#{{ tk.id }} · {{ tk.email }} · {{ tk.created_at }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% endblock %}
