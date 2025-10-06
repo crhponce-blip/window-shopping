@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ t("Clientes Extranjeros","Foreign Clients","外國客戶") }}</h2>
+{% if clientes %}
+<table>
+    <tr>
+        <th>{{ t("Empresa","Company","公司") }}</th>
+        <th>{{ t("País","Country","國家") }}</th>
+        <th>{{ t("Email","Email","電子郵件") }}</th>
+        <th>{{ t("Teléfono","Phone","電話") }}</th>
+        <th>{{ t("Acciones","Actions","操作") }}</th>
+    </tr>
+    {% for c in clientes %}
+    <tr>
+        <td><a href="{{ url_for('cliente_detalle', username=c.username) }}">{{ c.empresa }}</a></td>
+        <td>{{ c.pais or "Extranjero" }}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.telefono }}</td>
+        <td>
+            <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="table-btn">
+                {{ t("Ver Detalle","View Detail","查看詳情") }}
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p><em>{{ t("No hay clientes registrados aún.","No clients registered yet.","尚未註冊客戶") }}</em></p>
+{% endif %}
+{% endblock %}
