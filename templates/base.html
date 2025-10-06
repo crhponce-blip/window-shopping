@@ -1,44 +1,56 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ session.get('lang','es') }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WS | Window Shopping</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WS — Window Shopping</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <div class="navbar">
-            <div class="logo">
-                <a href="{{ url_for('home') }}">
-                    <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="Logo WS" class="logo-img">
-                </a>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="{{ url_for('home') }}">Inicio</a></li>
-                    <li><a href="{{ url_for('clientes') }}">Clientes</a></li>
-                    <li><a href="{{ url_for('ayuda') }}">Ayuda</a></li>
-                    {% if 'user_id' in session %}
-                        <li><a href="{{ url_for('panel') }}">Mi Panel</a></li>
-                        <li><a href="{{ url_for('perfil') }}">Perfil</a></li>
-                        <li><a href="{{ url_for('carrito') }}">Carrito</a></li>
-                        <li><a href="{{ url_for('logout') }}">Salir</a></li>
-                    {% else %}
-                        <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
-                        <li><a href="{{ url_for('register') }}">Registrarse</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-    </header>
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+<nav class="navbar">
+  <div class="brand">
+    <!-- Usa tu logo real que está en /static/uploads/... -->
+    <img src="{{ url_for('static', filename='uploads/687B2521-2792-49C5-BD7A-1BEC52D410EE.jpeg') }}" alt="WS Logo">
+    <span>WS</span>
+  </div>
 
-    <footer>
-        <p>© 2025 WS Window Shopping | Conectando productores, exportadores y clientes internacionales.</p>
-    </footer>
+  <ul>
+    <li><a href="{{ url_for('home') }}">{{ t("Inicio","Home","首頁") }}</a></li>
+
+    {% if session.get("user") %}
+      <li><a href="{{ url_for('clientes') }}">{{ t("Clientes","Clients","客戶") }}</a></li>
+      <li><a href="{{ url_for('dashboard') }}">{{ t("Mi Panel","Dashboard","控制台") }}</a></li>
+      <li><a href="{{ url_for('perfil') }}">{{ t("Perfil","Profile","個人資料") }}</a></li>
+      <li><a href="{{ url_for('carrito') }}">{{ t("Carrito","Cart","購物車") }}</a></li>
+      <li><a href="{{ url_for('logout') }}">{{ t("Salir","Logout","登出") }}</a></li>
+    {% else %}
+      <li><a href="{{ url_for('login') }}">{{ t("Ingresar","Login","登入") }}</a></li>
+      <li><a href="{{ url_for('register_router') }}">{{ t("Registrarse","Register","註冊") }}</a></li>
+    {% endif %}
+
+    <li><a href="{{ url_for('ayuda') }}">{{ t("Ayuda","Help","幫助") }}</a></li>
+    <li class="lang">
+      <a href="{{ url_for('set_lang','es') }}">ES</a>|
+      <a href="{{ url_for('set_lang','en') }}">EN</a>|
+      <a href="{{ url_for('set_lang','zh') }}">中文</a>
+    </li>
+  </ul>
+</nav>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="flash">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  © 2025 WS - Window Shopping
+</footer>
+
 </body>
 </html>
