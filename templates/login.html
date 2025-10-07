@@ -1,18 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
-  <h2>{{ t("Iniciar Sesión","Login","登入") }}</h2>
-  {% if error %}<div class="flash">{{ error }}</div>{% endif %}
-  <form method="POST" class="form-vert">
-    <label>{{ t("Usuario (email)","Username (email)","使用者（信箱）") }}</label>
-    <input type="email" name="username" placeholder="tu@empresa.com" required>
-    <label>{{ t("Contraseña","Password","密碼") }}</label>
-    <input type="password" name="password" placeholder="********" required>
-    <button class="btn" type="submit">{{ t("Ingresar","Login","登入") }}</button>
-  </form>
-  <p class="help">
-    {{ t("¿No tienes cuenta?","Don't have an account?","還沒有帳號？") }}
-    <a href="{{ url_for('register_router') }}">{{ t("Regístrate aquí","Register here","前往註冊") }}</a>
-  </p>
+
+<div class="auth-row">
+  <div class="auth-card dark">
+    <h2>{{ t("Iniciar sesión","Login","登入") }}</h2>
+    <form method="POST">
+      <!-- El backend espera 'username' y 'password' -->
+      <input type="email" name="username" placeholder="Correo electrónico" required>
+      <input type="password" name="password" placeholder="Contraseña" required>
+      <button class="btn" type="submit">{{ t("Ingresar","Login","登入") }}</button>
+    </form>
+    <p class="mini">
+      <a href="{{ url_for('password_reset_request') }}">{{ t("¿Olvidaste tu contraseña?","Forgot password?","忘記密碼？") }}</a>
+    </p>
+    <p class="mini">
+      {{ t("¿No tienes cuenta?","No account?","沒有帳戶？") }}
+      <a href="{{ url_for('register_router') }}">{{ t("Regístrate","Register","註冊") }}</a>
+    </p>
+  </div>
+
+  <div class="auth-card dark">
+    <h2>{{ t("Crear cuenta","Create account","建立帳戶") }}</h2>
+    <p class="muted">{{ t("Si aún no tienes acceso, crea tu cuenta.","If you don't have access yet, create your account.","如果尚未有帳號，請建立帳號。") }}</p>
+    <a class="btn-outline" href="{{ url_for('register_router') }}">{{ t("Registrarse","Register","註冊") }}</a>
+  </div>
 </div>
+
 {% endblock %}
