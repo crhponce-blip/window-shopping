@@ -1,25 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="auth-box">
-  <h2>Iniciar sesión</h2>
+<div class="login-container">
+  <h2>{{ t("Iniciar sesión", "Login", "登入") }}</h2>
+
   {% if error %}
-    <div class="flash" style="border-left-color:#ff5b5b;">{{ error }}</div>
+  <div class="flash-error">{{ error }}</div>
   {% endif %}
-  <form method="POST">
-    <label>Usuario o correo</label>
-    <input type="text" name="username" required>
+  {% for msg in get_flashed_messages() %}
+  <div class="flash">{{ msg }}</div>
+  {% endfor %}
 
-    <label>Contraseña</label>
-    <input type="password" name="password" required>
+  <form method="POST" action="{{ url_for('login') }}">
+    <label>{{ t("Correo electrónico", "Email", "電子郵件") }}</label>
+    <input type="email" name="username" required placeholder="usuario@demo.cl" />
 
-    <input type="submit" value="Entrar">
+    <label>{{ t("Contraseña", "Password", "密碼") }}</label>
+    <input type="password" name="password" required placeholder="••••••••" />
 
-    <p style="margin-top:10px;">
-      <a href="{{ url_for('password_reset_request') }}">¿Olvidaste tu contraseña?</a>
-    </p>
+    <button class="btn btn-primary" type="submit">{{ t("Ingresar", "Sign in", "登入") }}</button>
 
-    <p style="margin-top:10px;">
-      ¿No tienes cuenta? <a href="{{ url_for('register_router') }}">Regístrate aquí</a>.
+    <p style="margin-top:1rem;text-align:center;">
+      {{ t("¿No tienes cuenta?", "Don't have an account?", "還沒有帳號？") }}
+      <a href="{{ url_for('register_router') }}">{{ t("Regístrate aquí", "Register here", "立即註冊") }}</a>
     </p>
   </form>
 </div>
