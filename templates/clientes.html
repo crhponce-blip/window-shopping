@@ -1,22 +1,57 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ t("Explorar clientes y servicios","Explore clients and services","探索客戶與服務") }}</h2>
 
-<div class="tile-row">
-  <div class="tile">
-    <h3>{{ t("Ventas","Sales","銷售") }}</h3>
-    <p>{{ t("Ver empresas que ofrecen fruta o productos.","See companies offering fruit or products.","查看正在銷售的公司。") }}</p>
-    <a class="btn" href="{{ url_for('clientes', tipo='ventas') }}">{{ t("Ver detalle","View detail","查看詳情") }}</a>
-  </div>
-  <div class="tile">
-    <h3>{{ t("Compras","Purchases","採購") }}</h3>
-    <p>{{ t("Ver empresas que demandan fruta.","See companies demanding fruit.","查看正在採購的公司。") }}</p>
-    <a class="btn" href="{{ url_for('clientes', tipo='compras') }}">{{ t("Ver detalle","View detail","查看詳情") }}</a>
-  </div>
-  <div class="tile">
-    <h3>{{ t("Servicios","Services","服務") }}</h3>
-    <p>{{ t("Ver proveedores disponibles.","See available providers.","查看可用服務供應商。") }}</p>
-    <a class="btn" href="{{ url_for('clientes', tipo='servicios') }}">{{ t("Ver detalle","View detail","查看詳情") }}</a>
+<div class="floating-filter">
+  <div class="tile-row">
+    <div class="tile">
+      <h3>{{ t("Ventas","Sales","銷售") }}</h3>
+      <p class="mini">{{ t("Ver empresas que están ofreciendo fruta.","See companies offering fruit.","查看正在銷售水果的公司") }}</p>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('clientes', tipo='ventas') }}">{{ t("Ver detalle de ventas","View sales detail","查看銷售明細") }}</a>
+      </div>
+    </div>
+
+    <div class="tile">
+      <h3>{{ t("Compras","Purchases","採購") }}</h3>
+      <p class="mini">{{ t("Ver empresas que están demandando fruta.","See companies demanding fruit.","查看正在採購水果的公司") }}</p>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('clientes', tipo='compras') }}">{{ t("Ver detalle de compras","View purchases detail","查看採購明細") }}</a>
+      </div>
+    </div>
+
+    <div class="tile">
+      <h3>{{ t("Servicios","Services","服務") }}</h3>
+      <p class="mini">{{ t("Ver prestadores de servicios disponibles.","See available service providers.","查看可用服務供應商") }}</p>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('clientes', tipo='servicios') }}">{{ t("Ver detalle de servicios","View services detail","查看服務明細") }}</a>
+      </div>
+    </div>
   </div>
 </div>
+
+{% if clientes and clientes|length > 0 %}
+  <div class="card">
+    <h3>{{ t("Clientes extranjeros (demo)","Foreign clients (demo)","國外客戶（示例）") }}</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{{ t("Empresa","Company","公司") }}</th>
+          <th>{{ t("País","Country","國家") }}</th>
+          <th>{{ t("Email","Email","信箱") }}</th>
+          <th>{{ t("Teléfono","Phone","電話") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clientes %}
+          <tr>
+            <td>{{ c.empresa }}</td>
+            <td>{{ c.pais }}</td>
+            <td>{{ c.email }}</td>
+            <td>{{ c.telefono }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
 {% endblock %}
