@@ -1,46 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="profile-box">
-  <h2>{{ t("Panel de Usuario","User Dashboard","用戶面板") }}</h2>
-  <p><strong>{{ usuario }}</strong> - {{ rol }}</p>
+<div>
+  <h2>Panel principal - {{ rol }}</h2>
+  <p>Bienvenido {{ usuario }} 👋</p>
 
-  <h3>{{ t("Mi empresa/perfil","My company/profile","我的公司/檔案") }}</h3>
-  <p>{{ my_company.descripcion }}</p>
+  <div class="card">
+    <h3>Mi empresa</h3>
+    <p><strong>{{ my_company.empresa }}</strong></p>
+    <p>{{ my_company.descripcion }}</p>
+    <p><b>Email:</b> {{ my_company.email }} | <b>Teléfono:</b> {{ my_company.telefono }}</p>
+    <p><b>Dirección:</b> {{ my_company.direccion }}</p>
+    <br>
+    <a href="{{ url_for('perfil') }}" class="btn">Editar perfil / Agregar ítems</a>
+  </div>
 
-  <h3>{{ t("Ítems de mi perfil","My profile items","我的檔案項目") }}</h3>
-  {% if my_company.items and my_company.items|length>0 %}
-    <table class="table">
-      <thead>
-        <tr>
-          <th>{{ t("Tipo","Type","類型") }}</th>
-          <th>{{ t("Detalle","Detail","細節") }}</th>
-          <th>{{ t("Cant/Cap","Qty/Cap","數量/產能") }}</th>
-          <th>{{ t("Ubicación/Origen","Location/Origin","地點/來源") }}</th>
-          <th>{{ t("Precio","Price","價格") }}</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for it in my_company.items %}
-        <tr>
-          <td>{{ it.tipo|capitalize }}</td>
-          <td>{{ it.producto or it.servicio }}</td>
-          <td>{{ it.cantidad or it.capacidad }}</td>
-          <td>{{ it.origen or it.ubicacion }}</td>
-          <td>{{ it.precio or it.precio_caja or it.precio_kilo or "-" }}</td>
-          <td>
-            <!-- Eliminar ítem del perfil -->
-            <form method="post" action="{{ url_for('item_delete') }}" onsubmit="return confirm('¿Eliminar ítem?')">
-              <input type="hidden" name="idx" value="{{ loop.index0 }}">
-              <button class="table-btn remove-btn" type="submit">{{ t("Eliminar","Remove","刪除") }}</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p class="muted">{{ t("Aún no tienes ítems.","You don't have items yet.","尚無項目") }}</p>
-  {% endif %}
+  <div class="card">
+    <h3>Ver detalles</h3>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="{{ url_for('detalles', tipo='ventas') }}" class="btn">Ventas</a>
+      <a href="{{ url_for('detalles', tipo='compras') }}" class="btn">Compras</a>
+      <a href="{{ url_for('detalles', tipo='servicios') }}" class="btn">Servicios</a>
+      <a href="{{ url_for('clientes') }}" class="btn">Clientes</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Mi carrito</h3>
+    {% if cart and cart|length > 0 %}
+      <p>Tienes {{ cart|length }} ítems guardados.</p>
+      <a href="{{ url_for('carrito') }}" class="btn success">Ver carrito</a>
+    {% else %}
+      <p>No hay ítems en tu carrito aún.</p>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
