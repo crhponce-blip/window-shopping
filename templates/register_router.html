@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
 <div class="card">
   <h2>{{ t("Crear cuenta","Create account","建立帳戶") }}</h2>
   <p class="help">{{ t(
@@ -10,14 +9,12 @@
   ) }}</p>
 
   <form class="form-vert" method="get" action="{{ url_for('register') }}">
-    <!-- Origen -->
     <label for="nac"><strong>{{ t("Nacionalidad","Origin","來源") }}</strong></label>
     <select id="nac" name="nac" required>
       <option value="nacional">{{ t("Nacional","National","國內") }}</option>
       <option value="extranjero">{{ t("Extranjero","Foreign","國外") }}</option>
     </select>
 
-    <!-- Tipo de perfil (solo visible si nacional) -->
     <div id="tipo-wrapper">
       <label for="tipo"><strong>{{ t("Tipo de perfil","Profile type","檔案類型") }}</strong></label>
       <select id="tipo" name="tipo" required>
@@ -35,14 +32,9 @@
   const nac = document.getElementById('nac');
   const tipoWrapper = document.getElementById('tipo-wrapper');
   function syncTipo() {
-    if (nac.value === 'extranjero') {
-      tipoWrapper.style.display = 'none';
-    } else {
-      tipoWrapper.style.display = '';
-    }
+    tipoWrapper.style.display = (nac.value === 'extranjero') ? 'none' : '';
   }
   nac.addEventListener('change', syncTipo);
   syncTipo();
 </script>
-
 {% endblock %}
