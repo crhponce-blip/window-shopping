@@ -8,12 +8,14 @@
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="brand">
-    <img src="{{ url_for('static', filename='uploads/687B2521-2792-49C5-BD7A-1BEC52D410EE.jpeg') }}" alt="WS Logo">
-    <span>WS</span>
+<header class="site-header">
+  <div class="logo-stack">
+    <img class="brand-logo" src="{{ url_for('static', filename='uploads/687B2521-2792-49C5-BD7A-1BEC52D410EE.jpeg') }}" alt="WS Logo">
+    <div class="brand-title">WS — Window Shopping</div>
   </div>
+</header>
 
+<nav class="navbar">
   <ul>
     <li><a href="{{ url_for('home') }}">{{ t("Inicio","Home","首頁") }}</a></li>
 
@@ -30,6 +32,7 @@
 
     <li><a href="{{ url_for('ayuda') }}">{{ t("Ayuda","Help","幫助") }}</a></li>
     <li class="lang">
+      <!-- IMPORTANTE: url_for con argumento nombrado -->
       <a href="{{ url_for('set_lang', lang='es') }}">ES</a> |
       <a href="{{ url_for('set_lang', lang='en') }}">EN</a> |
       <a href="{{ url_for('set_lang', lang='zh') }}">中文</a>
