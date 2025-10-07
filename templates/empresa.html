@@ -1,55 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ comp.nombre }}</h2>
-<div class="empresa-detalle">
-    <p><strong>{{ t("Rol","Role","角色") }}:</strong> {{ comp.rol }}</p>
-    {% if comp.rut %}
-    <p><strong>{{ t("RUT","RUT","統一編號") }}:</strong> {{ comp.rut }}</p>
-    {% endif %}
-    <p><strong>{{ t("País","Country","國家") }}:</strong> {{ comp.pais }}</p>
-    <p><strong>{{ t("Email","Email","電子郵件") }}:</strong> {{ comp.email }}</p>
-    <p><strong>{{ t("Teléfono","Phone","電話") }}:</strong> {{ comp.telefono }}</p>
-    <p><strong>{{ t("Dirección","Address","地址") }}:</strong> {{ comp.direccion }}</p>
-    <p><strong>{{ t("Descripción","Description","描述") }}:</strong> {{ comp.descripcion }}</p>
-</div>
+<div class="card">
+  <h2>{{ comp.nombre }}</h2>
+  <p><strong>{{ t("Rol","Role","角色") }}:</strong> {{ comp.rol }}</p>
+  {% if comp.rut %}<p><strong>RUT:</strong> {{ comp.rut }}</p>{% endif %}
+  <p><strong>{{ t("País","Country","國家") }}:</strong> {{ comp.pais }}</p>
+  <p><strong>{{ t("Email","Email","電子郵件") }}:</strong> {{ comp.email }}</p>
+  <p><strong>{{ t("Teléfono","Phone","電話") }}:</strong> {{ comp.telefono }}</p>
+  <p><strong>{{ t("Dirección","Address","地址") }}:</strong> {{ comp.direccion }}</p>
+  <p><strong>{{ t("Descripción","Description","描述") }}:</strong> {{ comp.descripcion }}</p>
 
-<hr>
-<h3>{{ t("Ítems disponibles","Available Items","可用項目") }}</h3>
-<table>
+  <hr>
+  <h3>{{ t("Ítems disponibles","Available Items","可用項目") }}</h3>
+  <table>
     <tr>
-        <th>{{ t("Tipo","Type","類型") }}</th>
-        <th>{{ t("Detalle","Detail","細節") }}</th>
-        <th>{{ t("Cantidad/Capacidad","Qty/Capacity","數量/容量") }}</th>
-        <th>{{ t("Ubicación/Origen","Location/Origin","地點/來源") }}</th>
-        <th>{{ t("Precio","Price","價格") }}</th>
-        <th></th>
+      <th>{{ t("Tipo","Type","類型") }}</th>
+      <th>{{ t("Detalle","Detail","細節") }}</th>
+      <th>{{ t("Cantidad","Quantity","數量") }}</th>
+      <th>{{ t("Origen","Origin","來源") }}</th>
+      <th>{{ t("Precio","Price","價格") }}</th>
+      <th></th>
     </tr>
     {% for it in comp.items %}
     <tr>
-        <td>{{ it.tipo|capitalize }}</td>
-        <td>{{ it.producto or it.servicio }}</td>
-        <td>{{ it.cantidad or it.capacidad }}</td>
-        <td>{{ it.origen or it.ubicacion }}</td>
-        <td>{{ it.precio or "-" }}</td>
-        <td>
-            <form method="post" action="{{ url_for('cart_add') }}">
-                <input type="hidden" name="empresa" value="{{ comp.nombre }}">
-                {% if it.producto %}
-                <input type="hidden" name="producto" value="{{ it.producto }}">
-                {% elif it.servicio %}
-                <input type="hidden" name="servicio" value="{{ it.servicio }}">
-                {% endif %}
-                <button class="table-btn add-btn">{{ t("Agregar","Add","加入") }}</button>
-            </form>
-        </td>
+      <td>{{ it.tipo|capitalize }}</td>
+      <td>{{ it.producto or it.servicio }}</td>
+      <td>{{ it.cantidad or it.capacidad }}</td>
+      <td>{{ it.origen or it.ubicacion }}</td>
+      <td>{{ it.precio or "-" }}</td>
+      <td>
+        <form method="post" action="{{ url_for('cart_add') }}">
+          <input type="hidden" name="empresa" value="{{ comp.nombre }}">
+          <input type="hidden" name="producto" value="{{ it.producto or '' }}">
+          <input type="hidden" name="servicio" value="{{ it.servicio or '' }}">
+          <button class="btn">{{ t("Agregar","Add","加入") }}</button>
+        </form>
+      </td>
     </tr>
     {% endfor %}
-</table>
-
-{% if not es_user %}
-<hr>
-<p><em>{{ t("Este perfil es público.","This profile is public.","此資料為公開") }}</em></p>
-{% else %}
-<p><em>{{ t("Este perfil corresponde a un usuario registrado.","This profile belongs to a registered user.","此資料屬於註冊用戶") }}</em></p>
-{% endif %}
+  </table>
+</div>
 {% endblock %}
