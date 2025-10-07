@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2 style="margin-bottom:1rem;">
+    {{ t("Resultados de búsqueda", "Search Results", "搜尋結果") }}
+  </h2>
+
+  {% if query %}
+  <p>{{ t("Buscando por", "Searching for", "搜尋關鍵字") }}: <b>"{{ query }}"</b></p>
+  {% endif %}
+
+  {% if resultados %}
+  <table class="table-results">
+    <thead>
+      <tr>
+        <th>{{ t("Empresa", "Company", "公司") }}</th>
+        <th>{{ t("Rol", "Role", "角色") }}</th>
+        <th>{{ t("Descripción", "Description", "描述") }}</th>
+        <th>{{ t("Tipo", "Type", "類型") }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in resultados %}
+      <tr>
+        <td>{{ c.empresa }}</td>
+        <td>{{ c.rol }}</td>
+        <td>{{ c.descripcion }}</td>
+        <td>{{ c.perfil_tipo }}</td>
+        <td><a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">{{ t("Ver perfil", "View profile", "查看檔案") }}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="margin-top:2rem;">
+    <p>{{ t("No se encontraron resultados para tu búsqueda.", "No results found for your search.", "未找到相關結果。") }}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
