@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>{{ t("Servicios Disponibles", "Available Services", "可用服務") }}</h2>
+  <p>{{ t("Selecciona una categoría de servicio para visualizar las empresas que lo ofrecen.", "Select a service category to view the companies offering it.", "選擇服務類別以查看提供該服務的公司。") }}</p>
+
+  {% set categorias = ["Packing", "Frigorífico", "Transporte", "Agencia de Aduanas", "Extraportuario"] %}
+
+  {% for cat in categorias %}
+  <div class="service-block">
+    <h3 style="color:#1b5e20;">{{ cat }}</h3>
+
+    {% set empresas = [] %}
+    {% for c in data %}
+      {% if c.rol == cat %}
+        {% set _ = empresas.append(c) %}
+      {% endif %}
+    {% endfor %}
+
+    {% if empresas %}
+    <table class="table-results">
+      <thead>
+        <tr>
+          <th>{{ t("Empresa", "Company", "公司") }}</th>
+          <th>{{ t("Servicio", "Service", "服務") }}</th>
+          <th>{{ t("Capacidad", "Capacity", "容量") }}</th>
+          <th>{{ t("Ubicación", "Location", "地點") }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in empresas %}
+          {% for it in e.items if it.tipo == "servicio" %}
+          <tr>
+            <td>{{ e.empresa }}</td>
+            <td>{{ it.servicio }}</td>
+            <td>{{ it.capacidad }}</td>
+            <td>{{ it.ubicacion }}</td>
+            <td><a href="{{ url_for('cliente_detalle', username=e.username) }}" class="btn btn-primary">{{ t("Ver", "View", "查看") }}</a></td>
+          </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>{{ t("No hay servicios disponibles actualmente en esta categoría.", "No services currently available in this category.", "此分類目前無可用服務。") }}</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
