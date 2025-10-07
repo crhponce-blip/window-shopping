@@ -1,5 +1,5 @@
 /* =========================================================
-   ESTILO GENERAL - WINDOW SHOPPING (WS)
+   WINDOW SHOPPING - ESTILO GENERAL (2025)
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
@@ -11,9 +11,14 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* =========================================================
+   FONDO GENERAL
+   ========================================================= */
+
 body {
-  background: linear-gradient(135deg, #0a2342, #0e3a6e, #1b4f8a);
-  color: #f4f4f4;
+  background: linear-gradient(135deg, #081b33, #0a2342, #103b68);
+  background-attachment: fixed;
+  color: #f2f5f9;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -28,17 +33,19 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 15px 40px;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
   color: #fff;
   position: sticky;
   top: 0;
+  z-index: 100;
 }
 
 .navbar a {
   color: #fff;
   text-decoration: none;
   margin-left: 18px;
+  font-weight: 500;
   transition: 0.3s;
 }
 
@@ -58,7 +65,7 @@ body {
 footer {
   text-align: center;
   padding: 15px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
   color: #cfd9df;
   font-size: 14px;
   margin-top: auto;
@@ -96,9 +103,9 @@ p {
 }
 
 .logo-center img {
-  width: 160px;
+  width: 180px;
   height: auto;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .landing-buttons {
@@ -124,7 +131,7 @@ p {
 }
 
 .btn-primary:hover {
-  background: #005ecb;
+  background: #0065d1;
   box-shadow: 0 4px 15px rgba(0,123,255,0.6);
 }
 
@@ -139,7 +146,7 @@ p {
 }
 
 /* =========================================================
-   AUTENTICACIÓN / REGISTRO
+   LOGIN / REGISTRO
    ========================================================= */
 
 .auth-container, .register-container {
@@ -191,12 +198,12 @@ p {
 }
 
 .logo-login {
-  width: 100px;
+  width: 120px;
   margin-bottom: 10px;
 }
 
 /* =========================================================
-   FORMULARIOS Y MENSAJES
+   MENSAJES Y ALERTAS
    ========================================================= */
 
 .flash-container {
@@ -217,10 +224,6 @@ p {
   color: #ff7b7b;
   font-size: 14px;
   margin-top: 8px;
-}
-
-.info {
-  color: #aee0ff;
 }
 
 /* =========================================================
@@ -258,16 +261,17 @@ p {
 }
 
 /* =========================================================
-   PERFIL / DETALLES
+   PERFIL / DETALLES / LISTADOS
    ========================================================= */
 
-.perfil-container, .detalle-container {
+.perfil-container, .detalle-container, .error-container {
   background: rgba(0, 0, 0, 0.55);
   border-radius: 15px;
   max-width: 900px;
   margin: auto;
   padding: 30px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
 }
 
 .perfil-container input, .perfil-container textarea, .perfil-container select {
@@ -285,6 +289,7 @@ p {
 .listado {
   list-style: none;
   margin-top: 15px;
+  padding: 0;
 }
 
 .listado li {
@@ -303,6 +308,32 @@ p {
 }
 
 /* =========================================================
+   ERROR PAGE
+   ========================================================= */
+
+.error-box {
+  text-align: center;
+  color: #fff;
+}
+
+.error-box h1 {
+  font-size: 80px;
+  color: #00bfff;
+  margin-bottom: 10px;
+}
+
+.error-box p {
+  font-size: 18px;
+  color: #dbe9f5;
+  margin-bottom: 20px;
+}
+
+.logo-error {
+  width: 120px;
+  margin-bottom: 20px;
+}
+
+/* =========================================================
    RESPONSIVO
    ========================================================= */
 
@@ -318,5 +349,9 @@ p {
 
   .navbar .nav-right {
     margin-top: 10px;
+  }
+
+  .logo-center img {
+    width: 130px;
   }
 }
