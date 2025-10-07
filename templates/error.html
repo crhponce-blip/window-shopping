@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card" style="text-align:center">
+<div class="card center">
   <h2>{{ t("Error","Error","錯誤") }} {{ code }}</h2>
   <p>{{ message }}</p>
-  <p style="margin-top:16px">
-    <a class="btn" href="{{ url_for('home') }}">{{ t("Volver al inicio","Back to home","回首頁") }}</a>
-  </p>
+  <a href="{{ url_for('home') }}" class="btn">{{ t("Volver al inicio","Back to home","回首頁") }}</a>
 </div>
 {% endblock %}
