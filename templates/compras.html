@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Compras disponibles | Window Shopping{% endblock %}
+{% block content %}
+
+<div class="form-container">
+  <h2>Compras disponibles</h2>
+
+  <form method="get" class="search-form">
+    <input type="text" name="buscar" placeholder="Buscar producto o servicio..." />
+    <button type="submit">Buscar</button>
+  </form>
+
+  <form method="post" action="{{ url_for('cart_bulk_add') }}">
+    <div class="item-list">
+      {% for item in compras %}
+      <div class="item-card">
+        <label>
+          <input type="checkbox" name="selected" value='{{ item | tojson }}' />
+          <strong>
+            <a href="{{ url_for('perfil', empresa=item.empresa) }}">
+              {{ item.empresa }}
+            </a>
+          </strong>
+          – {{ item.producto or item.servicio }} ({{ item.cantidad or "N/A" }})
+          <br />
+          <span class="region">{{ item.origen or "Chile" }}</span>
+        </label>
+      </div>
+      {% else %}
+      <p>No hay productos disponibles en este momento.</p>
+      {% endfor %}
+    </div>
+
+    <div class="buttons">
+      <button type="submit" class="btn-primary">Agregar seleccionados al carrito</button>
+    </div>
+  </form>
+
+  <form method="post" action="{{ url_for('hide_from_view') }}" class="hide-form">
+    {% for item in compras %}
+      <input type="hidden" name="hide_keys" value="{{ item.username }}::{{ loop.index0 }}" />
+    {% endfor %}
+    <button type="submit" class="btn-secondary">Eliminar seleccionados de vista</button>
+  </form>
+</div>
+
+{% endblock %}
