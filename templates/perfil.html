@@ -1,31 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>{{ t("Mi Perfil","My Profile","我的檔案") }}</h2>
-{% if mensaje %}<div class="mensaje">{{ mensaje }}</div>{% endif %}
+{% if mensaje %}<div class="flash">{{ mensaje }}</div>{% endif %}
 <form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="action" value="save_profile">
-    <label>Empresa</label><input type="text" name="empresa" value="{{ perfil.empresa }}">
-    <label>Email</label><input type="text" name="email" value="{{ perfil.email }}">
-    <label>Teléfono</label><input type="text" name="telefono" value="{{ perfil.telefono }}">
-    <label>Dirección</label><input type="text" name="direccion" value="{{ perfil.direccion }}">
-    <label>Descripción</label><textarea name="descripcion">{{ perfil.descripcion }}</textarea>
-    <label>RUT</label><input type="text" name="rut" value="{{ perfil.rut }}">
-    <button type="submit">{{ t("Guardar","Save","保存") }}</button>
+  <label>Empresa</label><input type="text" name="empresa" value="{{ perfil.empresa }}">
+  <label>Email</label><input type="text" name="email" value="{{ perfil.email }}">
+  <label>Teléfono</label><input type="text" name="telefono" value="{{ perfil.telefono }}">
+  <label>Dirección</label><input type="text" name="direccion" value="{{ perfil.direccion }}">
+  <label>Descripción</label><textarea name="descripcion">{{ perfil.descripcion }}</textarea>
+  <button type="submit">{{ t("Guardar","Save","保存") }}</button>
 </form>
-
 <hr>
 <form method="post">
-    <input type="hidden" name="action" value="add_item">
-    <label>{{ t("Tipo de ítem","Item type","項目類型") }}</label>
-    <select name="subtipo">
-        <option value="oferta">{{ t("Oferta","Offer","供應") }}</option>
-        <option value="demanda">{{ t("Demanda","Demand","需求") }}</option>
-        <option value="servicio">{{ t("Servicio","Service","服務") }}</option>
-    </select>
-    <label>Producto/Servicio</label><input type="text" name="producto">
-    <label>Cantidad/Capacidad</label><input type="text" name="cantidad">
-    <label>Origen/Ubicación</label><input type="text" name="origen">
-    <label>Precio</label><input type="text" name="precio">
-    <button type="submit">{{ t("Agregar ítem","Add item","新增項目") }}</button>
+  <input type="hidden" name="action" value="add_item">
+  <label>{{ t("Tipo de ítem","Item type","項目類型") }}</label>
+  <select name="subtipo">
+    <option value="oferta">{{ t("Oferta","Offer","供應") }}</option>
+    <option value="demanda">{{ t("Demanda","Demand","需求") }}</option>
+    <option value="servicio">{{ t("Servicio","Service","服務") }}</option>
+  </select>
+  <label>Producto/Servicio</label><input type="text" name="producto">
+  <label>Cantidad/Capacidad</label><input type="text" name="cantidad">
+  <label>Origen/Ubicación</label><input type="text" name="origen">
+  <label>Precio</label><input type="text" name="precio">
+  <button type="submit">{{ t("Agregar ítem","Add item","新增項目") }}</button>
 </form>
 {% endblock %}
+
