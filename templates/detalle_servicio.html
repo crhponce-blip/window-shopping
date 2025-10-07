@@ -1,31 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
-  <h2>{{ t("Resultados de " + tipo, "Results for " + tipo, "結果：" + tipo) }}</h2>
+<div class="detalle-container">
+    <h2>{{ t("Servicios disponibles", "Available Services", "可用服務") }}</h2>
+    <form method="GET">
+        <input type="text" name="q" placeholder="{{ t('Buscar...', 'Search...', '搜尋...') }}" value="{{ query }}">
+        <button type="submit">{{ t("Buscar", "Search", "搜尋") }}</button>
+    </form>
 
-  {% if data %}
-  <table class="table-results">
-    <thead>
-      <tr>
-        <th>{{ t("Empresa", "Company", "公司") }}</th>
-        <th>{{ t("Rol", "Role", "角色") }}</th>
-        <th>{{ t("Descripción", "Description", "描述") }}</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in data %}
-      <tr>
-        <td>{{ c.empresa }}</td>
-        <td>{{ c.rol }}</td>
-        <td>{{ c.descripcion }}</td>
-        <td><a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">{{ t("Ver", "View", "查看") }}</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>{{ t("No se encontraron resultados.", "No results found.", "未找到結果。") }}</p>
-  {% endif %}
+    <form method="POST" action="{{ url_for('cart_add_bulk') }}">
+        <ul class="listado">
+            {% for c in data %}
+                {% for item in c.items %}
+                    {% if item.tipo == "servicio" %}
+                    <li>
+                        <input type="checkbox" name="sel" value='{{ item | tojson }}'>
+                        <strong>{{ c.empresa }}</strong> - {{ item.servicio }}
+                        <small>{{ item.ubicacion }} | {{ item.capacidad }}</small>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </ul>
+        <button type="submit">{{ t("Agregar seleccionados al carrito", "Add selected to cart", "加入購物車") }}</button>
+    </form>
 </div>
 {% endblock %}
