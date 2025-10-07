@@ -2,14 +2,17 @@
 {% block content %}
 <div class="card">
   <h2>{{ t("Iniciar Sesión","Login","登入") }}</h2>
-  <form method="POST">
-    <input type="email" name="email" placeholder="Correo electrónico" required>
-    <input type="password" name="password" placeholder="Contraseña" required>
-    <button type="submit" class="btn">{{ t("Ingresar","Login","登入") }}</button>
+  {% if error %}<div class="flash">{{ error }}</div>{% endif %}
+  <form method="POST" class="form-vert">
+    <label>{{ t("Usuario (email)","Username (email)","使用者（信箱）") }}</label>
+    <input type="email" name="username" placeholder="tu@empresa.com" required>
+    <label>{{ t("Contraseña","Password","密碼") }}</label>
+    <input type="password" name="password" placeholder="********" required>
+    <button class="btn" type="submit">{{ t("Ingresar","Login","登入") }}</button>
   </form>
-  <p><a href="#">{{ t("¿Olvidaste tu contraseña?","Forgot password?","忘記密碼？") }}</a></p>
-  <p>{{ t("¿No tienes cuenta?","Don't have an account?","還沒有帳戶？") }}
-    <a href="{{ url_for('register_router') }}">{{ t("Regístrate aquí","Register here","註冊這裡") }}</a>
+  <p class="help">
+    {{ t("¿No tienes cuenta?","Don't have an account?","還沒有帳號？") }}
+    <a href="{{ url_for('register_router') }}">{{ t("Regístrate aquí","Register here","前往註冊") }}</a>
   </p>
 </div>
 {% endblock %}
