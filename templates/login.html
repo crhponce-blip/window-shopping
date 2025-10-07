@@ -1,29 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="auth-box">
+  <h2>Iniciar sesión</h2>
+  {% if error %}
+    <div class="flash" style="border-left-color:#ff5b5b;">{{ error }}</div>
+  {% endif %}
+  <form method="POST">
+    <label>Usuario o correo</label>
+    <input type="text" name="username" required>
 
-<div class="auth-row">
-  <div class="auth-card dark">
-    <h2>{{ t("Iniciar sesión","Login","登入") }}</h2>
-    <form method="POST">
-      <!-- El backend espera 'username' y 'password' -->
-      <input type="email" name="username" placeholder="Correo electrónico" required>
-      <input type="password" name="password" placeholder="Contraseña" required>
-      <button class="btn" type="submit">{{ t("Ingresar","Login","登入") }}</button>
-    </form>
-    <p class="mini">
-      <a href="{{ url_for('password_reset_request') }}">{{ t("¿Olvidaste tu contraseña?","Forgot password?","忘記密碼？") }}</a>
-    </p>
-    <p class="mini">
-      {{ t("¿No tienes cuenta?","No account?","沒有帳戶？") }}
-      <a href="{{ url_for('register_router') }}">{{ t("Regístrate","Register","註冊") }}</a>
-    </p>
-  </div>
+    <label>Contraseña</label>
+    <input type="password" name="password" required>
 
-  <div class="auth-card dark">
-    <h2>{{ t("Crear cuenta","Create account","建立帳戶") }}</h2>
-    <p class="muted">{{ t("Si aún no tienes acceso, crea tu cuenta.","If you don't have access yet, create your account.","如果尚未有帳號，請建立帳號。") }}</p>
-    <a class="btn-outline" href="{{ url_for('register_router') }}">{{ t("Registrarse","Register","註冊") }}</a>
-  </div>
+    <input type="submit" value="Entrar">
+
+    <p style="margin-top:10px;">
+      <a href="{{ url_for('password_reset_request') }}">¿Olvidaste tu contraseña?</a>
+    </p>
+
+    <p style="margin-top:10px;">
+      ¿No tienes cuenta? <a href="{{ url_for('register_router') }}">Regístrate aquí</a>.
+    </p>
+  </form>
 </div>
-
 {% endblock %}
