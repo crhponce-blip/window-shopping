@@ -2,14 +2,34 @@
 {% block content %}
 <div class="card">
   <h2>{{ t("Panel de Usuario","User Dashboard","用戶面板") }}</h2>
-  <p><strong>{{ usuario }}</strong> - {{ rol }}</p>
-  <hr>
-  <h3>{{ t("Mi Empresa/Perfil","My Company/Profile","我的公司/檔案") }}</h3>
+  <p><strong>{{ usuario }}</strong> — {{ rol }} ({{ perfil_tipo }})</p>
+
+  <h3>{{ t("Mi empresa/perfil","My company/profile","我的公司/檔案") }}</h3>
   <p>{{ my_company.descripcion }}</p>
-  <ul>
-    {% for i in my_company.items %}
-      <li>{{ i }}</li>
-    {% endfor %}
-  </ul>
+
+  {% if my_company.items and my_company.items|length > 0 %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{{ t("Tipo","Type","類型") }}</th>
+          <th>{{ t("Detalle","Detail","細節") }}</th>
+          <th>{{ t("Cantidad/Capacidad","Qty/Capacity","數量/容量") }}</th>
+          <th>{{ t("Origen/Ubicación","Origin/Location","來源/位置") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in my_company.items %}
+          <tr>
+            <td>{{ it.tipo|capitalize }}</td>
+            <td>{{ it.producto or it.servicio }} {% if it.variedad %}({{ it.variedad }}){% endif %}</td>
+            <td>{{ it.cantidad or it.capacidad }}</td>
+            <td>{{ it.origen or it.ubicacion }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">{{ t("Aún no tienes ítems cargados.","You have no items yet.","尚未新增任何項目") }}</p>
+  {% endif %}
 </div>
 {% endblock %}
