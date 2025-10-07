@@ -1,74 +1,123 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
-  <h2>{{ t("Mi Perfil","My Profile","我的檔案") }}</h2>
-  {% if mensaje %}<div class="flash">{{ mensaje }}</div>{% endif %}
+<div>
+  <h2>Perfil de {{ perfil.empresa }}</h2>
 
-  <form method="post" class="form-vert">
+  {% if mensaje %}
+  <div class="flash">{{ mensaje }}</div>
+  {% endif %}
+
+  <form method="POST">
     <input type="hidden" name="action" value="save_profile">
-    <label>Empresa</label><input type="text" name="empresa" value="{{ perfil.empresa }}">
-    <label>Email</label><input type="text" name="email" value="{{ perfil.email }}">
-    <label>Teléfono</label><input type="text" name="telefono" value="{{ perfil.telefono }}">
-    <label>Dirección</label><input type="text" name="direccion" value="{{ perfil.direccion }}">
-    <label>Descripción</label><textarea name="descripcion">{{ perfil.descripcion }}</textarea>
-    <button class="btn" type="submit">{{ t("Guardar","Save","保存") }}</button>
+    <label>Empresa</label>
+    <input type="text" name="empresa" value="{{ perfil.empresa }}">
+
+    <label>Email</label>
+    <input type="email" name="email" value="{{ perfil.email }}">
+
+    <label>Teléfono</label>
+    <input type="text" name="telefono" value="{{ perfil.telefono }}">
+
+    <label>Dirección</label>
+    <input type="text" name="direccion" value="{{ perfil.direccion }}">
+
+    <label>Descripción</label>
+    <textarea name="descripcion">{{ perfil.descripcion }}</textarea>
+
+    <input type="submit" value="Guardar cambios" class="btn success">
   </form>
-</div>
 
-<div class="card">
-  <h3>{{ t("Agregar ítem","Add item","新增項目") }}</h3>
-  <form method="post" class="form-vert" id="addItemForm">
+  <hr style="margin:30px 0; opacity:0.3;">
+
+  <h3>Agregar ítem</h3>
+  <form method="POST">
     <input type="hidden" name="action" value="add_item">
-
-    <label>{{ t("Tipo de ítem","Item type","項目類型") }}</label>
-    <select name="tipo_perfil_item" id="tipo_perfil_item">
-      <option value="compra_venta">{{ t("Compra/Venta","Buy/Sell","買賣") }}</option>
-      <option value="servicios">{{ t("Servicios","Services","服務") }}</option>
+    <label>Tipo de ítem</label>
+    <select name="tipo_perfil_item" required style="color:black;">
+      <option value="compra_venta">Compra / Venta</option>
+      <option value="servicios">Servicios</option>
     </select>
 
-    <div id="block-cv">
-      <label>{{ t("Subtipo","Subtype","子類型") }}</label>
-      <select name="subtipo">
-        <option value="oferta">{{ t("Oferta","Offer","供應") }}</option>
-        <option value="demanda">{{ t("Demanda","Demand","需求") }}</option>
+    <div id="form_cv">
+      <label>Subtipo</label>
+      <select name="subtipo" style="color:black;">
+        <option value="oferta">Oferta</option>
+        <option value="demanda">Demanda</option>
       </select>
-      <label>Producto</label><input type="text" name="producto">
-      <label>Variedad</label><input type="text" name="variedad">
-      <div class="row">
-        <div><label>Cantidad</label><input type="text" name="cantidad" placeholder="120"></div>
-        <div><label>Bulto</label><input type="text" name="bulto" placeholder="pallets / cajas / kg"></div>
-        <div><label>Origen</label><input type="text" name="origen" placeholder="V Región"></div>
-      </div>
-      <div class="row">
-        <div><label>Precio/caja</label><input type="text" name="precio_caja" placeholder="$12"></div>
-        <div><label>Precio/kg</label><input type="text" name="precio_kilo" placeholder="$1.6"></div>
-      </div>
+
+      <label>Producto</label>
+      <input type="text" name="producto">
+
+      <label>Variedad</label>
+      <input type="text" name="variedad">
+
+      <label>Cantidad</label>
+      <input type="text" name="cantidad">
+
+      <label>Bulto</label>
+      <input type="text" name="bulto">
+
+      <label>Origen</label>
+      <input type="text" name="origen">
+
+      <label>Precio caja</label>
+      <input type="text" name="precio_caja">
+
+      <label>Precio kilo</label>
+      <input type="text" name="precio_kilo">
     </div>
 
-    <div id="block-srv" style="display:none">
-      <label>Servicio</label><input type="text" name="servicio" placeholder="Transporte reefer">
-      <label>Capacidad</label><input type="text" name="capacidad" placeholder="35 camiones">
-      <label>Ubicación</label><input type="text" name="ubicacion" placeholder="Valparaíso">
+    <div id="form_srv" style="display:none;">
+      <label>Servicio</label>
+      <input type="text" name="servicio">
+
+      <label>Capacidad</label>
+      <input type="text" name="capacidad">
+
+      <label>Ubicación</label>
+      <input type="text" name="ubicacion">
     </div>
 
-    <button class="btn" type="submit">{{ t("Agregar ítem","Add item","新增項目") }}</button>
+    <input type="submit" value="Agregar ítem">
   </form>
+
+  <hr style="margin:30px 0; opacity:0.3;">
+
+  <h3>Mis ítems</h3>
+  {% if perfil.items %}
+  <table>
+    <tr>
+      <th>Tipo</th>
+      <th>Producto / Servicio</th>
+      <th>Cantidad / Capacidad</th>
+      <th>Ubicación / Origen</th>
+    </tr>
+    {% for it in perfil.items %}
+    <tr>
+      <td>{{ it.tipo }}</td>
+      <td>{{ it.producto or it.servicio }}</td>
+      <td>{{ it.cantidad or it.capacidad }}</td>
+      <td>{{ it.origen or it.ubicacion }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p>No tienes ítems agregados todavía.</p>
+  {% endif %}
 </div>
 
 <script>
-  const sel = document.getElementById('tipo_perfil_item');
-  const cv = document.getElementById('block-cv');
-  const srv = document.getElementById('block-srv');
-  function sync() {
-    if (sel.value === 'servicios') {
-      cv.style.display = 'none';
-      srv.style.display = '';
-    } else {
-      cv.style.display = '';
-      srv.style.display = 'none';
-    }
+const tipoSelect = document.querySelector('[name="tipo_perfil_item"]');
+const formCV = document.getElementById('form_cv');
+const formSRV = document.getElementById('form_srv');
+tipoSelect.addEventListener('change', () => {
+  if (tipoSelect.value === 'servicios') {
+    formCV.style.display = 'none';
+    formSRV.style.display = 'block';
+  } else {
+    formCV.style.display = 'block';
+    formSRV.style.display = 'none';
   }
-  sel.addEventListener('change', sync);
-  sync();
+});
 </script>
 {% endblock %}
