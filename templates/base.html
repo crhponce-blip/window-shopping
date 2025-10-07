@@ -30,9 +30,9 @@
 
     <li><a href="{{ url_for('ayuda') }}">{{ t("Ayuda","Help","幫助") }}</a></li>
     <li class="lang">
-      <a href="{{ url_for('set_lang','es') }}">ES</a> |
-      <a href="{{ url_for('set_lang','en') }}">EN</a> |
-      <a href="{{ url_for('set_lang','zh') }}">中文</a>
+      <a href="{{ url_for('set_lang', lang='es') }}">ES</a> |
+      <a href="{{ url_for('set_lang', lang='en') }}">EN</a> |
+      <a href="{{ url_for('set_lang', lang='zh') }}">中文</a>
     </li>
   </ul>
 </nav>
