@@ -1,13 +1,16 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="error-page">
-  <h1 style="font-size:4rem;color:#b71c1c;">{{ code }}</h1>
-  <h2>{{ message }}</h2>
-  <p style="margin-top:1rem;">
-    {{ t("Algo salió mal o la página no existe.", "Something went wrong or the page does not exist.", "發生錯誤或頁面不存在。") }}
-  </p>
-  <a href="{{ url_for('home') }}" class="btn btn-primary" style="margin-top:2rem;">
-    {{ t("Volver al inicio", "Return to home", "返回首頁") }}
-  </a>
-</div>
+<main class="error-container">
+  <div class="error-box">
+    <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-error">
+    <h1>{{ code }}</h1>
+    <h2>{{ t("Error", "Error", "錯誤") }}</h2>
+    <p>{{ message }}</p>
+
+    <a href="{{ url_for('home') }}" class="btn-primary">
+      {{ t("Volver al inicio", "Go back home", "返回首頁") }}
+    </a>
+  </div>
+</main>
 {% endblock %}
