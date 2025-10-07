@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="text-align:center; padding:50px 20px;">
-  <h2>Bienvenido a <span style="color:#29a3ff;">Window Shopping</span></h2>
-  <p>La plataforma que conecta productores, exportadores y servicios del rubro frutícola chileno con compradores internacionales.</p>
-  <br>
-  {% if not session.get('user') %}
-  <a href="{{ url_for('login') }}" class="btn">Iniciar sesión</a>
-  <a href="{{ url_for('register_router') }}" class="btn" style="background:#1dd3b0;">Registrarse</a>
-  {% else %}
-  <a href="{{ url_for('dashboard') }}" class="btn">Ir a mi panel</a>
-  {% endif %}
-</div>
+<section style="text-align:center;padding:3rem 1rem;">
+  <h2 style="color:#1b5e20;">{{ t("Bienvenido a WS Platform", "Welcome to WS Platform", "歡迎使用WS平台") }}</h2>
+  <p style="max-width:600px;margin:1rem auto;font-size:1.1rem;">
+    {{ t("Conecta productores, packing, frigoríficos, exportadores y compradores internacionales en un solo lugar.",
+         "Connect producers, packers, cold storages, exporters and international buyers in one place.",
+         "在一個平台上連接生產商、包裝廠、冷庫、出口商和國際買家。") }}
+  </p>
+
+  <div style="margin-top:2rem;">
+    <a href="{{ url_for('register_router') }}" class="btn btn-primary">{{ t("Comenzar", "Get Started", "開始使用") }}</a>
+    <a href="{{ url_for('login') }}" class="btn btn-secondary">{{ t("Iniciar sesión", "Login", "登入") }}</a>
+  </div>
+</section>
 {% endblock %}
