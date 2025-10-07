@@ -1,51 +1,57 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ session.get('lang', 'es') }}">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WS - Window Shopping</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WS Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 </head>
 <body>
+
+  <!-- HEADER -->
   <header>
-    <div class="logo">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="WS Logo">
-      <h1>Window Shopping</h1>
-    </div>
-    <nav>
-      <ul>
-        <li><a href="{{ url_for('home') }}">Inicio</a></li>
-        {% if session.get('user') %}
-          <li><a href="{{ url_for('dashboard') }}">Mi Panel</a></li>
-          <li><a href="{{ url_for('carrito') }}">Carrito</a></li>
-          <li><a href="{{ url_for('logout') }}">Cerrar sesión</a></li>
-        {% else %}
-          <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
-          <li><a href="{{ url_for('register_router') }}">Registrarse</a></li>
-        {% endif %}
-        <li><a href="{{ url_for('ayuda') }}">Ayuda</a></li>
-        <li>
-          <a href="{{ url_for('set_lang', lang='es') }}">ES</a> |
-          <a href="{{ url_for('set_lang', lang='en') }}">EN</a> |
-          <a href="{{ url_for('set_lang', lang='zh') }}">中文</a>
-        </li>
-      </ul>
+    <h1><a href="{{ url_for('home') }}" style="color:#1b5e20;text-decoration:none;">WS Platform</a></h1>
+
+    <nav class="nav-links">
+      {% if session.get('user') %}
+        <a href="{{ url_for('dashboard') }}">{{ t("Inicio", "Home", "主頁") }}</a>
+        <a href="{{ url_for('perfil') }}">{{ t("Perfil", "Profile", "檔案") }}</a>
+        <a href="{{ url_for('detalles', tipo='compras') }}">{{ t("Compras", "Purchases", "採購") }}</a>
+        <a href="{{ url_for('detalles', tipo='ventas') }}">{{ t("Ventas", "Sales", "銷售") }}</a>
+        <a href="{{ url_for('detalles', tipo='servicios') }}">{{ t("Servicios", "Services", "服務") }}</a>
+        <a href="{{ url_for('logout') }}">{{ t("Cerrar sesión", "Logout", "登出") }}</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">{{ t("Iniciar sesión", "Login", "登入") }}</a>
+        <a href="{{ url_for('register_router') }}">{{ t("Registrarse", "Register", "註冊") }}</a>
+      {% endif %}
+
+      <!-- Selector de idioma -->
+      <select class="lang-selector" onchange="location.href='/set_lang/' + this.value">
+        {% for code, name in LANGS %}
+          <option value="{{ code }}" {% if session.get('lang','es') == code %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
     </nav>
   </header>
 
+  <!-- BUSCADOR GLOBAL -->
+  <div class="search-box">
+    <form action="{{ url_for('clientes') }}" method="get">
+      <input type="text" name="q" placeholder="{{ t('Buscar empresas, productos o servicios...', 'Search companies, products or services...', '搜尋公司、產品或服務...') }}" required />
+      <button type="submit">{{ t('Buscar', 'Search', '搜尋') }}</button>
+    </form>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
   <main class="container">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for msg in messages %}
-          <div class="flash">{{ msg }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
     {% block content %}{% endblock %}
   </main>
 
+  <!-- FOOTER -->
   <footer>
-    <p>© 2025 WS - Window Shopping | Desarrollado por Christopher Ponce</p>
+    <p>© 2025 WS Platform — {{ t("Conectando productores, exportadores y compradores del mundo.", "Connecting producers, exporters and buyers worldwide.", "連接全球生產商、出口商與買家。") }}</p>
   </footer>
+
 </body>
 </html>
