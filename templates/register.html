@@ -1,123 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
-  <h2>{{ t("Registro","Register","註冊") }}</h2>
-
+<div class="auth-box">
+  <h2>Formulario de registro</h2>
   {% if error %}
-    <div class="flash">{{ error }}</div>
+    <div class="flash" style="border-left-color:#ff5b5b;">{{ error }}</div>
   {% endif %}
 
-  <form class="form-vert" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="nacionalidad" value="{{ (nacionalidad or 'nacional') }}">
-    <input type="hidden" id="perfil_tipo" name="perfil_tipo" value="{{ (perfil_tipo or 'compra_venta') }}">
+  <form method="POST" enctype="multipart/form-data">
+    <label>Correo electrónico</label>
+    <input type="email" name="username" required>
 
-    <div class="row">
-      <div>
-        <label><strong>{{ t("Usuario (email)","Username (email)","使用者（信箱）") }}</strong></label>
-        <input type="email" name="username" placeholder="tu@empresa.com" required>
-      </div>
-      <div>
-        <label><strong>{{ t("Contraseña","Password","密碼") }}</strong></label>
-        <input type="password" name="password" required>
-      </div>
-    </div>
+    <label>Contraseña</label>
+    <input type="password" name="password" required>
 
-    <div class="row">
-      <div>
-        <label><strong>{{ t("Email contacto","Contact email","聯絡信箱") }}</strong></label>
-        <input type="email" name="email" placeholder="contacto@empresa.com">
-      </div>
-      <div>
-        <label><strong>{{ t("Teléfono","Phone","電話") }}</strong></label>
-        <input type="text" name="phone" placeholder="+56 9 ...">
-      </div>
-    </div>
+    <label>Nombre de la empresa</label>
+    <input type="text" name="empresa">
 
-    <div class="row">
-      <div>
-        <label><strong>{{ t("Dirección","Address","地址") }}</strong></label>
-        <input type="text" name="address" placeholder="Av. ...">
-      </div>
-      <div>
-        <label><strong>{{ t("País","Country","國家") }}</strong></label>
-        <input type="text" name="pais" placeholder="CL / US / ..." value="{{ 'CL' if (nacionalidad or 'nacional')=='nacional' else 'US' }}">
-      </div>
-    </div>
+    <label>Teléfono</label>
+    <input type="text" name="phone">
 
-    <div id="bloque-rol">
-      <label><strong>{{ t("Rol","Role","角色") }}</strong></label>
-      {% if (nacionalidad or 'nacional') == 'extranjero' %}
-        <input type="text" name="rol" value="Cliente extranjero" readonly>
-      {% else %}
-        <select name="rol" id="rol-select" required>
-          {% if (perfil_tipo or 'compra_venta') == 'servicios' %}
-            {% for r in roles_srv %}
-              <option value="{{ r }}">{{ r }}</option>
-            {% endfor %}
-          {% else %}
-            {% for r in roles_cv %}
-              <option value="{{ r }}">{{ r }}</option>
-            {% endfor %}
-          {% endif %}
-        </select>
-      {% endif %}
-    </div>
+    <label>Dirección</label>
+    <input type="text" name="address">
 
-    <div id="bloque-nacional" {% if (nacionalidad or 'nacional') != 'nacional' %}style="display:none"{% endif %}>
-      <div class="row">
-        <div>
-          <label><strong>RUT</strong></label>
-          <input type="text" name="rut" placeholder="76.123.456-7">
-        </div>
-        <div>
-          <label><strong>{{ t("Documento RUT (PDF/JPG/PNG)","RUT Document","RUT 檔案") }}</strong></label>
-          <input type="file" name="rut_file" accept=".pdf,.jpg,.jpeg,.png">
-        </div>
-      </div>
-    </div>
+    <label>País</label>
+    <input type="text" name="pais" placeholder="Ej: Chile o USA">
 
-    <div id="bloque-extranjero" {% if (nacionalidad or 'nacional') != 'extranjero' %}style="display:none"{% endif %}>
-      <div class="row">
-        <div>
-          <label><strong>USCI</strong></label>
-          <input type="text" name="usci" placeholder="US-XXXX">
-        </div>
-        <div>
-          <label><strong>EORI</strong></label>
-          <input type="text" name="eori" placeholder="EUXXXXXXXXX">
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label><strong>TAX ID</strong></label>
-          <input type="text" name="tax_id" placeholder="99-XXXXXXX">
-        </div>
-        <div>
-          <label><strong>{{ t("Otros ID","Other IDs","其他證號") }}</strong></label>
-          <input type="text" name="otros_id" placeholder="...">
-        </div>
-      </div>
-    </div>
+    <label>Rol</label>
+    <select name="rol" style="color:black;">
+      {% for r in roles_all_cv %}
+      <option value="{{ r }}">{{ r }}</option>
+      {% endfor %}
+    </select>
 
-    <button class="btn" type="submit">{{ t("Crear cuenta","Create account","建立帳戶") }}</button>
+    {% if nacionalidad == "nacional" %}
+    <label>RUT</label>
+    <input type="text" name="rut">
+    <label>Archivo RUT (PDF o imagen)</label>
+    <input type="file" name="rut_file">
+    {% else %}
+    <label>USCI</label>
+    <input type="text" name="usci">
+    <label>Tax ID</label>
+    <input type="text" name="tax_id">
+    {% endif %}
 
-    <p class="help">
-      {{ t(
-        "Si elegiste 'Ambos' en el paso anterior, quedará como Compra/Venta y podrás agregar servicios desde tu Perfil.",
-        "If you selected 'Both' previously, you’ll be registered as Buy/Sell and you can add services later from Profile.",
-        "若前一步選擇「同時」，會以買賣註冊，之後可在個人資料新增服務。"
-      ) }}
-    </p>
+    <input type="submit" value="Registrarme">
   </form>
 </div>
-
-<script>
-  (function(){
-    const params = new URLSearchParams(window.location.search);
-    const tipo = params.get('tipo');
-    if (tipo === 'ambos') {
-      document.getElementById('perfil_tipo').value = 'compra_venta';
-    }
-  })();
-</script>
 {% endblock %}
