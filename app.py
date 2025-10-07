@@ -604,7 +604,6 @@ def perfil():
 
     return render_template("perfil.html", perfil=ViewObj(prof), mensaje=mensaje)
 
-
 # =========================================================
 # CARRITO DE COMPRAS
 # =========================================================
@@ -622,6 +621,34 @@ def carrito():
                 flash(t("Ítem eliminado", "Item removed"))
             return redirect(url_for("carrito"))
     return render_template("carrito.html", cart=get_cart())
+
+
+# =========================================================
+# AGREGAR AL CARRITO (endpoint necesario para los templates)
+# =========================================================
+@app.route("/cart_add", methods=["POST"])
+def cart_add():
+    payload = {
+        "empresa": (request.form.get("empresa") or "").strip(),
+        "producto": (request.form.get("producto") or "").strip(),
+        "servicio": (request.form.get("servicio") or "").strip(),
+        "variedad": (request.form.get("variedad") or "").strip(),
+        "cantidad": (request.form.get("cantidad") or "").strip(),
+        "bulto": (request.form.get("bulto") or "").strip(),
+        "origen": (request.form.get("origen") or "").strip(),
+        "precio_caja": (request.form.get("precio_caja") or "").strip(),
+        "precio_kilo": (request.form.get("precio_kilo") or "").strip(),
+    }
+    # Limpieza: elimina claves vacías para que la UI no muestre valores vacíos
+    clean = {k: v for k, v in payload.items() if v}
+    if clean:
+        add_to_cart(clean)
+        flash(t("Agregado al carrito", "Added to cart", "已加入購物車"))
+    else:
+        flash(t("No se pudo agregar el ítem.", "Item could not be added.", "無法加入項目"))
+    return redirect(request.referrer or url_for("carrito"))
+
+
 # =========================================================
 # AYUDA / SOPORTE
 # =========================================================
@@ -635,10 +662,19 @@ def ayuda():
     ]
     return render_template("ayuda.html", temas=temas)
 
+
+# =========================================================
+# ARCHIVOS SUBIDOS (RUT / DOCUMENTOS)
+# =========================================================
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+    # Usamos la carpeta configurada al inicio del archivo (UPLOAD_FOLDER)
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
+
+# =========================================================
+# CAMBIO DE IDIOMA (ruta alternativa a /set_lang/<lang>)
+# =========================================================
 @app.route("/lang/<lang>")
 def cambiar_idioma(lang):
     if lang not in ("es", "en", "zh"):
@@ -667,6 +703,7 @@ def server_error(e):
         code=500,
         message=t("Error interno", "Internal server error", "內部伺服器錯誤"),
     ), 500
+
 
 # =========================================================
 # EJECUCIÓN PRINCIPAL
