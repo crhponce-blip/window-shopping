@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+<h2>Centro de Ayuda</h2>
+<p>Aquí encontrarás información básica para usar la plataforma Window Shopping (WS):</p>
+
+{% for t in temas %}
 <div class="card">
-  <h2>{{ t("Ayuda","Help","幫助") }}</h2>
-  <ul>
-    {% for it in temas %}
-      <li><strong>{{ it.titulo }}</strong>: {{ it.detalle }}</li>
-    {% endfor %}
-  </ul>
+  <h3>{{ t.titulo }}</h3>
+  <p>{{ t.detalle }}</p>
+</div>
+{% endfor %}
+
+<div style="margin-top:30px;">
+  <p>¿Aún necesitas ayuda? Escríbenos a <b>soporte@windowshopping.cl</b></p>
 </div>
 {% endblock %}
