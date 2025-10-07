@@ -1,50 +1,71 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="auth-box">
-  <h2>Formulario de registro</h2>
+<div class="register-container">
+  <h2>{{ t("Registro de usuario", "User registration", "使用者註冊") }}</h2>
+
   {% if error %}
-    <div class="flash" style="border-left-color:#ff5b5b;">{{ error }}</div>
+  <div class="flash-error">{{ error }}</div>
   {% endif %}
+  {% for msg in get_flashed_messages() %}
+  <div class="flash">{{ msg }}</div>
+  {% endfor %}
 
   <form method="POST" enctype="multipart/form-data">
-    <label>Correo electrónico</label>
-    <input type="email" name="username" required>
+    <label>{{ t("Nacionalidad", "Nationality", "國籍") }}</label>
+    <select name="nacionalidad" required>
+      <option value="nacional" {% if nacionalidad == "nacional" %}selected{% endif %}>{{ t("Nacional", "National", "本國") }}</option>
+      <option value="extranjero" {% if nacionalidad == "extranjero" %}selected{% endif %}>{{ t("Extranjero", "Foreign", "外國") }}</option>
+    </select>
 
-    <label>Contraseña</label>
-    <input type="password" name="password" required>
-
-    <label>Nombre de la empresa</label>
-    <input type="text" name="empresa">
-
-    <label>Teléfono</label>
-    <input type="text" name="phone">
-
-    <label>Dirección</label>
-    <input type="text" name="address">
-
-    <label>País</label>
-    <input type="text" name="pais" placeholder="Ej: Chile o USA">
-
-    <label>Rol</label>
-    <select name="rol" style="color:black;">
-      {% for r in roles_all_cv %}
-      <option value="{{ r }}">{{ r }}</option>
+    <label>{{ t("Tipo de perfil", "Profile type", "檔案類型") }}</label>
+    <select name="perfil_tipo" required>
+      {% for tipo in perfil_opciones %}
+      <option value="{{ tipo }}" {% if tipo == perfil_tipo %}selected{% endif %}>{{ tipo|capitalize }}</option>
       {% endfor %}
     </select>
 
+    <label>{{ t("Rol", "Role", "角色") }}</label>
+    <select name="rol" required>
+      {% if perfil_tipo == "compra_venta" %}
+        {% for r in roles_cv %}
+        <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+      {% else %}
+        {% for r in roles_srv %}
+        <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+      {% endif %}
+    </select>
+
+    <label>Email</label>
+    <input type="email" name="email" required />
+
+    <label>{{ t("Contraseña", "Password", "密碼") }}</label>
+    <input type="password" name="password" required />
+
+    <label>{{ t("Teléfono", "Phone", "電話") }}</label>
+    <input type="text" name="phone" />
+
+    <label>{{ t("Dirección", "Address", "地址") }}</label>
+    <input type="text" name="address" />
+
     {% if nacionalidad == "nacional" %}
-    <label>RUT</label>
-    <input type="text" name="rut">
-    <label>Archivo RUT (PDF o imagen)</label>
-    <input type="file" name="rut_file">
+      <label>RUT</label>
+      <input type="text" name="rut" />
+      <label>{{ t("Archivo RUT (PDF o imagen)", "RUT file (PDF or image)", "RUT 檔案") }}</label>
+      <input type="file" name="rut_file" />
     {% else %}
-    <label>USCI</label>
-    <input type="text" name="usci">
-    <label>Tax ID</label>
-    <input type="text" name="tax_id">
+      <label>EORI</label>
+      <input type="text" name="eori" />
+      <label>USCI</label>
+      <input type="text" name="usci" />
+      <label>Tax ID</label>
+      <input type="text" name="tax_id" />
+      <label>{{ t("Otros ID", "Other IDs", "其他ID") }}</label>
+      <input type="text" name="otros_id" />
     {% endif %}
 
-    <input type="submit" value="Registrarme">
+    <button type="submit" class="btn btn-primary">{{ t("Registrar", "Register", "註冊") }}</button>
   </form>
 </div>
 {% endblock %}
