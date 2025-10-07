@@ -1,21 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ t("Carrito","Cart","購物車") }}</h2>
-{% if cart %}
-<form method="post">
-<table>
-<tr><th>Empresa</th><th>Producto/Servicio</th><th>Acción</th></tr>
-{% for i in cart %}
-<tr>
-  <td>{{ i.empresa }}</td>
-  <td>{{ i.producto or i.servicio }}</td>
-  <td><button name="action" value="remove:{{ loop.index0 }}" class="table-btn remove-btn">{{ t("Eliminar","Remove","刪除") }}</button></td>
-</tr>
-{% endfor %}
-</table>
-<button name="action" value="clear">{{ t("Vaciar Carrito","Clear Cart","清空購物車") }}</button>
-</form>
-{% else %}
-<p>{{ t("Carrito vacío","Cart empty","購物車是空的") }}</p>
-{% endif %}
+<div class="card">
+  <h2>{{ t("Panel de Usuario","User Dashboard","用戶面板") }}</h2>
+  <p><strong>{{ usuario }}</strong> - {{ rol }}</p>
+  <hr>
+  <h3>{{ t("Mi Empresa/Perfil","My Company/Profile","我的公司/檔案") }}</h3>
+  <p>{{ my_company.descripcion }}</p>
+  <ul>
+    {% for i in my_company.items %}
+      <li>{{ i }}</li>
+    {% endfor %}
+  </ul>
+</div>
 {% endblock %}
