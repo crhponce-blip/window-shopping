@@ -3,46 +3,79 @@
 <div class="card">
   <h2>{{ t("Detalle de Compras","Purchases Detail","採購明細") }}</h2>
 
-  <form method="get" class="form-vert">
-    <input type="text" name="q" value="{{ query or '' }}" placeholder="{{ t('Buscar empresa o descripción','Search company or description','搜尋公司或描述') }}">
-    <button class="btn" type="submit">{{ t("Filtrar","Filter","篩選") }}</button>
-  </form>
+  <form method="post" action="{{ url_for('cart_add_bulk') }}" id="bulkForm">
+    <div class="bulk-actions">
+      <button class="btn" type="submit">{{ t("Agregar seleccionados al carrito","Add selected to cart","加入所選到購物車") }}</button>
+      <button class="btn-outline" type="button" onclick="hideSelected()">{{ t("Ocultar seleccionados","Hide selected","隱藏所選") }}</button>
+    </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>{{ t("Empresa","Company","公司") }}</th>
-        <th>{{ t("Rol","Role","角色") }}</th>
-        <th>{{ t("Demanda","Demand","需求") }}</th>
-        <th>{{ t("Cant.","Qty","數量") }}</th>
-        <th>{{ t("Origen","Origin","來源") }}</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in data %}
-        {% for it in c.items if it.tipo == 'demanda' %}
+    <table class="table" id="listTable">
+      <thead>
         <tr>
-          <td>{{ c.nombre or c.empresa }}</td>
-          <td>{{ c.rol }}</td>
-          <td>{{ it.producto }} {% if it.variedad %}({{ it.variedad }}){% endif %}</td>
-          <td>{{ it.cantidad }} {{ it.bulto }}</td>
-          <td>{{ it.origen }}</td>
-          <td>
-            <form method="post" action="{{ url_for('cart_add') }}">
-              <input type="hidden" name="empresa" value="{{ c.nombre or c.empresa }}">
-              <input type="hidden" name="producto" value="{{ it.producto }}">
-              <input type="hidden" name="variedad" value="{{ it.variedad }}">
-              <input type="hidden" name="cantidad" value="{{ it.cantidad }}">
-              <input type="hidden" name="bulto" value="{{ it.bulto }}">
-              <input type="hidden" name="origen" value="{{ it.origen }}">
-              <button class="btn" type="submit">{{ t("Agregar","Add","加入") }}</button>
-            </form>
-          </td>
+          <th><input type="checkbox" onclick="toggleAll(this)"></th>
+          <th>{{ t("Empresa","Company","公司") }}</th>
+          <th>{{ t("Rol","Role","角色") }}</th>
+          <th>{{ t("Demanda","Demand","需求") }}</th>
+          <th>{{ t("Cant.","Qty","數量") }}</th>
+          <th>{{ t("Origen","Origin","來源") }}</th>
+          <th></th>
         </tr>
+      </thead>
+      <tbody>
+        {% for c in data %}
+          {% for it in c.items if it.tipo == 'demanda' %}
+          <tr>
+            <td>
+              <input type="checkbox" name="sel" value='{{ {
+                "empresa": c.nombre or c.empresa,
+                "tipo": "compra",
+                "producto": it.producto,
+                "variedad": it.variedad,
+                "cantidad": it.cantidad,
+                "bulto": it.bulto,
+                "origen": it.origen
+              } | tojson }}'>
+            </td>
+            <td>
+              {% if c.username %}
+                <a href="{{ url_for('cliente_detalle', username=c.username) }}">{{ c.nombre or c.empresa }}</a>
+              {% else %}
+                {{ c.nombre or c.empresa }}
+              {% endif %}
+            </td>
+            <td>{{ c.rol }}</td>
+            <td>{{ it.producto }} {% if it.variedad %}({{ it.variedad }}){% endif %}</td>
+            <td>{{ it.cantidad }} {{ it.bulto }}</td>
+            <td>{{ it.origen }}</td>
+            <td>
+              <form method="post" action="{{ url_for('cart_add') }}">
+                <input type="hidden" name="empresa" value="{{ c.nombre or c.empresa }}">
+                <input type="hidden" name="tipo" value="compra">
+                <input type="hidden" name="producto" value="{{ it.producto }}">
+                <input type="hidden" name="variedad" value="{{ it.variedad }}">
+                <input type="hidden" name="cantidad" value="{{ it.cantidad }}">
+                <input type="hidden" name="bulto" value="{{ it.bulto }}">
+                <input type="hidden" name="origen" value="{{ it.origen }}">
+                <button class="btn" type="submit">{{ t("Agregar","Add","加入") }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
         {% endfor %}
-      {% endfor %}
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </form>
 </div>
+
+<script>
+function toggleAll(master){
+  document.querySelectorAll('#listTable tbody input[type=checkbox]').forEach(cb => cb.checked = master.checked);
+}
+function hideSelected(){
+  document.querySelectorAll('#listTable tbody input[type=checkbox]:checked').forEach(cb => {
+    const tr = cb.closest('tr');
+    tr.style.display = 'none';
+  });
+}
+</script>
 {% endblock %}
