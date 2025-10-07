@@ -1,57 +1,51 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('lang', 'es') }}">
+<html lang="{{ session.get('lang','es') }}">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WS Platform</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Window Shopping - {{ t("Inicio", "Home", "首頁") }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-left">
+                <a href="{{ url_for('home') }}"><strong>WS</strong></a>
+            </div>
+            <div class="nav-right">
+                <a href="{{ url_for('home') }}">{{ t("Inicio", "Home", "首頁") }}</a>
+                {% if session.get('user') %}
+                    <a href="{{ url_for('dashboard') }}">{{ t("Panel", "Dashboard", "控制台") }}</a>
+                    <a href="{{ url_for('perfil') }}">{{ t("Mi Perfil", "My Profile", "我的資料") }}</a>
+                    <a href="{{ url_for('logout') }}">{{ t("Cerrar Sesión", "Logout", "登出") }}</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">{{ t("Iniciar Sesión", "Login", "登入") }}</a>
+                    <a href="{{ url_for('register_router') }}">{{ t("Registrarse", "Register", "註冊") }}</a>
+                {% endif %}
+                <div class="lang-switch">
+                    {% for code, name in LANGS %}
+                        <a href="{{ url_for('set_lang', lang=code) }}">{{ name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </nav>
+    </header>
 
-  <!-- HEADER -->
-  <header>
-    <h1><a href="{{ url_for('home') }}" style="color:#1b5e20;text-decoration:none;">WS Platform</a></h1>
+    <main>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for msg in messages %}
+                        <div class="flash">{{ msg }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
 
-    <nav class="nav-links">
-      {% if session.get('user') %}
-        <a href="{{ url_for('dashboard') }}">{{ t("Inicio", "Home", "主頁") }}</a>
-        <a href="{{ url_for('perfil') }}">{{ t("Perfil", "Profile", "檔案") }}</a>
-        <a href="{{ url_for('detalles', tipo='compras') }}">{{ t("Compras", "Purchases", "採購") }}</a>
-        <a href="{{ url_for('detalles', tipo='ventas') }}">{{ t("Ventas", "Sales", "銷售") }}</a>
-        <a href="{{ url_for('detalles', tipo='servicios') }}">{{ t("Servicios", "Services", "服務") }}</a>
-        <a href="{{ url_for('logout') }}">{{ t("Cerrar sesión", "Logout", "登出") }}</a>
-      {% else %}
-        <a href="{{ url_for('login') }}">{{ t("Iniciar sesión", "Login", "登入") }}</a>
-        <a href="{{ url_for('register_router') }}">{{ t("Registrarse", "Register", "註冊") }}</a>
-      {% endif %}
-
-      <!-- Selector de idioma -->
-      <select class="lang-selector" onchange="location.href='/set_lang/' + this.value">
-        {% for code, name in LANGS %}
-          <option value="{{ code }}" {% if session.get('lang','es') == code %}selected{% endif %}>{{ name }}</option>
-        {% endfor %}
-      </select>
-    </nav>
-  </header>
-
-  <!-- BUSCADOR GLOBAL -->
-  <div class="search-box">
-    <form action="{{ url_for('clientes') }}" method="get">
-      <input type="text" name="q" placeholder="{{ t('Buscar empresas, productos o servicios...', 'Search companies, products or services...', '搜尋公司、產品或服務...') }}" required />
-      <button type="submit">{{ t('Buscar', 'Search', '搜尋') }}</button>
-    </form>
-  </div>
-
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="container">
-    {% block content %}{% endblock %}
-  </main>
-
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2025 WS Platform — {{ t("Conectando productores, exportadores y compradores del mundo.", "Connecting producers, exporters and buyers worldwide.", "連接全球生產商、出口商與買家。") }}</p>
-  </footer>
-
+    <footer>
+        <p>© 2025 Window Shopping (WS) - {{ t("Todos los derechos reservados", "All rights reserved", "保留所有權利") }}</p>
+    </footer>
 </body>
 </html>
