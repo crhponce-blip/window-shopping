@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="landing-container">
+
+  <div class="logo-center">
+    <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="Logo WS">
+    <h1>Window Shopping</h1>
+    <p>{{ t("Conectando productores chilenos con compradores internacionales", 
+             "Connecting Chilean producers with international buyers", 
+             "連接智利生產商與國際買家") }}</p>
+  </div>
+
+  <div class="landing-buttons">
+    <a href="{{ url_for('register') }}" class="btn-primary">
+      {{ t("Registrarse", "Register", "註冊") }}
+    </a>
+
+    <a href="{{ url_for('login') }}" class="btn-secondary">
+      {{ t("Iniciar sesión", "Login", "登入") }}
+    </a>
+  </div>
+
+  <div style="margin-top:40px; text-align:center; font-size:14px; color:#d9e4ef;">
+    <p>{{ t("Explora perfiles de usuarios nacionales y extranjeros, compra y vende frutas o servicios de exportación.", 
+             "Explore national and international profiles, buy and sell fruits or export services.", 
+             "探索本地與國際用戶，購買或銷售水果與出口服務。") }}</p>
+  </div>
+
+</main>
+{% endblock %}
