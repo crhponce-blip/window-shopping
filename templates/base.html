@@ -1,51 +1,65 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('lang','es') }}">
+<html lang="{{ session.get('lang', 'es') }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Window Shopping - {{ t("Inicio", "Home", "首頁") }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Window Shopping | WS</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo_ws.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="nav-left">
-                <a href="{{ url_for('home') }}"><strong>WS</strong></a>
-            </div>
-            <div class="nav-right">
-                <a href="{{ url_for('home') }}">{{ t("Inicio", "Home", "首頁") }}</a>
-                {% if session.get('user') %}
-                    <a href="{{ url_for('dashboard') }}">{{ t("Panel", "Dashboard", "控制台") }}</a>
-                    <a href="{{ url_for('perfil') }}">{{ t("Mi Perfil", "My Profile", "我的資料") }}</a>
-                    <a href="{{ url_for('logout') }}">{{ t("Cerrar Sesión", "Logout", "登出") }}</a>
-                {% else %}
-                    <a href="{{ url_for('login') }}">{{ t("Iniciar Sesión", "Login", "登入") }}</a>
-                    <a href="{{ url_for('register_router') }}">{{ t("Registrarse", "Register", "註冊") }}</a>
-                {% endif %}
-                <div class="lang-switch">
-                    {% for code, name in LANGS %}
-                        <a href="{{ url_for('set_lang', lang=code) }}">{{ name }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-        </nav>
-    </header>
 
-    <main>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="flash-container">
-                    {% for msg in messages %}
-                        <div class="flash">{{ msg }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-        {% block content %}{% endblock %}
-    </main>
+  <!-- =========================================================
+       NAVBAR SUPERIOR
+  ========================================================= -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="{{ url_for('home') }}" class="nav-logo">
+        <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" style="height:40px; vertical-align:middle;">
+        <span style="margin-left:8px; font-weight:600;">Window Shopping</span>
+      </a>
+    </div>
 
-    <footer>
-        <p>© 2025 Window Shopping (WS) - {{ t("Todos los derechos reservados", "All rights reserved", "保留所有權利") }}</p>
-    </footer>
+    <div class="nav-right">
+      {% if 'user' in session %}
+        <a href="{{ url_for('dashboard') }}">{{ t('Inicio', 'Home', '首頁') }}</a>
+        <a href="{{ url_for('perfil') }}">{{ t('Perfil', 'Profile', '個人資料') }}</a>
+        <a href="{{ url_for('logout') }}">{{ t('Cerrar sesión', 'Logout', '登出') }}</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">{{ t('Iniciar sesión', 'Login', '登入') }}</a>
+        <a href="{{ url_for('register') }}">{{ t('Registrarse', 'Register', '註冊') }}</a>
+      {% endif %}
+      <span class="lang-switch">
+        <a href="{{ url_for('set_language', lang='es') }}">ES</a> |
+        <a href="{{ url_for('set_language', lang='en') }}">EN</a> |
+        <a href="{{ url_for('set_language', lang='zh') }}">中文</a>
+      </span>
+    </div>
+  </nav>
+
+  <!-- =========================================================
+       CONTENIDO PRINCIPAL
+  ========================================================= -->
+  <main>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for message in messages %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- =========================================================
+       FOOTER
+  ========================================================= -->
+  <footer>
+    <p>© 2025 Window Shopping | Plataforma de Comercio Internacional</p>
+  </footer>
+
 </body>
 </html>
