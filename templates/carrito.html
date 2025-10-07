@@ -1,40 +1,55 @@
 {% extends "base.html" %}
+{% block title %}Carrito de Compras | Window Shopping{% endblock %}
 {% block content %}
-<h2>🛒 Carrito de compras</h2>
 
-{% if cart and cart|length > 0 %}
-  <form method="POST">
-    <table>
-      <tr>
-        <th>#</th>
-        <th>Empresa</th>
-        <th>Producto / Servicio</th>
-        <th>Cantidad</th>
-        <th>Origen / Ubicación</th>
-        <th>Precio</th>
-        <th>Acción</th>
-      </tr>
-      {% for i, item in enumerate(cart) %}
-      <tr>
-        <td>{{ i+1 }}</td>
-        <td>{{ item.empresa }}</td>
-        <td>{{ item.producto or item.servicio }}</td>
-        <td>{{ item.cantidad or item.capacidad }}</td>
-        <td>{{ item.origen or item.ubicacion }}</td>
-        <td>{{ item.precio_caja or item.precio_kilo or '-' }}</td>
-        <td>
-          <button type="submit" name="action" value="remove:{{ i }}" class="btn danger">Eliminar</button>
-        </td>
-      </tr>
-      {% endfor %}
+<div class="form-container">
+  <h2>🛒 Carrito de Compras</h2>
+
+  {% if cart and cart|length > 0 %}
+  <form method="post" action="{{ url_for('cart_update') }}">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Producto / Servicio</th>
+          <th>Cantidad</th>
+          <th>Origen</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart %}
+        <tr>
+          <td>
+            <a href="{{ url_for('perfil', empresa=item.empresa) }}">
+              {{ item.empresa }}
+            </a>
+          </td>
+          <td>{{ item.producto or item.servicio }}</td>
+          <td>{{ item.cantidad or "N/A" }}</td>
+          <td>{{ item.origen or "Chile" }}</td>
+          <td>
+            <form method="post" action="{{ url_for('cart_remove') }}" style="display:inline;">
+              <input type="hidden" name="item_key" value="{{ loop.index0 }}">
+              <button type="submit" class="btn-delete">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
 
-    <div style="margin-top:15px;">
-      <button type="submit" name="action" value="clear" class="btn danger">Vaciar carrito</button>
+    <div class="buttons">
+      <form method="post" action="{{ url_for('cart_clear') }}" style="display:inline;">
+        <button type="submit" class="btn-secondary">Vaciar Carrito</button>
+      </form>
+      <button type="submit" class="btn-primary">Actualizar Carrito</button>
     </div>
   </form>
-{% else %}
-  <p>No tienes productos o servicios en el carrito.</p>
-  <a href="{{ url_for('dashboard') }}" class="btn">Volver al panel</a>
-{% endif %}
+
+  {% else %}
+  <p>No hay productos en tu carrito aún.</p>
+  {% endif %}
+</div>
+
 {% endblock %}
