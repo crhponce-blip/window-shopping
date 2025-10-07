@@ -1,28 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="login-container">
-  <h2>{{ t("Iniciar sesión", "Login", "登入") }}</h2>
-
-  {% if error %}
-  <div class="flash-error">{{ error }}</div>
-  {% endif %}
-  {% for msg in get_flashed_messages() %}
-  <div class="flash">{{ msg }}</div>
-  {% endfor %}
-
-  <form method="POST" action="{{ url_for('login') }}">
-    <label>{{ t("Correo electrónico", "Email", "電子郵件") }}</label>
-    <input type="email" name="username" required placeholder="usuario@demo.cl" />
-
-    <label>{{ t("Contraseña", "Password", "密碼") }}</label>
-    <input type="password" name="password" required placeholder="••••••••" />
-
-    <button class="btn btn-primary" type="submit">{{ t("Ingresar", "Sign in", "登入") }}</button>
-
-    <p style="margin-top:1rem;text-align:center;">
-      {{ t("¿No tienes cuenta?", "Don't have an account?", "還沒有帳號？") }}
-      <a href="{{ url_for('register_router') }}">{{ t("Regístrate aquí", "Register here", "立即註冊") }}</a>
-    </p>
-  </form>
+<div class="auth-container">
+    <div class="auth-box">
+        <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-login">
+        <h2>{{ t("Iniciar Sesión", "Login", "登入") }}</h2>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Email" required>
+            <input type="password" name="password" placeholder="{{ t('Contraseña', 'Password', '密碼') }}" required>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+            <button type="submit">{{ t("Ingresar", "Enter", "登入") }}</button>
+        </form>
+        <div class="extra-links">
+            <a href="{{ url_for('password_reset_request') }}">{{ t("¿Olvidaste tu contraseña?", "Forgot your password?", "忘記密碼？") }}</a>
+        </div>
+    </div>
 </div>
 {% endblock %}
