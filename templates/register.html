@@ -1,71 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="register-container">
-  <h2>{{ t("Registro de usuario", "User registration", "使用者註冊") }}</h2>
+    <div class="auth-box">
+        <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-login">
+        <h2>{{ t("Completa tu registro", "Complete your registration", "完成註冊") }}</h2>
 
-  {% if error %}
-  <div class="flash-error">{{ error }}</div>
-  {% endif %}
-  {% for msg in get_flashed_messages() %}
-  <div class="flash">{{ msg }}</div>
-  {% endfor %}
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
 
-  <form method="POST" enctype="multipart/form-data">
-    <label>{{ t("Nacionalidad", "Nationality", "國籍") }}</label>
-    <select name="nacionalidad" required>
-      <option value="nacional" {% if nacionalidad == "nacional" %}selected{% endif %}>{{ t("Nacional", "National", "本國") }}</option>
-      <option value="extranjero" {% if nacionalidad == "extranjero" %}selected{% endif %}>{{ t("Extranjero", "Foreign", "外國") }}</option>
-    </select>
+        <form method="POST" enctype="multipart/form-data">
+            <label>{{ t("Email (Usuario)", "Email (Username)", "電子郵件") }}</label>
+            <input type="email" name="username" required>
 
-    <label>{{ t("Tipo de perfil", "Profile type", "檔案類型") }}</label>
-    <select name="perfil_tipo" required>
-      {% for tipo in perfil_opciones %}
-      <option value="{{ tipo }}" {% if tipo == perfil_tipo %}selected{% endif %}>{{ tipo|capitalize }}</option>
-      {% endfor %}
-    </select>
+            <label>{{ t("Contraseña", "Password", "密碼") }}</label>
+            <input type="password" name="password" required>
 
-    <label>{{ t("Rol", "Role", "角色") }}</label>
-    <select name="rol" required>
-      {% if perfil_tipo == "compra_venta" %}
-        {% for r in roles_cv %}
-        <option value="{{ r }}">{{ r }}</option>
-        {% endfor %}
-      {% else %}
-        {% for r in roles_srv %}
-        <option value="{{ r }}">{{ r }}</option>
-        {% endfor %}
-      {% endif %}
-    </select>
+            <label>{{ t("Nombre de Empresa", "Company Name", "公司名稱") }}</label>
+            <input type="text" name="empresa" placeholder="Ej: Frutas Chile Ltda.">
 
-    <label>Email</label>
-    <input type="email" name="email" required />
+            <label>{{ t("Teléfono", "Phone", "電話") }}</label>
+            <input type="text" name="phone" placeholder="+56 9 ...">
 
-    <label>{{ t("Contraseña", "Password", "密碼") }}</label>
-    <input type="password" name="password" required />
+            <label>{{ t("Dirección", "Address", "地址") }}</label>
+            <input type="text" name="address" placeholder="Ej: Santiago, Chile">
 
-    <label>{{ t("Teléfono", "Phone", "電話") }}</label>
-    <input type="text" name="phone" />
+            {% if nacionalidad == "nacional" %}
+                <label>RUT</label>
+                <input type="text" name="rut" placeholder="76.123.456-7">
+                <label>{{ t("Adjuntar RUT (PDF/JPG)", "Attach RUT (PDF/JPG)", "上傳RUT文件") }}</label>
+                <input type="file" name="rut_file" accept=".pdf,.jpg,.jpeg,.png">
+            {% else %}
+                <label>EORI</label>
+                <input type="text" name="eori" placeholder="Ej: EU123456789000">
+                <label>{{ t("Otros ID (Opcional)", "Other ID (Optional)", "其他識別碼") }}</label>
+                <input type="text" name="otros_id" placeholder="Ej: Registro aduanero local">
+            {% endif %}
 
-    <label>{{ t("Dirección", "Address", "地址") }}</label>
-    <input type="text" name="address" />
+            <label>{{ t("Rol", "Role", "角色") }}</label>
+            <select name="rol" required style="color:black">
+                {% for r in roles_all_cv %}
+                    <option value="{{r}}">{{r}}</option>
+                {% endfor %}
+                {% for r in roles_srv %}
+                    {% if r not in roles_all_cv %}
+                        <option value="{{r}}">{{r}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
 
-    {% if nacionalidad == "nacional" %}
-      <label>RUT</label>
-      <input type="text" name="rut" />
-      <label>{{ t("Archivo RUT (PDF o imagen)", "RUT file (PDF or image)", "RUT 檔案") }}</label>
-      <input type="file" name="rut_file" />
-    {% else %}
-      <label>EORI</label>
-      <input type="text" name="eori" />
-      <label>USCI</label>
-      <input type="text" name="usci" />
-      <label>Tax ID</label>
-      <input type="text" name="tax_id" />
-      <label>{{ t("Otros ID", "Other IDs", "其他ID") }}</label>
-      <input type="text" name="otros_id" />
-    {% endif %}
+            <label>{{ t("País", "Country", "國家") }}</label>
+            <input type="text" name="pais" placeholder="Ej: Chile o China">
 
-    <button type="submit" class="btn btn-primary">{{ t("Registrar", "Register", "註冊") }}</button>
-  </form>
+            <input type="hidden" name="nacionalidad" value="{{ nacionalidad }}">
+            <input type="hidden" name="perfil_tipo" value="{{ perfil_tipo }}">
+
+            <button type="submit">{{ t("Registrar", "Register", "註冊") }}</button>
+        </form>
+    </div>
 </div>
 {% endblock %}
