@@ -30,9 +30,9 @@
         <a href="{{ url_for('register') }}">{{ t('Registrarse', 'Register', '註冊') }}</a>
       {% endif %}
       <span class="lang-switch">
-        <a href="{{ url_for('set_language', lang='es') }}">ES</a> |
-        <a href="{{ url_for('set_language', lang='en') }}">EN</a> |
-        <a href="{{ url_for('set_language', lang='zh') }}">中文</a>
+        <a href="{{ url_for('set_lang', lang='es') }}">ES</a> |
+        <a href="{{ url_for('set_lang', lang='en') }}">EN</a> |
+        <a href="{{ url_for('set_lang', lang='zh') }}">中文</a>
       </span>
     </div>
   </nav>
