@@ -3,44 +3,75 @@
 <div class="card">
   <h2>{{ t("Detalle de Servicios","Services Detail","服務明細") }}</h2>
 
-  <form method="get" class="form-vert">
-    <input type="text" name="q" value="{{ query or '' }}" placeholder="{{ t('Buscar empresa o descripción','Search company or description','搜尋公司或描述') }}">
-    <button class="btn" type="submit">{{ t("Filtrar","Filter","篩選") }}</button>
-  </form>
+  <form method="post" action="{{ url_for('cart_add_bulk') }}" id="bulkForm">
+    <div class="bulk-actions">
+      <button class="btn" type="submit">{{ t("Agregar seleccionados al carrito","Add selected to cart","加入所選到購物車") }}</button>
+      <button class="btn-outline" type="button" onclick="hideSelected()">{{ t("Ocultar seleccionados","Hide selected","隱藏所選") }}</button>
+    </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>{{ t("Empresa","Company","公司") }}</th>
-        <th>{{ t("Rol","Role","角色") }}</th>
-        <th>{{ t("Servicio","Service","服務") }}</th>
-        <th>{{ t("Capacidad","Capacity","產能") }}</th>
-        <th>{{ t("Ubicación","Location","位置") }}</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in data %}
-        {% for it in c.items if it.tipo == 'servicio' %}
+    <table class="table" id="listTable">
+      <thead>
         <tr>
-          <td>{{ c.nombre or c.empresa }}</td>
-          <td>{{ c.rol }}</td>
-          <td>{{ it.servicio }}</td>
-          <td>{{ it.capacidad }}</td>
-          <td>{{ it.ubicacion }}</td>
-          <td>
-            <form method="post" action="{{ url_for('cart_add') }}">
-              <input type="hidden" name="empresa" value="{{ c.nombre or c.empresa }}">
-              <input type="hidden" name="servicio" value="{{ it.servicio }}">
-              <input type="hidden" name="capacidad" value="{{ it.capacidad }}">
-              <input type="hidden" name="ubicacion" value="{{ it.ubicacion }}">
-              <button class="btn" type="submit">{{ t("Agregar","Add","加入") }}</button>
-            </form>
-          </td>
+          <th><input type="checkbox" onclick="toggleAll(this)"></th>
+          <th>{{ t("Empresa","Company","公司") }}</th>
+          <th>{{ t("Rol","Role","角色") }}</th>
+          <th>{{ t("Servicio","Service","服務") }}</th>
+          <th>{{ t("Capacidad","Capacity","產能") }}</th>
+          <th>{{ t("Ubicación","Location","位置") }}</th>
+          <th></th>
         </tr>
+      </thead>
+      <tbody>
+        {% for c in data %}
+          {% for it in c.items if it.tipo == 'servicio' %}
+          <tr>
+            <td>
+              <input type="checkbox" name="sel" value='{{ {
+                "empresa": c.nombre or c.empresa,
+                "tipo": "servicio",
+                "servicio": it.servicio,
+                "capacidad": it.capacidad,
+                "ubicacion": it.ubicacion
+              } | tojson }}'>
+            </td>
+            <td>
+              {% if c.username %}
+                <a href="{{ url_for('cliente_detalle', username=c.username) }}">{{ c.nombre or c.empresa }}</a>
+              {% else %}
+                {{ c.nombre or c.empresa }}
+              {% endif %}
+            </td>
+            <td>{{ c.rol }}</td>
+            <td>{{ it.servicio }}</td>
+            <td>{{ it.capacidad }}</td>
+            <td>{{ it.ubicacion }}</td>
+            <td>
+              <form method="post" action="{{ url_for('cart_add') }}">
+                <input type="hidden" name="empresa" value="{{ c.nombre or c.empresa }}">
+                <input type="hidden" name="tipo" value="servicio">
+                <input type="hidden" name="servicio" value="{{ it.servicio }}">
+                <input type="hidden" name="capacidad" value="{{ it.capacidad }}">
+                <input type="hidden" name="ubicacion" value="{{ it.ubicacion }}">
+                <button class="btn" type="submit">{{ t("Agregar","Add","加入") }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
         {% endfor %}
-      {% endfor %}
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </form>
 </div>
+
+<script>
+function toggleAll(master){
+  document.querySelectorAll('#listTable tbody input[type=checkbox]').forEach(cb => cb.checked = master.checked);
+}
+function hideSelected(){
+  document.querySelectorAll('#listTable tbody input[type=checkbox]:checked').forEach(cb => {
+    const tr = cb.closest('tr');
+    tr.style.display = 'none';
+  });
+}
+</script>
 {% endblock %}
