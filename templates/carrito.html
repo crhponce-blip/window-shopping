@@ -1,26 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ t("Carrito","Cart","購物車") }}</h2>
-{% if cart %}
-<form method="post">
-  <table class="table">
-    <thead>
-      <tr><th>Empresa</th><th>{{ t("Producto/Servicio","Product/Service","產品/服務") }}</th><th>{{ t("Acción","Action","操作") }}</th></tr>
-    </thead>
-    <tbody>
-      {% for i in cart %}
+<h2>🛒 Carrito de compras</h2>
+
+{% if cart and cart|length > 0 %}
+  <form method="POST">
+    <table>
       <tr>
-        <td>{{ i.empresa }}</td>
-        <td>{{ i.producto or i.servicio }}</td>
-        <td><button name="action" value="remove:{{ loop.index0 }}" class="btn">{{ t("Eliminar","Remove","刪除") }}</button></td>
+        <th>#</th>
+        <th>Empresa</th>
+        <th>Producto / Servicio</th>
+        <th>Cantidad</th>
+        <th>Origen / Ubicación</th>
+        <th>Precio</th>
+        <th>Acción</th>
+      </tr>
+      {% for i, item in enumerate(cart) %}
+      <tr>
+        <td>{{ i+1 }}</td>
+        <td>{{ item.empresa }}</td>
+        <td>{{ item.producto or item.servicio }}</td>
+        <td>{{ item.cantidad or item.capacidad }}</td>
+        <td>{{ item.origen or item.ubicacion }}</td>
+        <td>{{ item.precio_caja or item.precio_kilo or '-' }}</td>
+        <td>
+          <button type="submit" name="action" value="remove:{{ i }}" class="btn danger">Eliminar</button>
+        </td>
       </tr>
       {% endfor %}
-    </tbody>
-  </table>
-  <button name="action" value="clear" class="btn btn-outline">{{ t("Vaciar Carrito","Clear Cart","清空購物車") }}</button>
-</form>
+    </table>
+
+    <div style="margin-top:15px;">
+      <button type="submit" name="action" value="clear" class="btn danger">Vaciar carrito</button>
+    </div>
+  </form>
 {% else %}
-<p>{{ t("Carrito vacío","Cart empty","購物車是空的") }}</p>
+  <p>No tienes productos o servicios en el carrito.</p>
+  <a href="{{ url_for('dashboard') }}" class="btn">Volver al panel</a>
 {% endif %}
 {% endblock %}
-
