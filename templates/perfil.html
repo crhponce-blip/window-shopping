@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<div>
-  <h2>Perfil de {{ perfil.empresa }}</h2>
+<div class="container">
+  <h2>{{ t("Mi Perfil", "My Profile", "我的檔案") }}</h2>
 
   {% if mensaje %}
   <div class="flash">{{ mensaje }}</div>
@@ -9,115 +9,29 @@
 
   <form method="POST">
     <input type="hidden" name="action" value="save_profile">
-    <label>Empresa</label>
-    <input type="text" name="empresa" value="{{ perfil.empresa }}">
+    <label>{{ t("Empresa", "Company", "公司") }}</label>
+    <input name="empresa" value="{{ perfil.empresa }}" />
 
-    <label>Email</label>
-    <input type="email" name="email" value="{{ perfil.email }}">
+    <label>{{ t("Email", "Email", "電子郵件") }}</label>
+    <input name="email" value="{{ perfil.email }}" />
 
-    <label>Teléfono</label>
-    <input type="text" name="telefono" value="{{ perfil.telefono }}">
+    <label>{{ t("Teléfono", "Phone", "電話") }}</label>
+    <input name="telefono" value="{{ perfil.telefono }}" />
 
-    <label>Dirección</label>
-    <input type="text" name="direccion" value="{{ perfil.direccion }}">
+    <label>{{ t("Dirección", "Address", "地址") }}</label>
+    <input name="direccion" value="{{ perfil.direccion }}" />
 
-    <label>Descripción</label>
+    <label>{{ t("Descripción", "Description", "描述") }}</label>
     <textarea name="descripcion">{{ perfil.descripcion }}</textarea>
 
-    <input type="submit" value="Guardar cambios" class="btn success">
+    <button type="submit" class="btn btn-primary">{{ t("Guardar cambios", "Save changes", "儲存變更") }}</button>
   </form>
 
-  <hr style="margin:30px 0; opacity:0.3;">
-
-  <h3>Agregar ítem</h3>
-  <form method="POST">
-    <input type="hidden" name="action" value="add_item">
-    <label>Tipo de ítem</label>
-    <select name="tipo_perfil_item" required style="color:black;">
-      <option value="compra_venta">Compra / Venta</option>
-      <option value="servicios">Servicios</option>
-    </select>
-
-    <div id="form_cv">
-      <label>Subtipo</label>
-      <select name="subtipo" style="color:black;">
-        <option value="oferta">Oferta</option>
-        <option value="demanda">Demanda</option>
-      </select>
-
-      <label>Producto</label>
-      <input type="text" name="producto">
-
-      <label>Variedad</label>
-      <input type="text" name="variedad">
-
-      <label>Cantidad</label>
-      <input type="text" name="cantidad">
-
-      <label>Bulto</label>
-      <input type="text" name="bulto">
-
-      <label>Origen</label>
-      <input type="text" name="origen">
-
-      <label>Precio caja</label>
-      <input type="text" name="precio_caja">
-
-      <label>Precio kilo</label>
-      <input type="text" name="precio_kilo">
-    </div>
-
-    <div id="form_srv" style="display:none;">
-      <label>Servicio</label>
-      <input type="text" name="servicio">
-
-      <label>Capacidad</label>
-      <input type="text" name="capacidad">
-
-      <label>Ubicación</label>
-      <input type="text" name="ubicacion">
-    </div>
-
-    <input type="submit" value="Agregar ítem">
-  </form>
-
-  <hr style="margin:30px 0; opacity:0.3;">
-
-  <h3>Mis ítems</h3>
-  {% if perfil.items %}
-  <table>
-    <tr>
-      <th>Tipo</th>
-      <th>Producto / Servicio</th>
-      <th>Cantidad / Capacidad</th>
-      <th>Ubicación / Origen</th>
-    </tr>
+  <h3 style="margin-top:2rem;">{{ t("Mis ítems", "My Items", "我的項目") }}</h3>
+  <ul>
     {% for it in perfil.items %}
-    <tr>
-      <td>{{ it.tipo }}</td>
-      <td>{{ it.producto or it.servicio }}</td>
-      <td>{{ it.cantidad or it.capacidad }}</td>
-      <td>{{ it.origen or it.ubicacion }}</td>
-    </tr>
+    <li>{{ it.tipo }} - {{ it.producto or it.servicio }} - <button name="action" value="delete_item_{{ loop.index0 }}" formmethod="post" class="btn btn-secondary">{{ t("Eliminar", "Delete", "刪除") }}</button></li>
     {% endfor %}
-  </table>
-  {% else %}
-  <p>No tienes ítems agregados todavía.</p>
-  {% endif %}
+  </ul>
 </div>
-
-<script>
-const tipoSelect = document.querySelector('[name="tipo_perfil_item"]');
-const formCV = document.getElementById('form_cv');
-const formSRV = document.getElementById('form_srv');
-tipoSelect.addEventListener('change', () => {
-  if (tipoSelect.value === 'servicios') {
-    formCV.style.display = 'none';
-    formSRV.style.display = 'block';
-  } else {
-    formCV.style.display = 'block';
-    formSRV.style.display = 'none';
-  }
-});
-</script>
 {% endblock %}
