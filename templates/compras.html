@@ -1,47 +1,184 @@
 {% extends "base.html" %}
-{% block title %}Compras disponibles | Window Shopping{% endblock %}
+{% block title %}{{ t("Carrito de Compras", "Shopping Cart", "購物車") }}{% endblock %}
+
 {% block content %}
+<div class="container">
+  <h2 class="page-title">{{ t("🛒 Carrito de Compras", "🛒 Shopping Cart", "🛒 購物車") }}</h2>
 
-<div class="form-container">
-  <h2>Compras disponibles</h2>
-
-  <form method="get" class="search-form">
-    <input type="text" name="buscar" placeholder="Buscar producto o servicio..." />
-    <button type="submit">Buscar</button>
-  </form>
-
-  <form method="post" action="{{ url_for('cart_bulk_add') }}">
-    <div class="item-list">
-      {% for item in compras %}
-      <div class="item-card">
-        <label>
-          <input type="checkbox" name="selected" value='{{ item | tojson }}' />
-          <strong>
-            <a href="{{ url_for('perfil', empresa=item.empresa) }}">
-              {{ item.empresa }}
+  {% if carrito and carrito|length > 0 %}
+    <div class="cart-grid">
+      {% for item in carrito %}
+      <div class="cart-card">
+        <div class="cart-info">
+          <h3 class="item-title">{{ item.nombre }}</h3>
+          <p>{{ t("Cantidad", "Quantity", "數量") }}: {{ item.cantidad }}</p>
+          <p>{{ t("Precio", "Price", "價格") }}: ${{ item.precio }}</p>
+          <p>{{ t("Vendedor", "Seller", "賣家") }}: 
+            <a href="{{ url_for('perfil', id=item.vendedor_id) }}" class="link">
+              {{ item.vendedor_nombre }}
             </a>
-          </strong>
-          – {{ item.producto or item.servicio }} ({{ item.cantidad or "N/A" }})
-          <br />
-          <span class="region">{{ item.origen or "Chile" }}</span>
-        </label>
+          </p>
+        </div>
+
+        <div class="cart-actions">
+          <form action="{{ url_for('eliminar_item') }}" method="POST" class="inline-form">
+            <input type="hidden" name="item_id" value="{{ item.id }}">
+            <button type="submit" class="btn btn-danger">
+              {{ t("Eliminar", "Remove", "刪除") }}
+            </button>
+          </form>
+
+          <form action="{{ url_for('hide_from_view') }}" method="POST" class="inline-form">
+            <input type="hidden" name="item_id" value="{{ item.id }}">
+            <button type="submit" class="btn btn-secondary">
+              {{ t("Ocultar vista previa", "Hide preview", "隱藏預覽") }}
+            </button>
+          </form>
+        </div>
       </div>
-      {% else %}
-      <p>No hay productos disponibles en este momento.</p>
       {% endfor %}
     </div>
 
-    <div class="buttons">
-      <button type="submit" class="btn-primary">Agregar seleccionados al carrito</button>
-    </div>
-  </form>
+    <div class="cart-summary">
+      <h3>{{ t("Resumen de compra", "Purchase Summary", "購買摘要") }}</h3>
+      <p>{{ t("Total de artículos", "Total items", "商品總數") }}: {{ total_items }}</p>
+      <p>{{ t("Monto total", "Total amount", "總金額") }}: <strong>${{ total_monto }}</strong></p>
 
-  <form method="post" action="{{ url_for('hide_from_view') }}" class="hide-form">
-    {% for item in compras %}
-      <input type="hidden" name="hide_keys" value="{{ item.username }}::{{ loop.index0 }}" />
-    {% endfor %}
-    <button type="submit" class="btn-secondary">Eliminar seleccionados de vista</button>
-  </form>
+      <form action="{{ url_for('finalizar_compra') }}" method="POST">
+        <button type="submit" class="btn btn-success">
+          {{ t("Finalizar Compra", "Checkout", "結帳") }}
+        </button>
+      </form>
+    </div>
+
+  {% else %}
+    <div class="empty-cart">
+      <p>{{ t("Tu carrito está vacío 🛍️", "Your cart is empty 🛍️", "您的購物車是空的 🛍️") }}</p>
+      <a href="{{ url_for('home') }}" class="btn btn-primary">
+        {{ t("Volver al inicio", "Return Home", "返回首頁") }}
+      </a>
+    </div>
+  {% endif %}
 </div>
 
+<style>
+.container {
+  max-width: 1100px;
+  margin: 50px auto;
+  padding: 25px;
+  background: linear-gradient(145deg, #061325, #0e274b);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  color: white;
+  font-family: 'Poppins', sans-serif;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #fff;
+  font-size: 2em;
+}
+
+.cart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.cart-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cart-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2);
+}
+
+.item-title {
+  color: #00c3ff;
+  margin-bottom: 8px;
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.inline-form {
+  display: inline;
+}
+
+.btn {
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+.btn-secondary {
+  background: #555;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #777;
+}
+
+.btn-success {
+  background: #2ecc71;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #27ae60;
+}
+
+.btn-primary {
+  background: #00c3ff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0096c7;
+}
+
+.cart-summary {
+  margin-top: 40px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 25px;
+  border-radius: 10px;
+}
+
+.empty-cart {
+  text-align: center;
+  padding: 60px;
+}
+
+.link {
+  color: #00c3ff;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+</style>
 {% endblock %}
