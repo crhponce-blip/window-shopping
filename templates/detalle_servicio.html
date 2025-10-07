@@ -1,41 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
-  <h2>{{ t("Detalle de Servicios","Services Detail","服務明細") }}</h2>
-  <table class="table">
-    <thead>
+  <h2>{{ t("Detalle de Compras","Purchase Detail","採購明細") }}</h2>
+  <table>
+    <tr>
+      <th>{{ t("Empresa","Company","公司") }}</th>
+      <th>{{ t("Producto","Product","產品") }}</th>
+      <th>{{ t("Cantidad","Quantity","數量") }}</th>
+      <th>{{ t("Origen","Origin","來源") }}</th>
+      <th></th>
+    </tr>
+    {% for c in data %}
+      {% for it in c.items if it.tipo == 'demanda' %}
       <tr>
-        <th>{{ t("Empresa","Company","公司") }}</th>
-        <th>{{ t("Rol","Role","角色") }}</th>
-        <th>{{ t("Servicio","Service","服務") }}</th>
-        <th>{{ t("Capacidad","Capacity","產能") }}</th>
-        <th>{{ t("Ubicación","Location","位置") }}</th>
-        <th></th>
+        <td>{{ c.nombre }}</td>
+        <td>{{ it.producto }}</td>
+        <td>{{ it.cantidad }}</td>
+        <td>{{ it.origen }}</td>
+        <td>
+          <form method="post" action="{{ url_for('cart_add') }}">
+            <input type="hidden" name="empresa" value="{{ c.nombre }}">
+            <input type="hidden" name="producto" value="{{ it.producto }}">
+            <button class="btn">{{ t("Agregar","Add","加入") }}</button>
+          </form>
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      {% for c in data %}
-        {% for it in c.items if it.tipo == 'servicio' %}
-        <tr>
-          <td>{{ c.nombre or c.empresa }}</td>
-          <td>{{ c.rol }}</td>
-          <td>{{ it.servicio }}</td>
-          <td>{{ it.capacidad }}</td>
-          <td>{{ it.ubicacion }}</td>
-          <td>
-            <form method="post" action="{{ url_for('cart_add') }}">
-              <input type="hidden" name="empresa" value="{{ c.nombre or c.empresa }}">
-              <input type="hidden" name="tipo" value="servicio">
-              <input type="hidden" name="servicio" value="{{ it.servicio }}">
-              <input type="hidden" name="capacidad" value="{{ it.capacidad }}">
-              <input type="hidden" name="ubicacion" value="{{ it.ubicacion }}">
-              <button class="btn" type="submit">{{ t("Agregar","Add","加入") }}</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
       {% endfor %}
-    </tbody>
+    {% endfor %}
   </table>
 </div>
 {% endblock %}
