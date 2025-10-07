@@ -1,37 +1,57 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
-  <h2>{{ t("Mi Perfil", "My Profile", "我的檔案") }}</h2>
+<div class="perfil-container">
+    <h2>{{ t("Mi Perfil", "My Profile", "我的資料") }}</h2>
 
-  {% if mensaje %}
-  <div class="flash">{{ mensaje }}</div>
-  {% endif %}
+    {% if mensaje %}
+        <p class="info">{{ mensaje }}</p>
+    {% endif %}
 
-  <form method="POST">
-    <input type="hidden" name="action" value="save_profile">
-    <label>{{ t("Empresa", "Company", "公司") }}</label>
-    <input name="empresa" value="{{ perfil.empresa }}" />
+    <form method="POST">
+        <input type="hidden" name="action" value="save_profile">
+        <label>{{ t("Empresa", "Company", "公司") }}</label>
+        <input type="text" name="empresa" value="{{ perfil.empresa }}">
+        <label>{{ t("Email", "Email", "電子郵件") }}</label>
+        <input type="email" name="email" value="{{ perfil.email }}">
+        <label>{{ t("Teléfono", "Phone", "電話") }}</label>
+        <input type="text" name="telefono" value="{{ perfil.telefono }}">
+        <label>{{ t("Dirección", "Address", "地址") }}</label>
+        <input type="text" name="direccion" value="{{ perfil.direccion }}">
+        <label>{{ t("Descripción", "Description", "描述") }}</label>
+        <textarea name="descripcion">{{ perfil.descripcion }}</textarea>
+        <button type="submit">{{ t("Guardar Cambios", "Save Changes", "儲存變更") }}</button>
+    </form>
 
-    <label>{{ t("Email", "Email", "電子郵件") }}</label>
-    <input name="email" value="{{ perfil.email }}" />
+    <hr>
 
-    <label>{{ t("Teléfono", "Phone", "電話") }}</label>
-    <input name="telefono" value="{{ perfil.telefono }}" />
+    <h3>{{ t("Tus ítems", "Your Items", "您的項目") }}</h3>
+    <ul>
+        {% for i, item in enumerate(perfil.items) %}
+            <li>{{ item.producto or item.servicio }} - {{ item.tipo }}
+                <form method="POST" style="display:inline;">
+                    <button type="submit" name="action" value="delete_item_{{ i }}">🗑️</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
 
-    <label>{{ t("Dirección", "Address", "地址") }}</label>
-    <input name="direccion" value="{{ perfil.direccion }}" />
-
-    <label>{{ t("Descripción", "Description", "描述") }}</label>
-    <textarea name="descripcion">{{ perfil.descripcion }}</textarea>
-
-    <button type="submit" class="btn btn-primary">{{ t("Guardar cambios", "Save changes", "儲存變更") }}</button>
-  </form>
-
-  <h3 style="margin-top:2rem;">{{ t("Mis ítems", "My Items", "我的項目") }}</h3>
-  <ul>
-    {% for it in perfil.items %}
-    <li>{{ it.tipo }} - {{ it.producto or it.servicio }} - <button name="action" value="delete_item_{{ loop.index0 }}" formmethod="post" class="btn btn-secondary">{{ t("Eliminar", "Delete", "刪除") }}</button></li>
-    {% endfor %}
-  </ul>
+    <h3>{{ t("Agregar nuevo ítem", "Add new item", "新增項目") }}</h3>
+    <form method="POST">
+        <input type="hidden" name="action" value="add_item">
+        <label>{{ t("Tipo de Perfil del Ítem", "Item Type", "項目類型") }}</label>
+        <select name="tipo_perfil_item">
+            <option value="compra_venta">{{ t("Compra/Venta", "Buy/Sell", "買賣") }}</option>
+            <option value="servicios">{{ t("Servicios", "Services", "服務") }}</option>
+        </select>
+        <label>{{ t("Producto o Servicio", "Product or Service", "產品或服務") }}</label>
+        <input type="text" name="producto">
+        <label>{{ t("Cantidad", "Quantity", "數量") }}</label>
+        <input type="text" name="cantidad">
+        <label>{{ t("Origen / Ubicación", "Origin / Location", "來源/地點") }}</label>
+        <input type="text" name="origen">
+        <label>{{ t("Precio Caja / Kilo", "Price per Box/Kg", "每箱/公斤價格") }}</label>
+        <input type="text" name="precio_caja">
+        <button type="submit">{{ t("Agregar", "Add", "新增") }}</button>
+    </form>
 </div>
 {% endblock %}
