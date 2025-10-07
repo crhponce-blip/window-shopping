@@ -261,3 +261,57 @@ footer {
     padding: 15px;
   }
 }
+/* Asegura texto visible en <select> y opciones */
+select, select option {
+  color: #111 !important;
+  background: #fff;
+}
+
+/* Estilo de tarjetas de login/registro dark, separadas */
+.auth-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin: 24px auto;
+  max-width: 980px;
+}
+.auth-card.dark {
+  background: #111;
+  color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+.auth-card.dark input,
+.auth-card.dark button,
+.auth-card.dark .btn,
+.auth-card.dark .btn-outline {
+  color: #fff;
+}
+
+/* Logo centrado en el header */
+.site-header {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 0;
+}
+.logo-stack {
+  text-align: center;
+}
+.brand-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+.brand-title {
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Acciones masivas */
+.bulk-actions{
+  display:flex; gap:12px; margin-bottom:8px; align-items:center;
+}
