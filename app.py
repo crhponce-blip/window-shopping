@@ -934,3 +934,69 @@ def cliente_mensaje(username):
         f"Your message to {prof.get('empresa', username)} was sent."
     ))
     return redirect(url_for("cliente_detalle", username=username))
+# =========================================================
+# RUTA: Enviar mensaje desde un perfil (limitado a 1 cada 3 días)
+# =========================================================
+from datetime import datetime, timedelta
+
+ULTIMO_ENVIO = {}
+
+@app.route("/enviar_mensaje", methods=["POST"])
+def enviar_mensaje():
+    if not is_logged():
+        return redirect(url_for("login"))
+
+    remitente = current_user_email()
+    destinatario = (request.form.get("destinatario") or "").strip()
+    mensaje = (request.form.get("mensaje") or "").strip()
+
+    if not destinatario or not mensaje:
+        flash(t("El mensaje está incompleto. Intenta nuevamente.",
+                "The message is incomplete. Please try again.",
+                "訊息不完整，請再試一次。"))
+        return redirect(request.referrer or url_for("home"))
+
+    ahora = datetime.now()
+    limite = ULTIMO_ENVIO.get(remitente)
+
+    if limite and (ahora - limite).days < 3:
+        dias_restantes = 3 - (ahora - limite).days
+        flash(t(f"Ya enviaste un mensaje recientemente. Podrás enviar otro en {dias_restantes} día(s).",
+                f"You already sent a message recently. You can send another in {dias_restantes} day(s).",
+                f"您最近已發送過訊息。您可以在 {dias_restantes} 天後再次發送。"))
+        return redirect(request.referrer or url_for("home"))
+
+    # Registrar nuevo envío
+    ULTIMO_ENVIO[remitente] = ahora
+
+    return render_template("mensaje_enviado.html",
+                           destinatario=destinatario,
+                           mensaje=mensaje,
+                           fecha=ahora.strftime("%d/%m/%Y %H:%M"))
+
+
+# =========================================================
+# RUTA: Ocultar ítem de vista previa (sin eliminarlo)
+# =========================================================
+@app.route("/hide_from_view", methods=["POST"])
+def hide_from_view():
+    if not is_logged():
+        return redirect(url_for("login"))
+
+    item_id = (request.form.get("item_id") or "").strip()
+    if not item_id:
+        flash(t("No se seleccionó ningún ítem para ocultar.",
+                "No item was selected to hide.",
+                "未選擇要隱藏的項目。"))
+        return redirect(request.referrer or url_for("dashboard"))
+
+    ocultos = session.get("ocultos", [])
+    if item_id not in ocultos:
+        ocultos.append(item_id)
+        session["ocultos"] = ocultos
+
+    flash(t("Ítem ocultado temporalmente de la vista.",
+            "Item temporarily hidden from view.",
+            "項目已暫時從視圖中隱藏。"))
+
+    return render_template("ocultar_item.html", item_id=item_id)
