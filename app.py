@@ -721,25 +721,82 @@ def perfil():
     return render_template("perfil.html", perfil=ViewObj(prof), mensaje=mensaje)
 
 # =========================================================
-# CARRITO DE COMPRAS
+# CARRITO DE COMPRAS  ✅ (reemplazo/actualizado)
 # =========================================================
+from datetime import datetime  # import local permitido
+
+def _hidden_keys() -> list:
+    """Devuelve/crea la lista de claves ocultas en la sesión."""
+    return session.setdefault("hidden_keys", [])
+
+def _save_hidden(keys: list):
+    session["hidden_keys"] = keys
+
+def _msg_history() -> dict:
+    """Historial de mensajes enviados por usuario destino."""
+    return session.setdefault("msg_history", {})
+
+def _can_message(username: str) -> tuple[bool, Optional[int]]:
+    """
+    True si han pasado >= 3 días desde el último mensaje a 'username'.
+    Devuelve (puede, minutos_restantes_si_no).
+    """
+    hist = _msg_history()
+    ts = hist.get(username)
+    if not ts:
+        return True, None
+    try:
+        last = datetime.fromisoformat(ts)
+    except Exception:
+        return True, None
+    delta = datetime.utcnow() - last
+    if delta.days >= 3:
+        return True, None
+    # minutos restantes hasta completar 3 días
+    restantes = int((3*24*60) - (delta.total_seconds() / 60))
+    return False, max(restantes, 1)
+
 @app.route("/carrito", methods=["GET", "POST"])
 def carrito():
+    """
+    Vista del carrito con acciones:
+    - POST action=clear
+    - POST action=remove:<idx>
+    - POST action=remove_selected con rm[]=idx,...
+    """
     if request.method == "POST":
-        action = request.form.get("action")
+        action = request.form.get("action", "")
         if action == "clear":
             clear_cart()
-            flash(t("Carrito vaciado", "Cart cleared"))
+            flash(t("Carrito vaciado", "Cart cleared", "購物車已清空"))
             return redirect(url_for("carrito"))
-        if action and action.startswith("remove:"):
+
+        if action.startswith("remove:"):
             idx = action.split(":", 1)[1]
             if remove_from_cart(idx):
-                flash(t("Ítem eliminado", "Item removed"))
+                flash(t("Ítem eliminado", "Item removed", "已刪除"))
             return redirect(url_for("carrito"))
+
+        if action == "remove_selected":
+            indices = [int(i) for i in request.form.getlist("rm")]
+            indices = sorted(set([i for i in indices if i >= 0]), reverse=True)
+            removed = 0
+            cart = get_cart()
+            for i in indices:
+                if 0 <= i < len(cart):
+                    cart.pop(i)
+                    removed += 1
+            session["cart"] = cart
+            if removed:
+                flash(t(f"{removed} ítem(s) eliminados", f"{removed} item(s) removed"))
+            return redirect(url_for("carrito"))
+
+    # GET
     return render_template("carrito.html", cart=get_cart())
 
+
 # =========================================================
-# AGREGAR AL CARRITO (single)
+# AGREGAR AL CARRITO (Ítem único desde tarjetas)
 # =========================================================
 @app.route("/cart_add", methods=["POST"])
 def cart_add():
@@ -753,6 +810,8 @@ def cart_add():
         "origen": (request.form.get("origen") or "").strip(),
         "precio_caja": (request.form.get("precio_caja") or "").strip(),
         "precio_kilo": (request.form.get("precio_kilo") or "").strip(),
+        "username": (request.form.get("username") or "").strip(),
+        "key": (request.form.get("key") or "").strip(),  # opcional, para relacionar con 'ocultar'
     }
     clean = {k: v for k, v in payload.items() if v}
     if clean:
@@ -762,83 +821,116 @@ def cart_add():
         flash(t("No se pudo agregar el ítem.", "Item could not be added.", "無法加入項目"))
     return redirect(request.referrer or url_for("carrito"))
 
+
 # =========================================================
-# AGREGAR AL CARRITO (bulk)
+# AGREGAR VARIOS AL CARRITO (checkbox de lista)
+# - En el template, cada checkbox puede llevar value con un JSON del ítem
+#   name="selected" value='{"empresa":"...", "producto":"...", ...}'
 # =========================================================
-@app.route("/cart_add_bulk", methods=["POST"])
-def cart_add_bulk():
-    # Recibimos múltiples 'sel' (cada uno es un JSON string) desde los detalles
-    seleccionados = request.form.getlist("sel")
-    added = 0
-    for raw in seleccionados:
+@app.route("/cart/bulk_add", methods=["POST"])
+def cart_bulk_add():
+    selected = request.form.getlist("selected")
+    ok = 0
+    for raw in selected:
         try:
             item = json.loads(raw)
-            clean = {k: v for k, v in item.items() if v}
-            if clean:
-                add_to_cart(clean)
-                added += 1
+            if isinstance(item, dict) and any(item.values()):
+                add_to_cart(item)
+                ok += 1
         except Exception:
+            # Si no viene JSON, ignoramos ese elemento
             continue
-    if added:
-        flash(t(f"{added} ítems agregados al carrito", f"{added} items added to cart", f"已加入 {added} 項"))
+    if ok:
+        flash(t(f"{ok} ítem(s) agregados al carrito",
+                f"{ok} item(s) added to cart"))
     else:
-        flash(t("No se agregaron ítems.", "No items added.", "未加入項目"))
+        flash(t("No se seleccionó nada para agregar.",
+                "Nothing selected to add."))
     return redirect(request.referrer or url_for("carrito"))
 
-# =========================================================
-# AYUDA / SOPORTE
-# =========================================================
-@app.route("/ayuda")
-def ayuda():
-    temas = [
-        {"titulo": "¿Cómo registrarme?", "detalle": "Selecciona tu tipo de usuario (nacional o extranjero) y completa los campos obligatorios. Puedes adjuntar tu RUT o documento de identificación."},
-        {"titulo": "¿Cómo agregar productos o servicios?", "detalle": "Desde tu perfil, selecciona 'Agregar ítem' y completa la información. Podrás subir ofertas, demandas o servicios."},
-        {"titulo": "¿Qué es el carrito?", "detalle": "Permite guardar productos o servicios que desees revisar más tarde o contactar a sus empresas."},
-        {"titulo": "Idiomas disponibles", "detalle": "El sitio puede visualizarse en Español, Inglés o Chino Mandarín."},
-    ]
-    return render_template("ayuda.html", temas=temas)
 
 # =========================================================
-# ARCHIVOS SUBIDOS (RUT / DOCUMENTOS)
+# ELIMINAR DE VISTA (ocultar tarjetas seleccionadas)
+# - En el template de detalles, postear a /hide_from_view con:
+#   name="hide_keys" value="usuario::clave"  (puedes usar cualquier string estable)
 # =========================================================
-@app.route("/uploads/<path:filename>")
-def uploaded_file(filename):
-    # Usamos la carpeta configurada al inicio del archivo (UPLOAD_FOLDER)
-    return send_from_directory(UPLOAD_FOLDER, filename)
+@app.route("/hide_from_view", methods=["POST"])
+def hide_from_view():
+    keys = request.form.getlist("hide_keys") or request.form.getlist("selected_keys")
+    if not keys:
+        # fallback: si venían JSON, intentar extraer "key"
+        for raw in request.form.getlist("selected"):
+            try:
+                obj = json.loads(raw)
+                k = obj.get("key")
+                if k:
+                    keys.append(k)
+            except Exception:
+                pass
 
-# =========================================================
-# CAMBIO DE IDIOMA (ruta alternativa)
-# =========================================================
-@app.route("/lang/<lang>")
-def cambiar_idioma(lang):
-    if lang not in ("es", "en", "zh"):
-        abort(404)
-    session["lang"] = lang
-    flash(t("Idioma cambiado", "Language changed", "語言已變更"))
+    if not keys:
+        flash(t("No se seleccionó nada para ocultar.",
+                "Nothing selected to hide."))
+        return redirect(request.referrer or url_for("home"))
+
+    hidden = set(_hidden_keys())
+    hidden.update(keys)
+    _save_hidden(list(hidden))
+    flash(t("Elementos ocultados en esta vista.",
+            "Items hidden from this view."))
     return redirect(request.referrer or url_for("home"))
 
-# =========================================================
-# ERRORES PERSONALIZADOS
-# =========================================================
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template(
-        "error.html",
-        code=404,
-        message=t("Página no encontrada", "Page not found", "找不到頁面"),
-    ), 404
 
-@app.errorhandler(500)
-def server_error(e):
-    return render_template(
-        "error.html",
-        code=500,
-        message=t("Error interno", "Internal server error", "內部伺服器錯誤"),
-    ), 500
+@app.route("/unhide_all", methods=["POST"])
+def unhide_all():
+    _save_hidden([])
+    flash(t("Se restauraron todos los elementos ocultos.",
+            "All hidden items were restored."))
+    return redirect(request.referrer or url_for("home"))
+
 
 # =========================================================
-# EJECUCIÓN PRINCIPAL
+# PERFIL PÚBLICO Y MENSAJERÍA CON ENFRIAMIENTO (3 días)
+# Enlázalo desde tarjetas con url_for('cliente_detalle', username=uname)
+# y el formulario de mensaje a /cliente/<username>/mensaje
 # =========================================================
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+@app.route("/cliente/<username>/mensaje", methods=["POST"])
+def cliente_mensaje(username):
+    prof = USER_PROFILES.get(username)
+    if not prof:
+        abort(404)
+
+    puede, minutos = _can_message(username)
+    if not puede:
+        # tiempo restante legible
+        dias = minutos // (24*60)
+        horas = (minutos % (24*60)) // 60
+        mins = minutos % 60
+        if dias > 0:
+            restante_txt = f"{dias}d {horas}h {mins}m"
+        elif horas > 0:
+            restante_txt = f"{horas}h {mins}m"
+        else:
+            restante_txt = f"{mins}m"
+        flash(t(
+            f"Ya enviaste un mensaje reciente. Podrás escribir nuevamente en {restante_txt}.",
+            f"You have sent a recent message. You can write again in {restante_txt}.",
+            f"您最近已發送訊息，請於 {restante_txt} 後再試。"
+        ))
+        return redirect(url_for("cliente_detalle", username=username))
+
+    # Guardamos el momento del envío (no persistente, solo sesión)
+    hist = _msg_history()
+    hist[username] = datetime.utcnow().isoformat()
+    session["msg_history"] = hist
+
+    # (Aquí iría el envío real por email/API si aplica)
+    contenido = (request.form.get("mensaje") or "").strip()
+    if not contenido:
+        contenido = t("Mensaje sin contenido", "Empty message")
+
+    flash(t(
+        f"Tu mensaje a {prof.get('empresa', username)} fue enviado correctamente.",
+        f"Your message to {prof.get('empresa', username)} was sent."
+    ))
+    return redirect(url_for("cliente_detalle", username=username))
