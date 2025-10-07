@@ -1,35 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
+<div class="profile-box">
   <h2>{{ t("Panel de Usuario","User Dashboard","用戶面板") }}</h2>
-  <p><strong>{{ usuario }}</strong> — {{ rol }} ({{ perfil_tipo }})</p>
+  <p><strong>{{ usuario }}</strong> - {{ rol }}</p>
 
   <h3>{{ t("Mi empresa/perfil","My company/profile","我的公司/檔案") }}</h3>
   <p>{{ my_company.descripcion }}</p>
 
-  {% if my_company.items and my_company.items|length > 0 %}
+  <h3>{{ t("Ítems de mi perfil","My profile items","我的檔案項目") }}</h3>
+  {% if my_company.items and my_company.items|length>0 %}
     <table class="table">
       <thead>
         <tr>
           <th>{{ t("Tipo","Type","類型") }}</th>
           <th>{{ t("Detalle","Detail","細節") }}</th>
-          <th>{{ t("Cantidad/Capacidad","Qty/Capacity","數量/容量") }}</th>
-          <th>{{ t("Origen/Ubicación","Origin/Location","來源/位置") }}</th>
+          <th>{{ t("Cant/Cap","Qty/Cap","數量/產能") }}</th>
+          <th>{{ t("Ubicación/Origen","Location/Origin","地點/來源") }}</th>
+          <th>{{ t("Precio","Price","價格") }}</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         {% for it in my_company.items %}
-          <tr>
-            <td>{{ it.tipo|capitalize }}</td>
-            <td>{{ it.producto or it.servicio }} {% if it.variedad %}({{ it.variedad }}){% endif %}</td>
-            <td>{{ it.cantidad or it.capacidad }}</td>
-            <td>{{ it.origen or it.ubicacion }}</td>
-          </tr>
+        <tr>
+          <td>{{ it.tipo|capitalize }}</td>
+          <td>{{ it.producto or it.servicio }}</td>
+          <td>{{ it.cantidad or it.capacidad }}</td>
+          <td>{{ it.origen or it.ubicacion }}</td>
+          <td>{{ it.precio or it.precio_caja or it.precio_kilo or "-" }}</td>
+          <td>
+            <!-- Eliminar ítem del perfil -->
+            <form method="post" action="{{ url_for('item_delete') }}" onsubmit="return confirm('¿Eliminar ítem?')">
+              <input type="hidden" name="idx" value="{{ loop.index0 }}">
+              <button class="table-btn remove-btn" type="submit">{{ t("Eliminar","Remove","刪除") }}</button>
+            </form>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   {% else %}
-    <p class="muted">{{ t("Aún no tienes ítems cargados.","You have no items yet.","尚未新增任何項目") }}</p>
+    <p class="muted">{{ t("Aún no tienes ítems.","You don't have items yet.","尚無項目") }}</p>
   {% endif %}
 </div>
 {% endblock %}
