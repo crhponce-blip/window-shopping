@@ -10,7 +10,6 @@
 
 <nav class="navbar">
   <div class="brand">
-    <!-- Usa tu logo real que está en /static/uploads/... -->
     <img src="{{ url_for('static', filename='uploads/687B2521-2792-49C5-BD7A-1BEC52D410EE.jpeg') }}" alt="WS Logo">
     <span>WS</span>
   </div>
@@ -31,8 +30,8 @@
 
     <li><a href="{{ url_for('ayuda') }}">{{ t("Ayuda","Help","幫助") }}</a></li>
     <li class="lang">
-      <a href="{{ url_for('set_lang','es') }}">ES</a>|
-      <a href="{{ url_for('set_lang','en') }}">EN</a>|
+      <a href="{{ url_for('set_lang','es') }}">ES</a> |
+      <a href="{{ url_for('set_lang','en') }}">EN</a> |
       <a href="{{ url_for('set_lang','zh') }}">中文</a>
     </li>
   </ul>
