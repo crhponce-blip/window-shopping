@@ -1,45 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
-  <h2>{{ t("Panel de usuario", "User Dashboard", "使用者主頁") }}</h2>
+<div class="dashboard-container">
+    <h2>{{ t("Panel de Control", "Dashboard", "控制台") }}</h2>
+    <p>{{ t("Bienvenido/a", "Welcome", "歡迎") }} <strong>{{ usuario }}</strong></p>
+    <p>{{ t("Rol", "Role", "角色") }}: <strong>{{ rol }}</strong> | {{ t("Perfil", "Profile", "檔案") }}: <strong>{{ perfil_tipo }}</strong></p>
 
-  {% for msg in get_flashed_messages() %}
-  <div class="flash">{{ msg }}</div>
-  {% endfor %}
-
-  <div class="dashboard">
-    <div class="profile-card">
-      <h3>{{ t("Mi perfil", "My Profile", "我的檔案") }}</h3>
-      <p><b>{{ t("Usuario", "User", "用戶") }}:</b> {{ usuario }}</p>
-      <p><b>{{ t("Rol", "Role", "角色") }}:</b> {{ rol }}</p>
-      <p><b>{{ t("Tipo de perfil", "Profile type", "檔案類型") }}:</b> {{ perfil_tipo }}</p>
-      <p><b>{{ t("Empresa", "Company", "公司") }}:</b> {{ my_company.empresa }}</p>
-      <a href="{{ url_for('perfil') }}" class="btn btn-secondary" style="margin-top:0.5rem;">{{ t("Editar perfil", "Edit profile", "編輯檔案") }}</a>
+    <div class="dashboard-actions">
+        <a href="{{ url_for('detalles', tipo='compras') }}" class="btn">{{ t("Comprar", "Buy", "採購") }}</a>
+        <a href="{{ url_for('detalles', tipo='ventas') }}" class="btn">{{ t("Vender", "Sell", "銷售") }}</a>
+        <a href="{{ url_for('detalles', tipo='servicios') }}" class="btn">{{ t("Servicios", "Services", "服務") }}</a>
+        <a href="{{ url_for('carrito') }}" class="btn">{{ t("Carrito", "Cart", "購物車") }} ({{ cart|length }})</a>
+        <a href="{{ url_for('ayuda') }}" class="btn">{{ t("Ayuda", "Help", "幫助") }}</a>
     </div>
 
-    <div class="items-list">
-      <h3>{{ t("Mis ítems", "My items", "我的項目") }}</h3>
-      {% if my_company.items %}
-      <table>
-        <tr>
-          <th>{{ t("Tipo", "Type", "類型") }}</th>
-          <th>{{ t("Nombre", "Name", "名稱") }}</th>
-          <th>{{ t("Cantidad", "Quantity", "數量") }}</th>
-          <th>{{ t("Origen", "Origin", "來源") }}</th>
-        </tr>
-        {% for it in my_company.items %}
-        <tr>
-          <td>{{ it.tipo }}</td>
-          <td>{{ it.producto or it.servicio }}</td>
-          <td>{{ it.cantidad or it.capacidad }}</td>
-          <td>{{ it.origen or it.ubicacion }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-      {% else %}
-      <p>{{ t("No tienes ítems aún.", "You have no items yet.", "尚無項目。") }}</p>
-      {% endif %}
+    <div class="company-data">
+        <h3>{{ t("Datos de tu empresa", "Your Company Data", "公司資料") }}</h3>
+        <p><strong>{{ my_company.empresa }}</strong></p>
+        <p>{{ my_company.descripcion }}</p>
+        <p><small>{{ my_company.email }} | {{ my_company.telefono }}</small></p>
     </div>
-  </div>
 </div>
 {% endblock %}
