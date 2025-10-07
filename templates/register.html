@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
 <div class="card">
   <h2>{{ t("Registro","Register","註冊") }}</h2>
 
@@ -9,7 +8,6 @@
   {% endif %}
 
   <form class="form-vert" method="post" enctype="multipart/form-data">
-    <!-- Estos llegan desde query o se reenvían -->
     <input type="hidden" name="nacionalidad" value="{{ (nacionalidad or 'nacional') }}">
     <input type="hidden" id="perfil_tipo" name="perfil_tipo" value="{{ (perfil_tipo or 'compra_venta') }}">
 
@@ -46,14 +44,11 @@
       </div>
     </div>
 
-    <!-- Selector de rol dinámico -->
     <div id="bloque-rol">
       <label><strong>{{ t("Rol","Role","角色") }}</strong></label>
       {% if (nacionalidad or 'nacional') == 'extranjero' %}
-        <!-- Extranjero: forzado a Cliente extranjero por backend -->
         <input type="text" name="rol" value="Cliente extranjero" readonly>
       {% else %}
-        <!-- Nacional: lista depende del tipo -->
         <select name="rol" id="rol-select" required>
           {% if (perfil_tipo or 'compra_venta') == 'servicios' %}
             {% for r in roles_srv %}
@@ -68,7 +63,6 @@
       {% endif %}
     </div>
 
-    <!-- Documentos / IDs -->
     <div id="bloque-nacional" {% if (nacionalidad or 'nacional') != 'nacional' %}style="display:none"{% endif %}>
       <div class="row">
         <div>
@@ -118,15 +112,12 @@
 </div>
 
 <script>
-  // Soporte simple para “Ambos”: si venimos con ?tipo=ambos, enviamos compra_venta al backend
   (function(){
     const params = new URLSearchParams(window.location.search);
     const tipo = params.get('tipo');
     if (tipo === 'ambos') {
       document.getElementById('perfil_tipo').value = 'compra_venta';
-      // y el usuario luego puede agregar servicios en /perfil
     }
   })();
 </script>
-
 {% endblock %}
