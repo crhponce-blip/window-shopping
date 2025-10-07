@@ -1,81 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
-  <h2>{{ t("Detalle de Ventas","Sales Detail","銷售明細") }}</h2>
+<h2>Ofertas disponibles - Ventas</h2>
 
-  <form method="post" action="{{ url_for('cart_add_bulk') }}" id="bulkForm">
-    <div class="bulk-actions">
-      <button class="btn" type="submit">{{ t("Agregar seleccionados al carrito","Add selected to cart","加入所選到購物車") }}</button>
-      <button class="btn-outline" type="button" onclick="hideSelected()">{{ t("Ocultar seleccionados","Hide selected","隱藏所選") }}</button>
-    </div>
+<form method="GET">
+  <input type="text" name="q" placeholder="Buscar empresa o producto..." value="{{ query }}">
+  <input type="submit" value="Buscar">
+</form>
 
-    <table class="table" id="listTable">
-      <thead>
-        <tr>
-          <th><input type="checkbox" onclick="toggleAll(this)"></th>
-          <th>{{ t("Empresa","Company","公司") }}</th>
-          <th>{{ t("Rol","Role","角色") }}</th>
-          <th>{{ t("Producto/Servicio","Product/Service","產品/服務") }}</th>
-          <th>{{ t("Cant./Cap.","Qty/Cap.","數量/產能") }}</th>
-          <th>{{ t("Origen/Ubicación","Origin/Location","來源/位置") }}</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for c in data %}
-          {% for it in c.items if it.tipo == 'oferta' %}
-          <tr>
-            <td>
-              <input type="checkbox" name="sel" value='{{ {
-                "empresa": c.nombre or c.empresa,
-                "tipo": "venta",
-                "producto": it.producto,
-                "variedad": it.variedad,
-                "cantidad": it.cantidad,
-                "bulto": it.bulto,
-                "origen": it.origen
-              } | tojson }}'>
-            </td>
-            <td>
-              {% if c.username %}
-                <a href="{{ url_for('cliente_detalle', username=c.username) }}">{{ c.nombre or c.empresa }}</a>
-              {% else %}
-                {{ c.nombre or c.empresa }}
+{% if data %}
+  <form method="POST" action="{{ url_for('cart_add_bulk') }}">
+    <table>
+      <tr>
+        <th></th>
+        <th>Empresa</th>
+        <th>Rol</th>
+        <th>Descripción</th>
+        <th>Productos</th>
+        <th>Acción</th>
+      </tr>
+      {% for d in data %}
+      <tr>
+        <td><input type="checkbox" name="sel" value='{{ d|tojson }}'></td>
+        <td><a href="{{ url_for('cliente_detalle', username=d.username) }}">{{ d.empresa }}</a></td>
+        <td>{{ d.rol }}</td>
+        <td>{{ d.descripcion }}</td>
+        <td>
+          <ul>
+            {% for it in d.items %}
+              {% if it.tipo == 'oferta' %}
+              <li>
+                {{ it.producto }} - {{ it.cantidad }} {{ it.bulto }} 
+                ({{ it.origen }}) <b>{{ it.precio_caja or it.precio_kilo }}</b>
+              </li>
               {% endif %}
-            </td>
-            <td>{{ c.rol }}</td>
-            <td>{{ it.producto }} {% if it.variedad %}({{ it.variedad }}){% endif %}</td>
-            <td>{{ it.cantidad }} {{ it.bulto }}</td>
-            <td>{{ it.origen }}</td>
-            <td>
-              <form method="post" action="{{ url_for('cart_add') }}">
-                <input type="hidden" name="empresa" value="{{ c.nombre or c.empresa }}">
-                <input type="hidden" name="tipo" value="venta">
-                <input type="hidden" name="producto" value="{{ it.producto }}">
-                <input type="hidden" name="variedad" value="{{ it.variedad }}">
-                <input type="hidden" name="cantidad" value="{{ it.cantidad }}">
-                <input type="hidden" name="bulto" value="{{ it.bulto }}">
-                <input type="hidden" name="origen" value="{{ it.origen }}">
-                <button class="btn" type="submit">{{ t("Agregar","Add","加入") }}</button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        {% endfor %}
-      </tbody>
+            {% endfor %}
+          </ul>
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('cart_add') }}">
+            <input type="hidden" name="empresa" value="{{ d.empresa }}">
+            <input type="hidden" name="producto" value="{{ it.producto }}">
+            <input type="hidden" name="cantidad" value="{{ it.cantidad }}">
+            <input type="hidden" name="origen" value="{{ it.origen }}">
+            <input type="hidden" name="precio_caja" value="{{ it.precio_caja }}">
+            <input type="submit" value="Agregar" class="btn success">
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
     </table>
+    <br>
+    <input type="submit" value="Agregar seleccionados al carrito" class="btn success">
   </form>
-</div>
-
-<script>
-function toggleAll(master){
-  document.querySelectorAll('#listTable tbody input[type=checkbox]').forEach(cb => cb.checked = master.checked);
-}
-function hideSelected(){
-  document.querySelectorAll('#listTable tbody input[type=checkbox]:checked').forEach(cb => {
-    const tr = cb.closest('tr');
-    tr.style.display = 'none';
-  });
-}
-</script>
+{% else %}
+  <p>No hay ofertas disponibles en este momento.</p>
+{% endif %}
 {% endblock %}
