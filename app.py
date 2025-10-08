@@ -322,6 +322,11 @@ def targets_for(tipo: str, my_rol: str) -> List[str]:
     }
 
     mapping = {"compras": compras_vis, "ventas": ventas_vis, "servicios": servicios_vis}.get(tipo, {})
+    # Ajuste: si el usuario es mixto (Packing o Frigorífico con perfil ambos)
+if my_rol in ("Packing", "Frigorífico") and tipo == "ventas":
+    # Puede ver tanto demandas de fruta como solicitudes de servicios
+    return list(set(ventas_vis["Packing"] + servicios_vis["Packing"]))
+
     return mapping.get(my_rol, mapping.get("default", []))
 
 # =========================================================
@@ -638,7 +643,14 @@ def detalles(tipo):
         tpl = "detalle_servicio.html"  # nombre correcto para evitar 500
     else:
         # ventas -> "oferta"; compras -> "demanda"
-        tag = "oferta" if tipo == "ventas" else "demanda"
+       # ventas -> mostrar "demanda" (quién solicita)
+# compras -> mostrar "oferta" (quién ofrece)
+if tipo == "ventas":
+    tag = "demanda"
+elif tipo == "compras":
+    tag = "oferta"
+else:
+    tag = "servicio"
 
         # Bloqueo suave: Productor/Planta NO compran
         if tipo == "compras" and my_rol in ("Productor", "Planta"):
@@ -797,9 +809,18 @@ def enviar_mensaje(id):
     if not is_logged():
         return redirect(url_for("login"))
 
-    destinatario = USER_PROFILES.get(id)
-    if not destinatario:
-        abort(404)
+# Acepta tanto email (clave) como empresa
+destinatario = USER_PROFILES.get(id)
+if not destinatario:
+    # Buscar por empresa si no existe el email
+    for k, v in USER_PROFILES.items():
+        if v.get("empresa") == id:
+            destinatario = v
+            id = k
+            break
+if not destinatario:
+    flash(t("No se encontró el destinatario.", "Recipient not found."))
+    return redirect(request.referrer or url_for("dashboard"))
 
     remitente = session.get("user")
     contenido = (request.form.get("mensaje") or "").strip()
@@ -908,27 +929,41 @@ def carrito():
 # =========================================================
 @app.route("/cart_add", methods=["POST"])
 def cart_add():
+    """
+    Agrega un solo ítem al carrito (producto o servicio).
+    Compatible con formularios simples y checkboxes JSON.
+    """
+    item_raw = request.form.get("item") or None
+    if item_raw:
+        try:
+            item = json.loads(item_raw)
+            if isinstance(item, dict):
+                add_to_cart(item)
+                flash(t("Agregado al carrito 🛒", "Added to cart 🛒"))
+                return redirect(request.referrer or url_for("carrito"))
+        except Exception:
+            pass
+
+    # Modo tradicional (form inputs)
     payload = {
-        "empresa": (request.form.get("empresa") or "").strip(),
-        "producto": (request.form.get("producto") or "").strip(),
-        "servicio": (request.form.get("servicio") or "").strip(),
-        "variedad": (request.form.get("variedad") or "").strip(),
-        "cantidad": (request.form.get("cantidad") or "").strip(),
-        "bulto": (request.form.get("bulto") or "").strip(),
-        "origen": (request.form.get("origen") or "").strip(),
-        "precio_caja": (request.form.get("precio_caja") or "").strip(),
-        "precio_kilo": (request.form.get("precio_kilo") or "").strip(),
-        "username": (request.form.get("username") or "").strip(),
-        "key": (request.form.get("key") or "").strip(),  # opcional
+        "empresa": request.form.get("empresa", "").strip(),
+        "producto": request.form.get("producto", "").strip(),
+        "servicio": request.form.get("servicio", "").strip(),
+        "variedad": request.form.get("variedad", "").strip(),
+        "cantidad": request.form.get("cantidad", "").strip(),
+        "bulto": request.form.get("bulto", "").strip(),
+        "origen": request.form.get("origen", "").strip(),
+        "precio_caja": request.form.get("precio_caja", "").strip(),
+        "precio_kilo": request.form.get("precio_kilo", "").strip(),
+        "username": request.form.get("username", "").strip(),
     }
     clean = {k: v for k, v in payload.items() if v}
     if clean:
         add_to_cart(clean)
-        flash(t("Agregado al carrito", "Added to cart", "已加入購物車"))
+        flash(t("Agregado al carrito 🛒", "Added to cart 🛒"))
     else:
-        flash(t("No se pudo agregar el ítem.", "Item could not be added.", "無法加入項目"))
+        flash(t("No se pudo agregar el ítem.", "Item could not be added."))
     return redirect(request.referrer or url_for("carrito"))
-
 
 # =========================================================
 # NUEVO ENDPOINT ✅ para múltiples ítems (detalles_compras / ventas / servicios)
