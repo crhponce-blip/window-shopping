@@ -1,443 +1,287 @@
 /* =========================================================
-   WINDOW SHOPPING - VERSIÓN "DE PANA" (2025)
-   Mezcla de WS Blue Pro + Light Blue, mejor contraste,
-   brillos suaves, glassmorphism y animaciones sutiles.
+   ESTILOS GENERALES WINDOW SHOPPING (WS)
    ========================================================= */
-
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
-
-/* =========================================================
-   FONDO GENERAL
-   ========================================================= */
-
 body {
-  background: linear-gradient(135deg, #081b33, #0a2342, #103b68);
-  background-attachment: fixed;
-  color: #f2f5f9;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  animation: fadeIn 0.8s ease-in-out;
+  margin: 0;
+  font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #222;
 }
 
 /* =========================================================
-   NAVBAR
+   NAVBAR SUPERIOR
    ========================================================= */
-
 .navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 191, 255, 0.05);
-  color: #fff;
+  padding: 10px 25px;
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid rgba(0, 191, 255, 0.2);
 }
 
 .navbar a {
-  color: #fff;
   text-decoration: none;
-  margin-left: 18px;
+  color: #000; /* letras negras en nav */
+  margin: 0 12px;
   font-weight: 500;
   transition: 0.3s;
 }
 
 .navbar a:hover {
-  color: #00cfff;
-  text-shadow: 0 0 8px #00bfff;
+  color: #007bff;
 }
 
 .lang-switch a {
-  font-size: 13px;
-  color: #aee0ff;
-}
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-footer {
-  text-align: center;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.35);
-  color: #cfd9df;
   font-size: 14px;
-  border-top: 1px solid rgba(0, 191, 255, 0.15);
-  margin-top: auto;
+  font-weight: 600;
 }
 
 /* =========================================================
-   CONTENEDORES BASE
+   CONTENEDORES Y BOTONES
    ========================================================= */
-
 main {
-  padding: 30px 15px;
-  flex: 1;
+  min-height: calc(100vh - 120px);
+  padding: 40px 20px;
 }
 
-h1, h2, h3 {
+.btn,
+button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn:hover,
+button:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #ddd;
+  color: #000;
+}
+
+.btn-secondary:hover {
+  background-color: #bbb;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* =========================================================
+   FORMULARIOS
+   ========================================================= */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0 14px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 15px;
+  box-sizing: border-box;
+  color: #000;
+  background-color: #fff;
+}
+
+input::placeholder {
+  color: #777;
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 8px;
+  color: #000;
+}
+
+/* =========================================================
+   LOGIN / REGISTRO BOX
+   ========================================================= */
+.auth-box {
+  background-color: #fff;
+  max-width: 450px;
+  margin: 40px auto;
+  padding: 35px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   text-align: center;
-  margin-bottom: 15px;
 }
 
-p {
-  text-align: center;
-  color: #d9e4ef;
+.auth-box h2 {
+  margin-bottom: 20px;
+  color: #000;
 }
 
-.content-container,
-.dashboard-container,
-.auth-box,
-.perfil-container,
-.detalle-container {
-  animation: slideUp 0.6s ease-out;
+.auth-box .error {
+  color: #e63946;
+  font-weight: 600;
+  background: #ffe8e8;
+  border: 1px solid #f5b5b5;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+/* Logo centrado */
+.logo-login {
+  width: 85px;
+  margin-bottom: 10px;
 }
 
 /* =========================================================
    LANDING PAGE
    ========================================================= */
-
 .landing-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 75vh;
+  height: 80vh;
+  flex-direction: column;
   text-align: center;
 }
 
-.logo-center img {
-  width: 180px;
-  height: auto;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 0 10px rgba(0,191,255,0.4));
+.logo-center .logo-main {
+  width: 120px;
+  margin-bottom: 10px;
+}
+
+.landing-container h1 {
+  font-size: 38px;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+.landing-container p {
+  font-size: 18px;
+  color: #444;
+  margin-bottom: 25px;
 }
 
 .landing-buttons {
-  margin-top: 25px;
-}
-
-.btn-primary, .btn-secondary, .btn {
-  display: inline-block;
-  padding: 12px 30px;
-  margin: 10px;
-  border-radius: 30px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: 0.3s;
-  letter-spacing: 0.3px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #009dff, #007bff);
-  color: white;
-  box-shadow: 0 4px 15px rgba(0,191,255,0.4);
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #00bfff, #0065d1);
-  box-shadow: 0 4px 20px rgba(0,191,255,0.7);
-}
-
-.btn-secondary {
-  background: rgba(255,255,255,0.1);
-  color: #e2f4ff;
-  border: 1.5px solid #00bfff;
-}
-
-.btn-secondary:hover {
-  background: rgba(0, 191, 255, 0.15);
-  color: #fff;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
 }
 
 /* =========================================================
-   LOGIN / REGISTRO
+   TARJETAS DE REGISTRO (Router)
    ========================================================= */
-
-.auth-container, .register-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 50px 20px;
-}
-
-.auth-box {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-  padding: 40px;
-  width: 400px;
+.router-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f6ff 100%);
+  color: #000; /* letras negras */
+  width: 270px;
+  padding: 25px;
   text-align: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 191, 255, 0.15);
+  transition: 0.3s ease;
 }
 
-.auth-box h2 {
-  color: #fff;
-  margin-bottom: 20px;
+.router-card h3 {
+  color: #000;
+  margin-bottom: 10px;
 }
 
-.auth-box input, .auth-box select, .auth-box textarea {
+.router-card p {
+  color: #333;
+  font-size: 14px;
+}
+
+.router-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================================================
+   TABLAS, LISTAS Y CARRITO
+   ========================================================= */
+table {
+  border-collapse: collapse;
   width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  outline: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
   font-size: 15px;
-  background-color: #eaf3ff;
+  margin-top: 15px;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
   color: #000;
 }
 
-.auth-box button {
-  background: linear-gradient(135deg, #009dff, #007bff);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 15px;
-  transition: 0.3s;
-  box-shadow: 0 3px 12px rgba(0,191,255,0.4);
+th {
+  background-color: #f0f2f5;
+  font-weight: 600;
 }
 
-.auth-box button:hover {
-  background: linear-gradient(135deg, #00bfff, #0065d1);
-  box-shadow: 0 3px 15px rgba(0,191,255,0.6);
-}
-
-.logo-login {
-  width: 120px;
-  margin-bottom: 10px;
-  filter: drop-shadow(0 0 10px rgba(0,191,255,0.5));
+tr:hover {
+  background-color: #f9f9f9;
 }
 
 /* =========================================================
-   MENSAJES Y ALERTAS
+   FLASH MESSAGES
    ========================================================= */
-
 .flash-container {
-  text-align: center;
-  margin-bottom: 20px;
-  animation: fadeIn 0.8s ease-in;
+  max-width: 700px;
+  margin: 10px auto;
 }
 
 .flash {
-  background: rgba(0, 123, 255, 0.25);
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 5px;
-  color: #fff;
-  font-size: 14px;
-  box-shadow: 0 2px 10px rgba(0,191,255,0.1);
-}
-
-.error {
-  color: #ff7b7b;
-  font-size: 14px;
-  margin-top: 8px;
-}
-
-/* =========================================================
-   DASHBOARD
-   ========================================================= */
-
-.dashboard-container {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 15px;
-  max-width: 900px;
-  margin: auto;
-  padding: 30px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 191, 255, 0.15);
-}
-
-.dashboard-actions {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.dashboard-actions .btn {
-  background: linear-gradient(135deg, #008cff, #00bfff);
-  color: #fff;
-  border-radius: 8px;
-  padding: 10px 25px;
-  font-weight: 500;
-  transition: 0.3s;
-  box-shadow: 0 3px 10px rgba(0,191,255,0.3);
-}
-
-.dashboard-actions .btn:hover {
-  background: linear-gradient(135deg, #00bfff, #007bff);
-  box-shadow: 0 4px 15px rgba(0,191,255,0.6);
-}
-
-/* =========================================================
-   PERFIL / DETALLES / LISTADOS
-   ========================================================= */
-
-.perfil-container, .detalle-container, .error-container {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 15px;
-  max-width: 900px;
-  margin: auto;
-  padding: 30px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-  text-align: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 191, 255, 0.15);
-}
-
-.perfil-container input, .perfil-container textarea, .perfil-container select {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  background-color: #eaf3ff;
-  color: #000;
-}
-
-.listado {
-  list-style: none;
-  margin-top: 15px;
-  padding: 0;
-}
-
-.listado li {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  margin: 6px 0;
+  background-color: #e7f3ff;
+  border-left: 5px solid #007bff;
   padding: 10px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: 0.2s;
-  border: 1px solid rgba(0,191,255,0.1);
-}
-
-.listado li:hover {
-  background: rgba(0, 191, 255, 0.15);
-  transform: translateY(-2px);
-}
-
-/* =========================================================
-   ANIMACIONES
-   ========================================================= */
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* =========================================================
-   ERROR PAGE
-   ========================================================= */
-
-.error-box {
-  text-align: center;
-  color: #fff;
-}
-
-.error-box h1 {
-  font-size: 80px;
-  color: #00bfff;
+  border-radius: 5px;
+  color: #000;
   margin-bottom: 10px;
 }
 
-.error-box p {
-  font-size: 18px;
-  color: #dbe9f5;
-  margin-bottom: 20px;
-}
-
-.logo-error {
-  width: 120px;
-  margin-bottom: 20px;
+/* =========================================================
+   FOOTER
+   ========================================================= */
+footer {
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+  text-align: center;
+  padding: 15px 0;
+  color: #000;
+  font-size: 14px;
 }
 
 /* =========================================================
-   RESPONSIVO
+   RESPONSIVE
    ========================================================= */
-
 @media (max-width: 768px) {
-  .auth-box, .dashboard-container, .perfil-container {
-    width: 95%;
+  .landing-container h1 {
+    font-size: 30px;
+  }
+
+  .router-card {
+    width: 90%;
+    margin-bottom: 20px;
+  }
+
+  .auth-box {
+    margin: 20px;
     padding: 25px;
   }
 
   .navbar {
     flex-direction: column;
+    align-items: flex-start;
   }
-
-  .navbar .nav-right {
-    margin-top: 10px;
-  }
-
-  .logo-center img {
-    width: 130px;
-  }
-}
-/* =========================================================
-   AJUSTES EXTRA DE VISIBILIDAD Y CONTRASTE (2025-10)
-   ========================================================= */
-
-/* Letras negras en landing y botones claros */
-.landing-container h1,
-.landing-container p {
-  color: #000 !important;
-}
-
-/* Forzar texto negro en botones secundarios sobre fondos claros */
-.btn-secondary {
-  color: #000 !important;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1.5px solid #00bfff;
-}
-
-.btn-secondary:hover {
-  background: #eaf6ff;
-  color: #003a60;
-}
-
-/* Corregir color de input/placeholder */
-input::placeholder,
-textarea::placeholder {
-  color: #555;
-}
-
-/* Contraste extra en listado */
-.listado li {
-  color: #fff;
-}
-
-.listado li small {
-  color: #aad4ff;
 }
