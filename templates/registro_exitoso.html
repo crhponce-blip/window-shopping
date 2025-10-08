@@ -3,9 +3,9 @@
 <div class="success-box" style="max-width:600px;margin:auto;text-align:center;margin-top:50px;">
   <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" style="width:120px;margin-bottom:20px;">
   <h2 style="color:green;">{{ t("¡Registro exitoso!", "Registration successful!", "註冊完成！") }}</h2>
-  <p>{{ t("Tu cuenta fue creada correctamente. Ya puedes acceder a tu panel principal o explorar los detalles de compra y venta.",
-           "Your account has been successfully created. You can now access your main dashboard or explore listings.",
-           "您的帳戶已成功建立。您現在可以進入主頁面或瀏覽供應資訊。") }}</p>
+  <p>{{ t("Tu cuenta fue creada correctamente. Ya puedes acceder a tu panel principal o explorar las secciones de compra, venta y servicios.",
+           "Your account has been successfully created. You can now access your dashboard or explore the buy, sell and services sections.",
+           "您的帳戶已成功建立。您現在可以進入主頁或瀏覽購買、銷售和服務區域。") }}</p>
 
   <div style="margin-top:30px;">
     <a href="{{ url_for('dashboard') }}" class="btn">{{ t("Ir al Panel Principal", "Go to Dashboard", "前往主頁") }}</a>
