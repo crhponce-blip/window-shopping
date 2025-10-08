@@ -27,7 +27,6 @@
 
     <hr class="divider">
 
-    <!-- FORMULARIO PARA AGREGAR NUEVOS ÍTEMS -->
     <form method="POST" class="add-item-form">
       <h3>{{ t("Agregar Ítem", "Add Item", "新增項目") }}</h3>
       <label>{{ t("Tipo de ítem", "Item Type", "項目類型") }}</label>
@@ -53,13 +52,12 @@
 
     <hr class="divider">
 
-    <!-- LISTA DE ÍTEMS -->
     {% if perfil.items %}
       <h3>{{ t("Mis ítems", "My Items", "我的項目") }}</h3>
       <ul class="items-list">
         {% for item in perfil.items %}
         <li>
-          {{ item.producto or item.servicio }} — 
+          {{ item.producto or item.servicio }} —
           {% if item.precio_caja %}${{ item.precio_caja }} / {{ t("Caja", "Box", "箱") }}{% endif %}
           <form method="POST" style="display:inline;">
             <button type="submit" name="action" value="delete_item_{{ loop.index0 }}" class="btn btn-secondary">
