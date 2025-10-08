@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}{{ t("Iniciar Sesión", "Login", "登入") }}{% endblock %}
-
 {% block content %}
 <div class="auth-container">
   <div class="auth-box">
@@ -10,12 +9,11 @@
     <form method="POST">
       <label>Email</label>
       <input type="text" name="username" placeholder="correo@empresa.cl" required>
-
       <label>{{ t("Contraseña", "Password", "密碼") }}</label>
       <input type="password" name="password" placeholder="••••••••" required>
 
       {% if error %}
-        <p class="error">{{ error }}</p>
+      <p class="error">{{ error }}</p>
       {% endif %}
 
       <button type="submit" class="btn btn-primary" style="width:100%; margin-top:15px;">
@@ -24,19 +22,13 @@
     </form>
 
     <div class="extra-links" style="margin-top:15px;">
-      <a href="{{ url_for('password_reset_request') }}">
-        {{ t("¿Olvidaste tu contraseña?", "Forgot your password?", "忘記密碼？") }}
-      </a>
+      <a href="{{ url_for('password_reset_request') }}">{{ t("¿Olvidaste tu contraseña?", "Forgot your password?", "忘記密碼？") }}</a>
     </div>
 
-    <div style="margin-top:20px;">
-      <p style="font-size:0.9em; color:#bbb;">
-        {{ t("¿No tienes cuenta?", "Don't have an account?", "還沒有帳號？") }}
-        <a href="{{ url_for('register_router') }}" style="color:#00c3ff;">
-          {{ t("Regístrate aquí", "Register here", "點此註冊") }}
-        </a>
-      </p>
-    </div>
+    <p style="margin-top:20px; font-size:0.9em; color:#bbb;">
+      {{ t("¿No tienes cuenta?", "Don't have an account?", "還沒有帳號？") }}
+      <a href="{{ url_for('register_router') }}" style="color:#00c3ff;">{{ t("Regístrate aquí", "Register here", "點此註冊") }}</a>
+    </p>
   </div>
 </div>
 {% endblock %}
