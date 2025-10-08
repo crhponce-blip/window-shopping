@@ -405,3 +405,39 @@ p {
     width: 130px;
   }
 }
+/* =========================================================
+   AJUSTES EXTRA DE VISIBILIDAD Y CONTRASTE (2025-10)
+   ========================================================= */
+
+/* Letras negras en landing y botones claros */
+.landing-container h1,
+.landing-container p {
+  color: #000 !important;
+}
+
+/* Forzar texto negro en botones secundarios sobre fondos claros */
+.btn-secondary {
+  color: #000 !important;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid #00bfff;
+}
+
+.btn-secondary:hover {
+  background: #eaf6ff;
+  color: #003a60;
+}
+
+/* Corregir color de input/placeholder */
+input::placeholder,
+textarea::placeholder {
+  color: #555;
+}
+
+/* Contraste extra en listado */
+.listado li {
+  color: #fff;
+}
+
+.listado li small {
+  color: #aad4ff;
+}
