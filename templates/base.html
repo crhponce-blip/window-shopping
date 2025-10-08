@@ -4,55 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Window Shopping | WS</title>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo_ws.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
-    .flash-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
-    }
-    .flash {
-      background: linear-gradient(135deg, #1a3b5d, #002b49);
-      color: white;
-      padding: 12px 18px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      animation: fadeInOut 4s ease forwards;
-      font-size: 15px;
-    }
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translateY(-10px); }
-      10%, 90% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(-10px); }
-    }
+    .flash-container{position:fixed;top:20px;right:20px;z-index:9999}
+    .flash{background:linear-gradient(135deg,#1a3b5d,#002b49);color:#fff;padding:12px 18px;border-radius:8px;margin-bottom:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);animation:fadeInOut 4s ease forwards;font-size:15px}
+    @keyframes fadeInOut{0%{opacity:0;transform:translateY(-10px)}10%,90%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-10px)}}
+    .navbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:rgba(255,255,255,.06);backdrop-filter:blur(8px)}
+    .nav-right a{margin-left:12px}
+    main{min-height:70vh}
+    footer{opacity:.7;text-align:center;padding:20px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:6px;background:#0ea5e9;color:#fff;text-decoration:none}
+    .btn-secondary{background:#64748b;color:#fff}
+    .btn-danger{background:#e11d48}
+    .btn-success{background:#10b981}
   </style>
 </head>
 <body>
 
   <nav class="navbar">
     <div class="nav-left">
-      <a href="{{ url_for('home') }}" class="nav-logo">
-        <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" style="height:40px; vertical-align:middle;">
-        <span style="margin-left:8px; font-weight:600;">Window Shopping</span>
+      <a href="{{ url_for('home') }}" class="nav-logo" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;">
+        <img
+          src="{{ url_for('static', filename='logo_ws.png') }}"
+          alt="WS"
+          style="height:40px;vertical-align:middle"
+          onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22><rect width=%2240%22 height=%2240%22 rx=%228%22 fill=%22%2300c3ff%22/><text x=%2250%25%22 y=%2255%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22white%22>WS</text></svg>';">
+        <span style="font-weight:600;">Window Shopping</span>
       </a>
     </div>
 
     <div class="nav-right">
       {% if 'user' in session %}
-        <a href="{{ url_for('dashboard') }}">{{ t('Inicio', 'Home', '首頁') }}</a>
-        <a href="{{ url_for('perfil') }}">{{ t('Mi Perfil', 'My Profile', '我的資料') }}</a>
-        <a href="{{ url_for('carrito') }}">{{ t('Carrito', 'Cart', '購物車') }}</a>
-        <a href="{{ url_for('ayuda') }}">{{ t('Ayuda', 'Help', '幫助') }}</a>
-        <a href="{{ url_for('logout') }}">{{ t('Cerrar sesión', 'Logout', '登出') }}</a>
+        <a href="{{ url_for('dashboard') }}">{{ t('Inicio','Home','首頁') }}</a>
+        <a href="{{ url_for('detalles', tipo='compras') }}">{{ t('Comprar','Buy','採購') }}</a>
+        <a href="{{ url_for('detalles', tipo='ventas') }}">{{ t('Vender','Sell','銷售') }}</a>
+        <a href="{{ url_for('detalles', tipo='servicios') }}">{{ t('Servicios','Services','服務') }}</a>
+        <a href="{{ url_for('perfil') }}">{{ t('Mi Perfil','My Profile','我的資料') }}</a>
+        <a href="{{ url_for('carrito') }}">{{ t('Carrito','Cart','購物車') }}</a>
+        <a href="{{ url_for('ayuda') }}">{{ t('Ayuda','Help','幫助') }}</a>
+        <a href="{{ url_for('logout') }}">{{ t('Cerrar sesión','Logout','登出') }}</a>
       {% else %}
-        <a href="{{ url_for('login') }}">{{ t('Iniciar sesión', 'Login', '登入') }}</a>
-        <a href="{{ url_for('register_router') }}">{{ t('Registrarse', 'Register', '註冊') }}</a>
-        <a href="{{ url_for('ayuda') }}">{{ t('Ayuda', 'Help', '幫助') }}</a>
+        <a href="{{ url_for('login') }}">{{ t('Iniciar sesión','Login','登入') }}</a>
+        <a href="{{ url_for('register_router') }}">{{ t('Registrarse','Register','註冊') }}</a>
+        <a href="{{ url_for('ayuda') }}">{{ t('Ayuda','Help','幫助') }}</a>
       {% endif %}
-      <span class="lang-switch">
+      <span class="lang-switch" style="margin-left:10px">
         <a href="{{ url_for('set_lang', lang='es') }}">ES</a> |
         <a href="{{ url_for('set_lang', lang='en') }}">EN</a> |
         <a href="{{ url_for('set_lang', lang='zh') }}">中文</a>
@@ -74,7 +70,7 @@
   </main>
 
   <footer>
-    <p>© 2025 Window Shopping | Plataforma de Comercio Internacional</p>
+    <p>© 2025 Window Shopping · {{ t('Plataforma de comercio internacional','International trade platform','國際貿易平台') }}</p>
   </footer>
 </body>
 </html>
