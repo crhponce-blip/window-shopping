@@ -9,13 +9,11 @@
       <p class="sub-text">{{ t("Selecciona los servicios que deseas agregar a tu carrito", "Select the services you want to add to your cart", "選擇要加入購物車的服務") }}</p>
     </div>
 
-    <!-- 🔍 Buscador -->
     <form method="GET" class="search-form">
       <input type="text" name="q" placeholder="{{ t('Buscar servicio o empresa...', 'Search service or company...', '搜尋服務或公司...') }}" value="{{ query }}">
       <button type="submit" class="btn btn-primary">{{ t("Buscar", "Search", "搜尋") }}</button>
     </form>
 
-    <!-- 🧾 Listado -->
     <form method="POST" action="{{ url_for('cart_add') }}">
       <ul class="detalle-lista">
         {% if data %}
@@ -37,12 +35,8 @@
 
                     <div class="item-actions">
                       <input type="hidden" name="item" value='{{ item | tojson }}'>
-                      <button type="submit" class="btn btn-success">
-                        {{ t("Agregar al carrito 🛒", "Add to cart 🛒", "加入購物車 🛒") }}
-                      </button>
-                      <a href="{{ url_for('perfil', id=c.id) }}" class="btn btn-secondary">
-                        {{ t("Ver perfil", "View profile", "查看資料") }}
-                      </a>
+                      <button type="submit" class="btn btn-success">{{ t("Agregar al carrito 🛒", "Add to cart 🛒", "加入購物車 🛒") }}</button>
+                      <a href="{{ url_for('perfil', id=c.id) }}" class="btn btn-secondary">{{ t("Ver perfil", "View profile", "查看資料") }}</a>
                     </div>
                   </li>
                 {% endif %}
@@ -56,14 +50,8 @@
     </form>
 
     <div class="detalle-footer">
-      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
-        {{ t("Volver al panel", "Back to Dashboard", "返回控制台") }}
-      </a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">{{ t("Volver al panel", "Back to Dashboard", "返回控制台") }}</a>
     </div>
   </div>
 </div>
-
-<style>
-{{ self.parent() }}
-</style>
 {% endblock %}
