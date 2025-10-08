@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="success-box" style="max-width:600px;margin:auto;text-align:center;margin-top:50px;">
+  <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" style="width:120px;margin-bottom:20px;">
+  <h2 style="color:green;">{{ t("¡Registro exitoso!", "Registration successful!", "註冊完成！") }}</h2>
+  <p>{{ t("Tu cuenta fue creada correctamente. Ya puedes acceder a tu panel principal o explorar los detalles de compra y venta.",
+           "Your account has been successfully created. You can now access your main dashboard or explore listings.",
+           "您的帳戶已成功建立。您現在可以進入主頁面或瀏覽供應資訊。") }}</p>
+
+  <div style="margin-top:30px;">
+    <a href="{{ url_for('dashboard') }}" class="btn">{{ t("Ir al Panel Principal", "Go to Dashboard", "前往主頁") }}</a>
+    <a href="{{ url_for('home') }}" class="btn btn-secondary" style="margin-left:10px;">{{ t("Volver al Inicio", "Back to Home", "返回首頁") }}</a>
+  </div>
+</div>
+{% endblock %}
