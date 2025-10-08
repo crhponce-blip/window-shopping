@@ -1,55 +1,196 @@
 {% extends "base.html" %}
-{% block title %}Carrito de Compras | Window Shopping{% endblock %}
+{% block title %}{{ t("Mi Carrito", "My Cart", "我的購物車") }}{% endblock %}
+
 {% block content %}
+<div class="carrito-container">
+  <div class="carrito-card">
+    <h2 class="carrito-titulo">{{ t("🛒 Mi Carrito de Compras", "🛒 My Shopping Cart", "🛒 我的購物車") }}</h2>
 
-<div class="form-container">
-  <h2>🛒 Carrito de Compras</h2>
+    {% if cart and cart|length > 0 %}
+      <table class="carrito-tabla">
+        <thead>
+          <tr>
+            <th>{{ t("Empresa", "Company", "公司") }}</th>
+            <th>{{ t("Tipo", "Type", "類別") }}</th>
+            <th>{{ t("Detalle", "Detail", "詳細內容") }}</th>
+            <th>{{ t("Precio", "Price", "價格") }}</th>
+            <th>{{ t("Acción", "Action", "操作") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i, item in enumerate(cart) %}
+          <tr>
+            <td>{{ item.get("empresa", "—") }}</td>
+            <td>
+              {% if item.tipo == "servicio" %}
+                {{ t("Servicio", "Service", "服務") }}
+              {% else %}
+                {{ t("Producto", "Product", "產品") }}
+              {% endif %}
+            </td>
+            <td>
+              {% if item.tipo == "servicio" %}
+                {{ item.servicio }} {% if item.ubicacion %} - {{ item.ubicacion }}{% endif %}
+              {% else %}
+                {{ item.producto }}
+                {% if item.variedad %} ({{ item.variedad }}){% endif %}
+                {% if item.origen %} - {{ item.origen }}{% endif %}
+              {% endif %}
+            </td>
+            <td>
+              {% if item.precio_caja %}
+                ${{ item.precio_caja }}
+              {% elif item.precio_kilo %}
+                ${{ item.precio_kilo }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('cart_remove', index=i) }}">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                  {{ t("Eliminar", "Remove", "刪除") }}
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
-  {% if cart and cart|length > 0 %}
-  <form method="post" action="{{ url_for('cart_update') }}">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Empresa</th>
-          <th>Producto / Servicio</th>
-          <th>Cantidad</th>
-          <th>Origen</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in cart %}
-        <tr>
-          <td>
-            <a href="{{ url_for('perfil', empresa=item.empresa) }}">
-              {{ item.empresa }}
-            </a>
-          </td>
-          <td>{{ item.producto or item.servicio }}</td>
-          <td>{{ item.cantidad or "N/A" }}</td>
-          <td>{{ item.origen or "Chile" }}</td>
-          <td>
-            <form method="post" action="{{ url_for('cart_remove') }}" style="display:inline;">
-              <input type="hidden" name="item_key" value="{{ loop.index0 }}">
-              <button type="submit" class="btn-delete">Eliminar</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      <!-- Total + Acciones -->
+      <div class="carrito-actions">
+        <form method="POST" action="{{ url_for('cart_clear') }}">
+          <button type="submit" class="btn btn-danger">
+            {{ t("Vaciar carrito 🗑️", "Clear cart 🗑️", "清空購物車 🗑️") }}
+          </button>
+        </form>
 
-    <div class="buttons">
-      <form method="post" action="{{ url_for('cart_clear') }}" style="display:inline;">
-        <button type="submit" class="btn-secondary">Vaciar Carrito</button>
-      </form>
-      <button type="submit" class="btn-primary">Actualizar Carrito</button>
-    </div>
-  </form>
+        <form method="POST" action="{{ url_for('checkout') }}">
+          <button type="submit" class="btn btn-success">
+            {{ t("Finalizar compra ✅", "Checkout ✅", "完成購買 ✅") }}
+          </button>
+        </form>
+      </div>
 
-  {% else %}
-  <p>No hay productos en tu carrito aún.</p>
-  {% endif %}
+    {% else %}
+      <div class="carrito-vacio">
+        <h3>{{ t("Tu carrito está vacío 🛒", "Your cart is empty 🛒", "購物車是空的 🛒") }}</h3>
+        <p>{{ t("Agrega productos o servicios para comenzar tu compra.", "Add products or services to start shopping.", "新增商品或服務以開始購物。") }}</p>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+          {{ t("Volver al inicio", "Back to Home", "返回首頁") }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
 </div>
 
+<style>
+.carrito-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 90vh;
+  background: linear-gradient(145deg, #071932, #0c2952);
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  padding: 40px 0;
+}
+
+.carrito-card {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  width: 900px;
+}
+
+.carrito-titulo {
+  text-align: center;
+  color: #00c3ff;
+  margin-bottom: 25px;
+}
+
+.carrito-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.carrito-tabla th, .carrito-tabla td {
+  padding: 12px 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.carrito-tabla th {
+  color: #00c3ff;
+  font-weight: bold;
+}
+
+.carrito-tabla tr:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transition: 0.2s;
+}
+
+.btn {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 8px 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 0.85em;
+}
+
+.btn-primary {
+  background: #00c3ff;
+  color: white;
+}
+
+.btn-primary:hover { background: #0096c7; }
+
+.btn-secondary {
+  background: #555;
+  color: white;
+}
+
+.btn-secondary:hover { background: #777; }
+
+.btn-success {
+  background: #2ecc71;
+  color: white;
+}
+
+.btn-success:hover { background: #27ae60; }
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover { background: #c0392b; }
+
+.carrito-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+.carrito-vacio {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.carrito-vacio h3 {
+  color: #00c3ff;
+  margin-bottom: 10px;
+}
+</style>
 {% endblock %}
+
