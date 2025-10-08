@@ -2,6 +2,7 @@
 {% block content %}
 <div class="detalle-container">
   <h2>{{ t("Compras disponibles", "Available Purchases", "可購買項目") }}</h2>
+
   <form method="GET">
     <input type="text" name="q" placeholder="{{ t('Buscar...', 'Search...', '搜尋...') }}" value="{{ query }}">
     <button type="submit">{{ t("Buscar", "Search", "搜尋") }}</button>
@@ -13,7 +14,9 @@
         {% for item in c.items %}
           <li>
             <input type="checkbox" name="sel" value='{{ item | tojson }}'>
-            <strong>{{ c.empresa }}</strong> - {{ item.producto }} ({{ item.cantidad }})
+            <strong>
+              <a href="{{ url_for('perfil_publico', id=c.email) }}">{{ c.empresa }}</a>
+            </strong> - {{ item.producto }} ({{ item.cantidad }})
             <small>{{ item.origen }} | {{ item.precio_caja or "" }}</small>
           </li>
         {% endfor %}
