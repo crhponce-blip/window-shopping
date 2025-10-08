@@ -427,7 +427,41 @@ def register_router():
     Pantalla intermedia para elegir el tipo de usuario antes del formulario.
     Se invoca desde el botón 'Registrarse' en landing.html.
     """
-    return render_template("register_router.html")
+    opciones = [
+        {
+            "titulo": t("Registro Nacional", "National Registration", "國內註冊"),
+            "descripcion": t("Para empresas chilenas: productores, plantas, packings, frigoríficos y exportadores.",
+                             "For Chilean companies: producers, plants, packings, cold storages and exporters.",
+                             "適用於智利公司：生產商、工廠、包裝廠及冷藏商。"),
+            "url": url_for("register", tipo="compra_venta", nac="nacional"),
+            "btn": t("Registro Nacional", "National", "國內")
+        },
+        {
+            "titulo": t("Registro Extranjero", "Foreign Registration", "國際註冊"),
+            "descripcion": t("Para compradores o importadores internacionales que buscan proveedores en Chile.",
+                             "For international buyers or importers looking for suppliers in Chile.",
+                             "適用於希望尋找智利供應商的國際買家或進口商。"),
+            "url": url_for("register", tipo="compra_venta", nac="extranjero"),
+            "btn": t("Registro Extranjero", "Foreign", "國際")
+        },
+        {
+            "titulo": t("Registro de Servicios", "Service Registration", "服務註冊"),
+            "descripcion": t("Para empresas chilenas que ofrecen servicios logísticos o complementarios.",
+                             "For Chilean companies offering logistics or complementary services.",
+                             "適用於提供物流或相關服務的智利公司。"),
+            "url": url_for("register", tipo="servicios", nac="nacional"),
+            "btn": t("Registro de Servicios", "Service", "服務")
+        },
+        {
+            "titulo": t("Registro Mixto (Ambos)", "Mixed Registration (Both)", "混合註冊"),
+            "descripcion": t("Solo para Packing y Frigoríficos: pueden operar tanto en compraventa como servicios.",
+                             "Only for Packing and Cold Storages: can operate in both buy/sell and service profiles.",
+                             "僅限包裝廠與冷藏商，可同時提供買賣與服務。"),
+            "url": url_for("register", tipo="ambos", nac="nacional"),
+            "btn": t("Registro Mixto", "Mixed", "混合")
+        }
+    ]
+    return render_template("register_router.html", opciones=opciones)
 
 # ---------------------------------------------------------
 # REGISTRO DE USUARIOS (validación por nacionalidad, tipo y rol)
