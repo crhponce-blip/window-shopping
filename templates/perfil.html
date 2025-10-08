@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ t("Perfil de Usuario", "User Profile", "用戶資料") }}{% endblock %}
+{% block title %}{{ t("Mi Perfil", "My Profile", "我的資料") }}{% endblock %}
 
 {% block content %}
 <div class="perfil-container">
@@ -7,7 +7,8 @@
     <div class="perfil-avatar">
       <img src="{{ perfil.imagen or url_for('static', filename='img/default_user.png') }}" alt="avatar">
     </div>
-    <h2 class="perfil-nombre">{{ perfil.nombre }}</h2>
+
+    <h2 class="perfil-nombre">{{ perfil.empresa or perfil.nombre }}</h2>
     <p class="perfil-rol">{{ t("Rol", "Role", "角色") }}: <strong>{{ perfil.rol }}</strong></p>
 
     <div class="perfil-info">
@@ -15,34 +16,65 @@
       {% if perfil.telefono %}
       <p><strong>{{ t("Teléfono", "Phone", "電話") }}:</strong> {{ perfil.telefono }}</p>
       {% endif %}
-      {% if perfil.empresa %}
-      <p><strong>{{ t("Empresa", "Company", "公司") }}:</strong> {{ perfil.empresa }}</p>
+      {% if perfil.direccion %}
+      <p><strong>{{ t("Dirección", "Address", "地址") }}:</strong> {{ perfil.direccion }}</p>
       {% endif %}
     </div>
 
-    <hr class="divider">
-
-    <div class="perfil-actions">
-      <form method="POST" action="{{ url_for('enviar_mensaje', id=perfil.id) }}">
-        <textarea name="mensaje" class="mensaje-input" placeholder="{{ t('Escribe tu mensaje...', 'Write your message...', '輸入您的訊息...') }}" required></textarea>
-        <button type="submit" class="btn btn-primary">
-          {{ t("Enviar Mensaje", "Send Message", "發送訊息") }}
-        </button>
-      </form>
-    </div>
-
-    {% if mensaje_enviado %}
-      <div class="alert success">
-        {{ t("Mensaje enviado correctamente ✅", "Message sent successfully ✅", "訊息已成功發送 ✅") }}
-      </div>
-    {% elif cooldown_activo %}
-      <div class="alert warning">
-        {{ t("Solo puedes enviar un mensaje cada 3 días ⏳", "You can only send a message every 3 days ⏳", "您每3天只能發送一次訊息 ⏳") }}
-      </div>
+    {% if mensaje %}
+    <div class="alert success">{{ mensaje }}</div>
     {% endif %}
 
-    <a href="{{ url_for('home') }}" class="btn btn-secondary volver">
-      {{ t("Volver al Inicio", "Return Home", "返回首頁") }}
+    <hr class="divider">
+
+    <!-- FORMULARIO PARA AGREGAR NUEVOS ÍTEMS -->
+    <form method="POST" class="add-item-form">
+      <h3>{{ t("Agregar Ítem", "Add Item", "新增項目") }}</h3>
+      <label>{{ t("Tipo de ítem", "Item Type", "項目類型") }}</label>
+      <select name="tipo_perfil_item">
+        <option value="producto">{{ t("Producto / Oferta", "Product / Offer", "產品 / 报价") }}</option>
+        <option value="servicios">{{ t("Servicio", "Service", "服務") }}</option>
+      </select>
+
+      <div class="item-fields">
+        <input type="text" name="producto" placeholder="{{ t('Producto', 'Product', '產品') }}">
+        <input type="text" name="variedad" placeholder="{{ t('Variedad', 'Variety', '品種') }}">
+        <input type="text" name="cantidad" placeholder="{{ t('Cantidad', 'Quantity', '數量') }}">
+        <input type="text" name="bulto" placeholder="{{ t('Tipo de bulto', 'Package type', '包裝類型') }}">
+        <input type="text" name="origen" placeholder="{{ t('Origen', 'Origin', '來源') }}">
+        <input type="text" name="precio_caja" placeholder="{{ t('Precio por caja', 'Price per box', '每箱價格') }}">
+        <input type="text" name="precio_kilo" placeholder="{{ t('Precio por kilo', 'Price per kilo', '每公斤價格') }}">
+      </div>
+
+      <button type="submit" name="action" value="add_item" class="btn btn-primary">
+        {{ t("Agregar", "Add", "新增") }}
+      </button>
+    </form>
+
+    <hr class="divider">
+
+    <!-- LISTA DE ÍTEMS -->
+    {% if perfil.items %}
+      <h3>{{ t("Mis ítems", "My Items", "我的項目") }}</h3>
+      <ul class="items-list">
+        {% for item in perfil.items %}
+        <li>
+          {{ item.producto or item.servicio }} — 
+          {% if item.precio_caja %}${{ item.precio_caja }} / {{ t("Caja", "Box", "箱") }}{% endif %}
+          <form method="POST" style="display:inline;">
+            <button type="submit" name="action" value="delete_item_{{ loop.index0 }}" class="btn btn-secondary">
+              {{ t("Eliminar", "Delete", "刪除") }}
+            </button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>{{ t("Aún no has agregado ítems.", "You haven't added items yet.", "您尚未新增項目。") }}</p>
+    {% endif %}
+
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary volver">
+      {{ t("Volver al inicio", "Return Home", "返回首頁") }}
     </a>
   </div>
 </div>
