@@ -415,7 +415,6 @@ def password_reset_form():
           <button>Actualizar</button>
         </form>
         """, 200
-
 # ---------------------------------------------------------
 # REGISTRO DE USUARIOS (validación por nacionalidad, tipo y rol)
 # ---------------------------------------------------------
@@ -425,7 +424,7 @@ def register():
     nacionalidad = request.args.get("nac")
     perfil_tipo = request.args.get("tipo")
 
-    # --- Definición de roles según tu lógica ---
+    # --- Definición de roles según la lógica WS ---
     ROLES_COMPRA_VENTA = ["Productor", "Planta", "Packing", "Frigorífico", "Exportador"]
     ROLES_SERVICIOS = ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"]
     ROLES_AMBOS = ["Packing", "Frigorífico"]
@@ -448,12 +447,12 @@ def register():
         elif username in USERS:
             error = t("El usuario ya existe.", "User already exists.")
         else:
-            # --- Asignar rol automáticamente para extranjeros ---
+            # --- Asignar rol automático para extranjeros ---
             if nacionalidad == "extranjero":
                 rol = "Cliente extranjero"
                 perfil_tipo = "compra_venta"
 
-            # --- Validación de roles por tipo ---
+            # --- Validación de roles según tipo de perfil ---
             elif nacionalidad == "nacional":
                 if perfil_tipo == "compra_venta" and rol not in ROLES_COMPRA_VENTA:
                     error = t("Rol inválido para perfil de compra/venta.",
@@ -463,11 +462,11 @@ def register():
                               "Invalid role for services profile.")
                 elif perfil_tipo == "ambos" and rol not in ROLES_AMBOS:
                     error = t("Solo Packing o Frigorífico pueden registrar ambos perfiles.",
-                        "Only Packing or Cold Storage can register as both.")
+                              "Only Packing or Cold Storage can register as both.")
 
-        # --- Si no hay error, proceder a registrar ---
+        # --- Si no hay error, registrar usuario ---
         if not error:
-            # Guardar archivo RUT si corresponde
+            # Guardar archivo RUT (solo nacionales)
             rut_file_path = None
             if nacionalidad == "nacional" and "rut_file" in request.files:
                 f = request.files["rut_file"]
@@ -508,7 +507,8 @@ def register():
 
             session["user"] = username
             flash(t("Registro exitoso", "Registration successful", "註冊完成"))
-            return redirect(url_for("dashboard"))
+            # Mostrar pantalla visual de confirmación
+            return render_template("registro_exitoso.html")
 
     return render_template(
         "register.html",
