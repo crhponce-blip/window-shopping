@@ -28,26 +28,38 @@
             {% if nacionalidad == "nacional" %}
                 <label>RUT</label>
                 <input type="text" name="rut" placeholder="76.123.456-7">
+
                 <label>{{ t("Adjuntar RUT (PDF/JPG)", "Attach RUT (PDF/JPG)", "上傳RUT文件") }}</label>
                 <input type="file" name="rut_file" accept=".pdf,.jpg,.jpeg,.png">
             {% else %}
                 <label>EORI</label>
                 <input type="text" name="eori" placeholder="Ej: EU123456789000">
+
                 <label>{{ t("Otros ID (Opcional)", "Other ID (Optional)", "其他識別碼") }}</label>
                 <input type="text" name="otros_id" placeholder="Ej: Registro aduanero local">
             {% endif %}
 
-            <label>{{ t("Rol", "Role", "角色") }}</label>
-            <select name="rol" required style="color:black">
-                {% for r in roles_all_cv %}
-                    <option value="{{r}}">{{r}}</option>
-                {% endfor %}
-                {% for r in roles_srv %}
-                    {% if r not in roles_all_cv %}
-                        <option value="{{r}}">{{r}}</option>
+            {% if nacionalidad == "extranjero" %}
+                <label>{{ t("Rol", "Role", "角色") }}</label>
+                <input type="text" name="rol" value="Cliente Extranjero" readonly style="background:#eaeaea; color:#555;">
+            {% else %}
+                <label>{{ t("Rol", "Role", "角色") }}</label>
+                <select name="rol" required style="color:black">
+                    {% if perfil_tipo == "compra_venta" %}
+                        {% for r in ["Productor","Planta","Packing","Frigorífico","Exportador"] %}
+                            <option value="{{ r }}">{{ r }}</option>
+                        {% endfor %}
+                    {% elif perfil_tipo == "servicios" %}
+                        {% for r in ["Packing","Frigorífico","Transporte","Extraportuario","Agencia de Aduanas"] %}
+                            <option value="{{ r }}">{{ r }}</option>
+                        {% endfor %}
+                    {% elif perfil_tipo == "ambos" %}
+                        {% for r in ["Packing","Frigorífico"] %}
+                            <option value="{{ r }}">{{ r }}</option>
+                        {% endfor %}
                     {% endif %}
-                {% endfor %}
-            </select>
+                </select>
+            {% endif %}
 
             <label>{{ t("País", "Country", "國家") }}</label>
             <input type="text" name="pais" placeholder="Ej: Chile o China">
