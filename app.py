@@ -633,14 +633,15 @@ def detalles(tipo):
         return render_template(tpl, data=wrap_list(data), tipo=tipo, query=filtro_texto)
 
     if tipo == "servicios":
-        for uname, c in USER_PROFILES.items():
-            if any(it.get("tipo") == "servicio" for it in c.get("items", [])):
-                if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
-                    if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion","").lower()):
-                        item = c.copy()
-                        item["username"] = uname
-                        data.append(item)
-        tpl = "detalle_servicio.html"  # nombre correcto para evitar 500
+    for uname, c in USER_PROFILES.items():
+        if any(it.get("tipo") == "servicio" for it in c.get("items", [])):
+            if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
+                if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion","").lower()):
+                    item = c.copy()
+                    item["username"] = uname
+                    data.append(item)
+    tpl = "detalle_servicio.html"  # nombre correcto para evitar 500
+
 else:
     # ventas -> "oferta"; compras -> "demanda"
     # ventas -> mostrar "demanda" (quién solicita)
@@ -652,21 +653,21 @@ else:
     else:
         tag = "servicio"
 
-        # Bloqueo suave: Productor/Planta NO compran
-        if tipo == "compras" and my_rol in ("Productor", "Planta"):
-            flash(t("Tu rol no puede comprar fruta. Revisa Ventas o Servicios.",
-                    "Your role cannot buy fruit. Check Sales or Services.",
-                    "你的角色不能購買水果。請查看銷售或服務。"))
-            # data quedará vacío, se muestran filtros sin resultados
+    # Bloqueo suave: Productor/Planta NO compran
+    if tipo == "compras" and my_rol in ("Productor", "Planta"):
+        flash(t("Tu rol no puede comprar fruta. Revisa Ventas o Servicios.",
+                "Your role cannot buy fruit. Check Sales or Services.",
+                "你的角色不能購買水果。"))
+        # data quedará vacío, se muestran filtros sin resultados
 
-        for uname, c in USER_PROFILES.items():
-            if any(it.get("tipo") == tag for it in c.get("items", [])):
-                if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
-                    if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion","").lower()):
-                        item = c.copy()
-                        item["username"] = uname
-                        data.append(item)
-        tpl = "detalle_ventas.html" if tipo == "ventas" else "detalle_compras.html"
+    for uname, c in USER_PROFILES.items():
+        if any(it.get("tipo") == tag for it in c.get("items", [])):
+            if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
+                if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion","").lower()):
+                    item = c.copy()
+                    item["username"] = uname
+                    data.append(item)
+    tpl = "detalle_ventas.html" if tipo == "ventas" else "detalle_compras.html"
 
     return render_template(tpl, data=wrap_list(data), tipo=tipo, query=filtro_texto)
 
