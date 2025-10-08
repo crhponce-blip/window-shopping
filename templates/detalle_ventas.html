@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="detalle-container">
-  <h2>{{ t("Ofertas de Venta", "Sales Offers", "銷售項目") }}</h2>
+  <h2>{{ t("Ofertas disponibles", "Available Offers", "可供應項目") }}</h2>
+
   <form method="GET">
     <input type="text" name="q" placeholder="{{ t('Buscar...', 'Search...', '搜尋...') }}" value="{{ query }}">
     <button type="submit">{{ t("Buscar", "Search", "搜尋") }}</button>
@@ -11,15 +12,26 @@
     <ul class="listado">
       {% for c in data %}
         {% for item in c.items %}
+          {% if item.tipo != "servicio" %}
           <li>
             <input type="checkbox" name="sel" value='{{ item | tojson }}'>
-            <strong>{{ c.empresa }}</strong> - {{ item.producto }} ({{ item.cantidad }})
-            <small>{{ item.origen }} | {{ item.precio_caja or "" }}</small>
+            <strong>
+              <a href="{{ url_for('perfil_publico', id=c.email) }}">{{ c.empresa }}</a>
+            </strong> - {{ item.producto }} ({{ item.cantidad }})
+            <small>
+              {{ item.origen }} | 
+              {% if item.precio_caja %}Caja: ${{ item.precio_caja }}{% endif %}
+              {% if item.precio_kilo %} / Kilo: ${{ item.precio_kilo }}{% endif %}
+            </small>
           </li>
+          {% endif %}
         {% endfor %}
       {% endfor %}
     </ul>
-    <button type="submit">{{ t("Agregar seleccionados al carrito", "Add selected to cart", "加入購物車") }}</button>
+
+    <button type="submit" class="btn btn-primary">
+      {{ t("Agregar seleccionados al carrito", "Add selected to cart", "加入購物車") }}
+    </button>
   </form>
 </div>
 {% endblock %}
