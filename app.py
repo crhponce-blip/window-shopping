@@ -48,13 +48,6 @@ def inject_globals():
         LANGS=[("es", "ES"), ("en", "EN"), ("zh", "中文")]
     )
 
-
-@app.route("/set_lang/<lang>")
-def set_lang(lang):
-    session["lang"] = lang if lang in ("es", "en", "zh") else "es"
-    return redirect(request.referrer or url_for("home"))
-
-
 # =========================================================
 # USUARIOS Y PERFILES DE PRUEBA
 # =========================================================
