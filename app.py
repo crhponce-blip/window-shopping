@@ -641,16 +641,16 @@ def detalles(tipo):
                         item["username"] = uname
                         data.append(item)
         tpl = "detalle_servicio.html"  # nombre correcto para evitar 500
-    else:
-        # ventas -> "oferta"; compras -> "demanda"
-       # ventas -> mostrar "demanda" (quién solicita)
-# compras -> mostrar "oferta" (quién ofrece)
-if tipo == "ventas":
-    tag = "demanda"
-elif tipo == "compras":
-    tag = "oferta"
 else:
-    tag = "servicio"
+    # ventas -> "oferta"; compras -> "demanda"
+    # ventas -> mostrar "demanda" (quién solicita)
+    # compras -> mostrar "oferta" (quién ofrece)
+    if tipo == "ventas":
+        tag = "demanda"
+    elif tipo == "compras":
+        tag = "oferta"
+    else:
+        tag = "servicio"
 
         # Bloqueo suave: Productor/Planta NO compran
         if tipo == "compras" and my_rol in ("Productor", "Planta"):
