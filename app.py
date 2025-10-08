@@ -1,8 +1,8 @@
-# === app.py (completo) ===
+# === app.py (corregido y completo) ===
 import os
 import uuid
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from werkzeug.utils import secure_filename
 from jinja2 import TemplateNotFound
@@ -24,8 +24,10 @@ UPLOAD_FOLDER = os.path.join(STATIC_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg"}
 
+
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
+
 
 # =========================================================
 # SISTEMA DE IDIOMAS (ES / EN / ZH)
@@ -38,6 +40,7 @@ def t(es, en, zh=None):
         return zh
     return es
 
+
 @app.context_processor
 def inject_globals():
     return dict(
@@ -45,11 +48,11 @@ def inject_globals():
         LANGS=[("es", "ES"), ("en", "EN"), ("zh", "中文")]
     )
 
+
 @app.route("/set_lang/<lang>")
 def set_lang(lang):
     session["lang"] = lang if lang in ("es", "en", "zh") else "es"
     return redirect(request.referrer or url_for("home"))
-
 # =========================================================
 # USUARIOS Y PERFILES DE PRUEBA
 # =========================================================
@@ -80,8 +83,8 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Productores de uva de mesa y arándano.",
         "items": [
             {"tipo": "oferta", "producto": "Uva Red Globe", "bulto": "pallets", "cantidad": "100", "origen": "V Región", "precio_caja": "$12"},
-            {"tipo": "oferta", "producto": "Arándano Duke", "bulto": "pallets", "cantidad": "60", "origen": "VI Región", "precio_caja": "$15"}
-        ]
+            {"tipo": "oferta", "producto": "Arándano Duke", "bulto": "pallets", "cantidad": "60", "origen": "VI Región", "precio_caja": "$15"},
+        ],
     },
     "planta@demo.cl": {
         "empresa": "Planta Frutal Rengo",
@@ -95,8 +98,8 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Recepción y proceso de fruta fresca.",
         "items": [
             {"tipo": "demanda", "producto": "Ciruela D’Agen", "bulto": "pallets", "cantidad": "80", "origen": "VI Región"},
-            {"tipo": "oferta", "producto": "Cajas plásticas 10kg", "bulto": "unidades", "cantidad": "20000", "origen": "R.M."}
-        ]
+            {"tipo": "oferta", "producto": "Cajas plásticas 10kg", "bulto": "unidades", "cantidad": "20000", "origen": "R.M."},
+        ],
     },
     "packing@demo.cl": {
         "empresa": "PackSmart SPA",
@@ -110,8 +113,8 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Servicios de embalaje y QA.",
         "items": [
             {"tipo": "servicio", "servicio": "Embalaje exportación", "capacidad": "25.000 cajas/día", "ubicacion": "Rancagua"},
-            {"tipo": "oferta", "producto": "Ciruela Angeleno", "bulto": "pallets", "cantidad": "50", "origen": "R.M.", "precio_caja": "$11"}
-        ]
+            {"tipo": "oferta", "producto": "Ciruela Angeleno", "bulto": "pallets", "cantidad": "50", "origen": "R.M.", "precio_caja": "$11"},
+        ],
     },
     "frigorifico@demo.cl": {
         "empresa": "FríoCenter Ltda.",
@@ -125,8 +128,8 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Almacenaje en frío y logística portuaria.",
         "items": [
             {"tipo": "servicio", "servicio": "Preenfriado", "capacidad": "6 túneles", "ubicacion": "Valparaíso"},
-            {"tipo": "servicio", "servicio": "Cámara fría", "capacidad": "1500 pallets", "ubicacion": "Valparaíso"}
-        ]
+            {"tipo": "servicio", "servicio": "Cámara fría", "capacidad": "1500 pallets", "ubicacion": "Valparaíso"},
+        ],
     },
     "exportador@demo.cl": {
         "empresa": "OCExport Chile",
@@ -140,8 +143,8 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Exportador multiproducto a Asia, EU y EEUU.",
         "items": [
             {"tipo": "demanda", "producto": "Cereza Santina", "bulto": "pallets", "cantidad": "120", "origen": "VII Región"},
-            {"tipo": "demanda", "producto": "Uva Thompson", "bulto": "pallets", "cantidad": "80", "origen": "V Región"}
-        ]
+            {"tipo": "demanda", "producto": "Uva Thompson", "bulto": "pallets", "cantidad": "80", "origen": "V Región"},
+        ],
     },
     "cliente@usa.com": {
         "empresa": "GlobalBuyer Co.",
@@ -154,9 +157,10 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Importador y distribuidor de frutas frescas.",
         "items": [
             {"tipo": "demanda", "producto": "Ciruela D’Agen", "bulto": "pallets", "cantidad": "200", "origen": "CL"},
-            {"tipo": "demanda", "producto": "Cereza Lapins", "bulto": "pallets", "cantidad": "300", "origen": "CL"}
+            {"tipo": "demanda", "producto": "Cereza Lapins", "bulto": "pallets", "cantidad": "300", "origen": "CL"},
         ],
-        "eori": None, "otros_id": None  # Para extranjeros preferimos EORI y Otros
+        "eori": None,
+        "otros_id": None,
     },
     "transporte@demo.cl": {
         "empresa": "TransVeloz SPA",
@@ -170,8 +174,8 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Transporte nacional y refrigerado de fruta.",
         "items": [
             {"tipo": "servicio", "servicio": "Transporte reefer", "capacidad": "35 camiones", "ubicacion": "RM"},
-            {"tipo": "servicio", "servicio": "Flete marítimo local", "capacidad": "20 contenedores", "ubicacion": "Valparaíso"}
-        ]
+            {"tipo": "servicio", "servicio": "Flete marítimo local", "capacidad": "20 contenedores", "ubicacion": "Valparaíso"},
+        ],
     },
     "aduana@demo.cl": {
         "empresa": "AduanasFast Ltda.",
@@ -185,8 +189,8 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Tramitación documental y asesoría exportadora.",
         "items": [
             {"tipo": "servicio", "servicio": "Despacho de exportación", "capacidad": "Alta", "ubicacion": "Valparaíso"},
-            {"tipo": "servicio", "servicio": "Asesoría logística", "capacidad": "Media", "ubicacion": "Valparaíso"}
-        ]
+            {"tipo": "servicio", "servicio": "Asesoría logística", "capacidad": "Media", "ubicacion": "Valparaíso"},
+        ],
     },
     "extraport@demo.cl": {
         "empresa": "PortHelper SPA",
@@ -200,12 +204,11 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Consolidación, desconsolidación y contenedores.",
         "items": [
             {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "120/día", "ubicacion": "San Antonio"},
-            {"tipo": "servicio", "servicio": "Desconsolidado", "capacidad": "80/día", "ubicacion": "San Antonio"}
-        ]
-    }
+            {"tipo": "servicio", "servicio": "Desconsolidado", "capacidad": "80/día", "ubicacion": "San Antonio"},
+        ],
+    },
 }
-# --- Fin de diccionario USER_PROFILES ---
-
+# --- Fin de diccionario USER_PROFILES —
 # =========================================================
 # CLASES Y FUNCIONES AUXILIARES
 # =========================================================
@@ -217,8 +220,10 @@ class ViewObj:
         if hasattr(self, "items") and not isinstance(getattr(self, "items"), list):
             setattr(self, "items", data.get("items", []))
 
+
 def wrap_list(dict_list: List[Dict[str, Any]]) -> List[ViewObj]:
     return [ViewObj(d) for d in dict_list]
+
 
 # ---------------------------------------------------------
 # Sesión y carrito
@@ -226,17 +231,21 @@ def wrap_list(dict_list: List[Dict[str, Any]]) -> List[ViewObj]:
 def is_logged() -> bool:
     return "user" in session
 
+
 def current_user_profile() -> Optional[Dict[str, Any]]:
     u = session.get("user")
     return USER_PROFILES.get(u)
 
+
 def get_cart() -> List[Dict[str, Any]]:
     return session.setdefault("cart", [])
+
 
 def add_to_cart(item_dict: Dict[str, Any]) -> None:
     cart = get_cart()
     cart.append(item_dict)
     session["cart"] = cart
+
 
 def remove_from_cart(index) -> bool:
     cart = get_cart()
@@ -250,8 +259,10 @@ def remove_from_cart(index) -> bool:
         pass
     return False
 
+
 def clear_cart() -> None:
     session["cart"] = []
+
 
 # ---------------------------------------------------------
 # Normalizador de dinero
@@ -263,7 +274,6 @@ def norm_money(val: str) -> str:
     if val.startswith("$"):
         return val
     return f"${val}"
-
 # =========================================================
 # REGLAS DE VISIBILIDAD ENTRE ROLES (según flujo definido)
 # =========================================================
@@ -311,8 +321,9 @@ def targets_for(tipo: str, my_rol: str) -> List[str]:
     elif tipo == "servicios":
         return servicios_vis.get(my_rol, [])
     else:
-        # Valor por defecto: devolver unión básica
+        # Valor por defecto: unión básica
         return list(set(ventas_vis.get(my_rol, []) + servicios_vis.get(my_rol, [])))
+
 
 # =========================================================
 # RUTAS PRINCIPALES
@@ -321,9 +332,11 @@ def targets_for(tipo: str, my_rol: str) -> List[str]:
 def home():
     return render_template("landing.html")
 
+
 @app.route("/favicon.ico")
 def favicon():
     return ("", 204)
+
 
 # ---------------------------------------------------------
 # LOGIN / LOGOUT
@@ -343,11 +356,13 @@ def login():
         error = t("Credenciales inválidas", "Invalid credentials", "帳密錯誤")
     return render_template("login.html", error=error)
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     flash(t("Sesión cerrada", "Session closed", "登出完成"))
     return redirect(url_for("home"))
+
 
 # ---------------------------------------------------------
 # RESET DE CONTRASEÑA (flujo simple local, sin email real)
@@ -365,23 +380,28 @@ def password_reset_request():
             return redirect(url_for("password_reset_form"))
         else:
             msg = t("Ese usuario no existe.", "That user does not exist.", "此用戶不存在")
+
     try:
         return render_template("password_reset_request.html", msg=msg)
     except TemplateNotFound:
-        # Fallback simple por si aún no subes el template
         return """
         <h1>Recuperar contraseña</h1>
         <form method="post">
-          <input name="email" placeholder="Email"/><button>Enviar</button>
+            <input name="email" placeholder="Email"/>
+            <button>Enviar</button>
         </form>
         """, 200
+
+
 @app.route("/password_reset/reset", methods=["GET", "POST"])
 def password_reset_form():
     msg = None
     email = session.get("pwd_reset_user")
 
     if not email:
-        flash(t("Primero solicita el enlace de restablecimiento.", "Request a reset link first.", "請先申請重設連結"))
+        flash(t("Primero solicita el enlace de restablecimiento.",
+                "Request a reset link first.",
+                "請先申請重設連結"))
         return redirect(url_for("password_reset_request"))
 
     if request.method == "POST":
@@ -398,16 +418,14 @@ def password_reset_form():
     try:
         return render_template("password_reset_form.html", msg=msg)
     except TemplateNotFound:
-        # Fallback simple por si aún no subes el template
         return """
         <h1>Ingresar nueva contraseña</h1>
         <form method="post">
-          <input type="password" name="p1" placeholder="Nueva contraseña"/>
-          <input type="password" name="p2" placeholder="Repetir contraseña"/>
-          <button>Actualizar</button>
+            <input type="password" name="p1" placeholder="Nueva contraseña"/>
+            <input type="password" name="p2" placeholder="Repetir contraseña"/>
+            <button>Actualizar</button>
         </form>
         """, 200
-
 # =========================================================
 # SELECCIÓN DE REGISTRO (Router Nacional / Extranjero / Ambos)
 # =========================================================
@@ -453,8 +471,9 @@ def register_router():
     ]
     return render_template("register_router.html", opciones=opciones)
 
+
 # ---------------------------------------------------------
-# REGISTRO DE USUARIOS (validación por nacionalidad, tipo y rol)
+# REGISTRO DE USUARIOS
 # ---------------------------------------------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -462,7 +481,6 @@ def register():
     nacionalidad = request.args.get("nac")
     perfil_tipo = request.args.get("tipo")
 
-    # --- Definición de roles según la lógica WS ---
     ROLES_COMPRA_VENTA = ["Productor", "Planta", "Packing", "Frigorífico", "Exportador"]
     ROLES_SERVICIOS = ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"]
     ROLES_AMBOS = ["Packing", "Frigorífico"]
@@ -479,32 +497,24 @@ def register():
         pais = (request.form.get("pais") or "").strip()
         rol = (request.form.get("rol") or "").strip()
 
-        # --- Validación de campos obligatorios ---
         if not username or not password:
             error = t("Completa los campos obligatorios.", "Please fill required fields.")
         elif username in USERS:
             error = t("El usuario ya existe.", "User already exists.")
         else:
-            # --- Asignar rol automático para extranjeros ---
             if nacionalidad == "extranjero":
                 rol = "Cliente extranjero"
                 perfil_tipo = "compra_venta"
-
-            # --- Validación de roles según tipo de perfil ---
             elif nacionalidad == "nacional":
                 if perfil_tipo == "compra_venta" and rol not in ROLES_COMPRA_VENTA:
-                    error = t("Rol inválido para perfil de compra/venta.",
-                              "Invalid role for buy/sell profile.")
+                    error = t("Rol inválido para perfil de compra/venta.", "Invalid role for buy/sell profile.")
                 elif perfil_tipo == "servicios" and rol not in ROLES_SERVICIOS:
-                    error = t("Rol inválido para perfil de servicios.",
-                              "Invalid role for services profile.")
+                    error = t("Rol inválido para perfil de servicios.", "Invalid role for services profile.")
                 elif perfil_tipo == "ambos" and rol not in ROLES_AMBOS:
                     error = t("Solo Packing o Frigorífico pueden registrar ambos perfiles.",
                               "Only Packing or Cold Storage can register as both.")
 
-        # --- Si no hay error, registrar usuario ---
         if not error:
-            # Guardar archivo RUT (solo nacionales)
             rut_file_path = None
             if nacionalidad == "nacional" and "rut_file" in request.files:
                 f = request.files["rut_file"]
@@ -516,17 +526,16 @@ def register():
             rut = (request.form.get("rut") or "").strip() if nacionalidad == "nacional" else None
             eori = (request.form.get("eori") or "").strip() if nacionalidad == "extranjero" else None
             otros_id = (request.form.get("otros_id") or "").strip() if nacionalidad == "extranjero" else None
-
             if not pais:
                 pais = "CL" if nacionalidad == "nacional" else "US"
 
-            # --- Crear usuario y perfil ---
             USERS[username] = {
                 "password": password,
                 "rol": rol,
                 "perfil_tipo": perfil_tipo,
                 "pais": pais,
             }
+
             USER_PROFILES[username] = {
                 "empresa": empresa or username.split("@")[0].replace(".", " ").title(),
                 "rut": rut,
@@ -545,7 +554,6 @@ def register():
 
             session["user"] = username
             flash(t("Registro exitoso", "Registration successful", "註冊完成"))
-            # Mostrar pantalla visual de confirmación
             return render_template("registro_exitoso.html")
 
     return render_template(
@@ -556,6 +564,7 @@ def register():
         roles_all_cv=["Productor", "Planta", "Packing", "Frigorífico", "Exportador", "Cliente extranjero"],
         roles_srv=["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"],
     )
+
 
 # =========================================================
 # DASHBOARD
@@ -579,6 +588,7 @@ def dashboard():
         cart=get_cart(),
     )
 
+
 # =========================================================
 # FILTROS Y DETALLES (Ventas / Compras / Servicios)
 # =========================================================
@@ -599,71 +609,59 @@ def detalles(tipo):
         my_rol = me.get("rol", "")
         roles_permitidos = set(targets_for(tipo, my_rol))
 
-    # Buscar por nombre o producto
     filtro_texto = (request.args.get("q", "") or "").lower().strip()
-
     data = []
-    # Caso especial Cliente extranjero en "compras":
-    # quiere ver exportadores que ESTÁN VENDIENDO (oferta)
+
+    # Caso especial Cliente extranjero
     if tipo == "compras" and my_rol == "Cliente extranjero":
         tag = "oferta"
         forced_roles = {"Exportador"}
         for uname, c in USER_PROFILES.items():
             if c.get("rol") in forced_roles and any(it.get("tipo") == tag for it in c.get("items", [])):
-                if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion","").lower()):
+                if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
                     item = c.copy()
                     item["username"] = uname
                     data.append(item)
-        tpl = "detalle_compras.html"  # usamos plantilla de compras para mantener coherencia visual
+        tpl = "detalle_compras.html"
         return render_template(tpl, data=wrap_list(data), tipo=tipo, query=filtro_texto)
 
-if tipo == "servicios":
-    for uname, c in USER_PROFILES.items():
-        if any(it.get("tipo") == "servicio" for it in c.get("items", [])):
-            if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
-                if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion","").lower()):
-                    item = c.copy()
-                    item["username"] = uname
-                    data.append(item)
-    tpl = "detalle_servicio.html"  # nombre correcto para evitar 500
-
-else:
-    # ventas -> "oferta"; compras -> "demanda"
-    # ventas -> mostrar "demanda" (quién solicita)
-    # compras -> mostrar "oferta" (quién ofrece)
-    if tipo == "ventas":
-        tag = "demanda"
-    elif tipo == "compras":
-        tag = "oferta"
+    if tipo == "servicios":
+        for uname, c in USER_PROFILES.items():
+            if any(it.get("tipo") == "servicio" for it in c.get("items", [])):
+                if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
+                    if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
+                        item = c.copy()
+                        item["username"] = uname
+                        data.append(item)
+        tpl = "detalle_servicio.html"
     else:
-        tag = "servicio"
+        if tipo == "ventas":
+            tag = "demanda"
+        elif tipo == "compras":
+            tag = "oferta"
+        else:
+            tag = "servicio"
 
-    # Bloqueo suave: Productor/Planta NO compran
-    if tipo == "compras" and my_rol in ("Productor", "Planta"):
-        flash(t("Tu rol no puede comprar fruta. Revisa Ventas o Servicios.",
-                "Your role cannot buy fruit. Check Sales or Services.",
-                "你的角色不能購買水果。"))
-        # data quedará vacío, se muestran filtros sin resultados
+        if tipo == "compras" and my_rol in ("Productor", "Planta"):
+            flash(t("Tu rol no puede comprar fruta. Revisa Ventas o Servicios.",
+                    "Your role cannot buy fruit. Check Sales or Services.",
+                    "你的角色不能購買水果。"))
 
-    for uname, c in USER_PROFILES.items():
-        if any(it.get("tipo") == tag for it in c.get("items", [])):
-            if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
-                if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion","").lower()):
-                    item = c.copy()
-                    item["username"] = uname
-                    data.append(item)
-    tpl = "detalle_ventas.html" if tipo == "ventas" else "detalle_compras.html"
+        for uname, c in USER_PROFILES.items():
+            if any(it.get("tipo") == tag for it in c.get("items", [])):
+                if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
+                    if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
+                        item = c.copy()
+                        item["username"] = uname
+                        data.append(item)
+        tpl = "detalle_ventas.html" if tipo == "ventas" else "detalle_compras.html"
 
     return render_template(tpl, data=wrap_list(data), tipo=tipo, query=filtro_texto)
-
 # =========================================================
 # CLIENTES Y DETALLES DE PERFIL PÚBLICO
 # =========================================================
 @app.route("/clientes")
 def clientes():
-    """
-    Permite filtrar según tipo: ?tipo=compras|ventas|servicios
-    """
     filtro = request.args.get("tipo")
     if filtro in ("compras", "ventas", "servicios"):
         return redirect(url_for("detalles", tipo=filtro))
@@ -676,6 +674,7 @@ def clientes():
             lista.append(item)
 
     return render_template("clientes.html", clientes=wrap_list(lista))
+
 
 @app.route("/cliente/<username>")
 def cliente_detalle(username):
@@ -694,8 +693,9 @@ def cliente_detalle(username):
     }
     return render_template("cliente_detalle.html", comp=ViewObj(comp), username=username)
 
+
 # =========================================================
-# PERFIL PERSONAL (Editar datos + Agregar ítems + Eliminar ítems)
+# PERFIL PERSONAL (Editar datos + Agregar / Eliminar ítems)
 # =========================================================
 @app.route("/perfil", methods=["GET", "POST"])
 def perfil():
@@ -764,99 +764,16 @@ def perfil():
 
     return render_template("perfil.html", perfil=ViewObj(prof), mensaje=mensaje)
 
-# =========================================================
-# PERFIL PÚBLICO (ver perfil de otra empresa)
-# =========================================================
-@app.route("/perfil_publico/<id>")
-def perfil_publico(id):
-    if not is_logged():
-        return redirect(url_for("login"))
-
-    # Busca el perfil por ID (email)
-    prof = USER_PROFILES.get(id)
-    if not prof:
-        abort(404)
-
-    # Control de enfriamiento de mensajes (3 días)
-    puede_enviar, _ = _can_message(id)
-
-    return render_template(
-        "perfil.html",  # o un template público separado si prefieres
-        perfil=ViewObj(prof),
-        mensaje_enviado=False,
-        cooldown_activo=not puede_enviar
-    )
 
 # =========================================================
-# ENVÍO DE MENSAJES (actualizado, redirige a mensaje_enviado.html)
+# PERFIL PÚBLICO Y MENSAJERÍA CON ENFRIAMIENTO (3 días)
 # =========================================================
-@app.route("/enviar_mensaje/<id>", methods=["POST"])
-def enviar_mensaje(id):
-    if not is_logged():
-        return redirect(url_for("login"))
-
-# Acepta tanto email (clave) como empresa
-destinatario = USER_PROFILES.get(id)
-if not destinatario:
-    # Buscar por empresa si no existe el email
-    for k, v in USER_PROFILES.items():
-        if v.get("empresa") == id:
-            destinatario = v
-            id = k
-            break
-if not destinatario:
-    flash(t("No se encontró el destinatario.", "Recipient not found."))
-    return redirect(request.referrer or url_for("dashboard"))
-
-    remitente = session.get("user")
-    contenido = (request.form.get("mensaje") or "").strip()
-
-    if not contenido:
-        flash(t("El mensaje no puede estar vacío.", "Message cannot be empty.", "訊息不能為空"))
-        return redirect(request.referrer or url_for("home"))
-
-    # Enfriamiento: 3 días entre mensajes
-    puede, _ = _can_message(id)
-    if not puede:
-        flash(t("Solo puedes enviar un mensaje cada 3 días ⏳",
-                 "You can only send one message every 3 days ⏳",
-                 "您每3天只能發送一次訊息 ⏳"))
-        return redirect(request.referrer or url_for("home"))
-
-    # Guarda el timestamp de envío en la sesión
-    hist = _msg_history()
-    hist[id] = datetime.utcnow().isoformat()
-    session["msg_history"] = hist
-
-    # Renderiza confirmación visual
-    return render_template(
-        "mensaje_enviado.html",
-        destinatario=destinatario.get("empresa", id),
-        mensaje=contenido,
-        fecha=datetime.now().strftime("%d/%m/%Y %H:%M")
-    )
-
-# =========================================================
-# CARRITO DE COMPRAS  ✅ (reemplazo/actualizado)
-# =========================================================
-from datetime import datetime  # import local permitido
-
-def _hidden_keys() -> list:
-    """Devuelve/crea la lista de claves ocultas en la sesión."""
-    return session.setdefault("hidden_keys", [])
-
-def _save_hidden(keys: list):
-    session["hidden_keys"] = keys
+from datetime import datetime
 
 def _msg_history() -> dict:
-    """Historial de mensajes enviados por usuario destino."""
     return session.setdefault("msg_history", {})
 
 def _can_message(username: str) -> tuple[bool, Optional[int]]:
-    """
-    True si han pasado >= 3 días desde el último mensaje a 'username'.
-    Devuelve (puede, minutos_restantes_si_no).
-    """
     hist = _msg_history()
     ts = hist.get(username)
     if not ts:
@@ -868,194 +785,10 @@ def _can_message(username: str) -> tuple[bool, Optional[int]]:
     delta = datetime.utcnow() - last
     if delta.days >= 3:
         return True, None
-    # minutos restantes hasta completar 3 días
-    restantes = int((3*24*60) - (delta.total_seconds() / 60))
+    restantes = int((3 * 24 * 60) - (delta.total_seconds() / 60))
     return False, max(restantes, 1)
 
-@app.route("/carrito", methods=["GET", "POST"])
-def carrito():
-    """
-    Vista del carrito con acciones:
-    - POST action=clear
-    - POST action=remove:<idx>
-    - POST action=remove_selected con rm[]=idx,...
-    """
-    if request.method == "POST":
-        action = request.form.get("action", "")
-        if action == "clear":
-            clear_cart()
-            flash(t("Carrito vaciado", "Cart cleared", "購物車已清空"))
-            return redirect(url_for("carrito"))
 
-        if action.startswith("remove:"):
-            idx = action.split(":", 1)[1]
-            if remove_from_cart(idx):
-                flash(t("Ítem eliminado", "Item removed", "已刪除"))
-            return redirect(url_for("carrito"))
-
-        if action == "remove_selected":
-            indices = [int(i) for i in request.form.getlist("rm")]
-            indices = sorted(set([i for i in indices if i >= 0]), reverse=True)
-            removed = 0
-            cart = get_cart()
-            for i in indices:
-                if 0 <= i < len(cart):
-                    cart.pop(i)
-                    removed += 1
-            session["cart"] = cart
-            if removed:
-                flash(t(f"{removed} ítem(s) eliminados", f"{removed} item(s) removed"))
-            return redirect(url_for("carrito"))
-
-    # GET
-    return render_template("carrito.html", cart=get_cart())
-
-# =========================================================
-# AGREGAR AL CARRITO (Ítem único desde tarjetas)
-# =========================================================
-@app.route("/cart_add", methods=["POST"])
-def cart_add():
-    """
-    Agrega un solo ítem al carrito (producto o servicio).
-    Compatible con formularios simples y checkboxes JSON.
-    """
-    item_raw = request.form.get("item") or None
-    if item_raw:
-        try:
-            item = json.loads(item_raw)
-            if isinstance(item, dict):
-                add_to_cart(item)
-                flash(t("Agregado al carrito 🛒", "Added to cart 🛒"))
-                return redirect(request.referrer or url_for("carrito"))
-        except Exception:
-            pass
-
-    # Modo tradicional (form inputs)
-    payload = {
-        "empresa": request.form.get("empresa", "").strip(),
-        "producto": request.form.get("producto", "").strip(),
-        "servicio": request.form.get("servicio", "").strip(),
-        "variedad": request.form.get("variedad", "").strip(),
-        "cantidad": request.form.get("cantidad", "").strip(),
-        "bulto": request.form.get("bulto", "").strip(),
-        "origen": request.form.get("origen", "").strip(),
-        "precio_caja": request.form.get("precio_caja", "").strip(),
-        "precio_kilo": request.form.get("precio_kilo", "").strip(),
-        "username": request.form.get("username", "").strip(),
-    }
-    clean = {k: v for k, v in payload.items() if v}
-    if clean:
-        add_to_cart(clean)
-        flash(t("Agregado al carrito 🛒", "Added to cart 🛒"))
-    else:
-        flash(t("No se pudo agregar el ítem.", "Item could not be added."))
-    return redirect(request.referrer or url_for("carrito"))
-
-# =========================================================
-# NUEVO ENDPOINT ✅ para múltiples ítems (detalles_compras / ventas / servicios)
-# =========================================================
-@app.route("/cart_add_bulk", methods=["POST"])
-def cart_add_bulk():
-    """
-    Permite agregar varios ítems seleccionados desde los formularios
-    de detalle_compras, detalle_ventas o detalle_servicio.
-    """
-    seleccionados = request.form.getlist("sel") or request.form.getlist("selected")
-    if not seleccionados:
-        flash(t("No seleccionaste ningún producto.", "No items selected.", "未選擇任何項目"))
-        return redirect(request.referrer or url_for("dashboard"))
-
-    agregados = 0
-    for raw in seleccionados:
-        try:
-            item = json.loads(raw)
-            if isinstance(item, dict):
-                add_to_cart(item)
-                agregados += 1
-        except Exception:
-            continue
-
-    if agregados:
-        flash(t(f"Se agregaron {agregados} ítems al carrito 🛒",
-                f"{agregados} items added to cart 🛒",
-                f"已將 {agregados} 個項目加入購物車 🛒"))
-    else:
-        flash(t("No se pudo agregar ningún ítem.", "No items could be added.", "無法加入任何項目"))
-    return redirect(request.referrer or url_for("dashboard"))
-
-# =========================================================
-# AGREGAR VARIOS AL CARRITO (checkbox de lista)
-# - En el template, cada checkbox puede llevar value con un JSON del ítem
-#   name="selected" value='{"empresa":"...", "producto":"...", ...}'
-# =========================================================
-@app.route("/cart/bulk_add", methods=["POST"])
-def cart_bulk_add():
-    selected = request.form.getlist("selected")
-    ok = 0
-    for raw in selected:
-        try:
-            item = json.loads(raw)
-            if isinstance(item, dict) and any(item.values()):
-                add_to_cart(item)
-                ok += 1
-        except Exception:
-            # Si no viene JSON, ignoramos ese elemento
-            continue
-    if ok:
-        flash(t(f"{ok} ítem(s) agregados al carrito",
-                f"{ok} item(s) added to cart"))
-    else:
-        flash(t("No se seleccionó nada para agregar.",
-                "Nothing selected to add."))
-    return redirect(request.referrer or url_for("carrito"))
-
-# =========================================================
-# ELIMINAR DE VISTA (ocultar tarjetas seleccionadas)
-# =========================================================
-@app.route("/hide_from_view", methods=["POST"])
-def hide_from_view():
-    """
-    Permite ocultar elementos temporalmente de la vista (detalle o lista),
-    guardando sus claves en la sesión. Evita duplicados de endpoint.
-    """
-    keys = request.form.getlist("hide_keys") or request.form.getlist("selected_keys")
-    if not keys:
-        # fallback: si venían JSON, intentar extraer "key"
-        for raw in request.form.getlist("selected"):
-            try:
-                obj = json.loads(raw)
-                k = obj.get("key")
-                if k:
-                    keys.append(k)
-            except Exception:
-                pass
-
-    if not keys:
-        flash(t("No se seleccionó nada para ocultar.",
-                "Nothing selected to hide.",
-                "未選擇要隱藏的項目"))
-        return redirect(request.referrer or url_for("home"))
-
-    hidden = set(_hidden_keys())
-    hidden.update(keys)
-    _save_hidden(list(hidden))
-    flash(t("Elementos ocultados en esta vista.",
-            "Items hidden from this view.",
-            "已隱藏這些項目"))
-    return redirect(request.referrer or url_for("home"))
-
-@app.route("/unhide_all", methods=["POST"])
-def unhide_all():
-    _save_hidden([])
-    flash(t("Se restauraron todos los elementos ocultos.",
-            "All hidden items were restored."))
-    return redirect(request.referrer or url_for("home"))
-
-# =========================================================
-# PERFIL PÚBLICO Y MENSAJERÍA CON ENFRIAMIENTO (3 días)
-# Enlázalo desde tarjetas con url_for('cliente_detalle', username=uname)
-# y el formulario de mensaje a /cliente/<username>/mensaje
-# =========================================================
 @app.route("/cliente/<username>/mensaje", methods=["POST"])
 def cliente_mensaje(username):
     prof = USER_PROFILES.get(username)
@@ -1064,7 +797,6 @@ def cliente_mensaje(username):
 
     puede, minutos = _can_message(username)
     if not puede:
-        # tiempo restante legible
         dias = minutos // (24*60)
         horas = (minutos % (24*60)) // 60
         mins = minutos % 60
@@ -1081,12 +813,10 @@ def cliente_mensaje(username):
         ))
         return redirect(url_for("cliente_detalle", username=username))
 
-    # Guardamos el momento del envío (no persistente, solo sesión)
     hist = _msg_history()
     hist[username] = datetime.utcnow().isoformat()
     session["msg_history"] = hist
 
-    # (Aquí iría el envío real por email/API si aplica)
     contenido = (request.form.get("mensaje") or "").strip()
     if not contenido:
         contenido = t("Mensaje sin contenido", "Empty message")
@@ -1097,8 +827,63 @@ def cliente_mensaje(username):
     ))
     return redirect(url_for("cliente_detalle", username=username))
 
+
 # =========================================================
-# RUTA: Centro de Ayuda (multilenguaje)
+# CARRITO DE COMPRAS (ver, agregar, eliminar)
+# =========================================================
+@app.route("/carrito", methods=["GET", "POST"])
+def carrito():
+    if request.method == "POST":
+        action = request.form.get("action", "")
+        if action == "clear":
+            clear_cart()
+            flash(t("Carrito vaciado", "Cart cleared", "購物車已清空"))
+            return redirect(url_for("carrito"))
+
+        if action.startswith("remove:"):
+            idx = action.split(":", 1)[1]
+            if remove_from_cart(idx):
+                flash(t("Ítem eliminado", "Item removed", "已刪除"))
+            return redirect(url_for("carrito"))
+
+    return render_template("carrito.html", cart=get_cart())
+
+
+@app.route("/cart_add", methods=["POST"])
+def cart_add():
+    item_raw = request.form.get("item") or None
+    if item_raw:
+        try:
+            item = json.loads(item_raw)
+            if isinstance(item, dict):
+                add_to_cart(item)
+                flash(t("Agregado al carrito 🛒", "Added to cart 🛒"))
+                return redirect(request.referrer or url_for("carrito"))
+        except Exception:
+            pass
+
+    payload = {
+        "empresa": request.form.get("empresa", "").strip(),
+        "producto": request.form.get("producto", "").strip(),
+        "servicio": request.form.get("servicio", "").strip(),
+        "cantidad": request.form.get("cantidad", "").strip(),
+        "bulto": request.form.get("bulto", "").strip(),
+        "origen": request.form.get("origen", "").strip(),
+        "precio_caja": request.form.get("precio_caja", "").strip(),
+        "precio_kilo": request.form.get("precio_kilo", "").strip(),
+        "username": request.form.get("username", "").strip(),
+    }
+    clean = {k: v for k, v in payload.items() if v}
+    if clean:
+        add_to_cart(clean)
+        flash(t("Agregado al carrito 🛒", "Added to cart 🛒"))
+    else:
+        flash(t("No se pudo agregar el ítem.", "Item could not be added."))
+    return redirect(request.referrer or url_for("carrito"))
+
+
+# =========================================================
+# CENTRO DE AYUDA
 # =========================================================
 @app.route("/ayuda")
 def ayuda():
@@ -1136,9 +921,11 @@ def ayuda():
             ),
         },
     ]
+    return render_template("ayuda.html", temas=temas, title=t("Centro de Ayuda", "Help Center", "幫助中心"))
 
-    return render_template(
-        "ayuda.html",
-        temas=temas,
-        title=t("Centro de Ayuda", "Help Center", "幫助中心")
-    )
+
+# =========================================================
+# MAIN (solo para pruebas locales)
+# =========================================================
+if __name__ == "__main__":
+    app.run(debug=True)
