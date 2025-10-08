@@ -1,287 +1,258 @@
 /* =========================================================
-   ESTILOS GENERALES WINDOW SHOPPING (WS)
+   WINDOW SHOPPING - WS BLUE (versión final estable)
    ========================================================= */
-body {
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+* {
   margin: 0;
-  font-family: "Poppins", "Segoe UI", Arial, sans-serif;
-  background-color: #f5f7fa;
-  color: #222;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #081b33, #0a2342, #103b68);
+  background-attachment: fixed;
+  color: #f2f5f9;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* =========================================================
-   NAVBAR SUPERIOR
+   NAVBAR
    ========================================================= */
 .navbar {
-  background-color: #ffffff;
-  border-bottom: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 25px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  padding: 15px 40px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 191, 255, 0.2);
 }
 
 .navbar a {
+  color: #fff;
   text-decoration: none;
-  color: #000; /* letras negras en nav */
-  margin: 0 12px;
+  margin-left: 18px;
   font-weight: 500;
   transition: 0.3s;
 }
 
 .navbar a:hover {
-  color: #007bff;
-}
-
-.lang-switch a {
-  font-size: 14px;
-  font-weight: 600;
+  color: #00cfff;
+  text-shadow: 0 0 8px #00bfff;
 }
 
 /* =========================================================
-   CONTENEDORES Y BOTONES
-   ========================================================= */
-main {
-  min-height: calc(100vh - 120px);
-  padding: 40px 20px;
-}
-
-.btn,
-button {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 5px;
-  cursor: pointer;
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.3s;
-}
-
-.btn:hover,
-button:hover {
-  background-color: #0056b3;
-}
-
-.btn-secondary {
-  background-color: #ddd;
-  color: #000;
-}
-
-.btn-secondary:hover {
-  background-color: #bbb;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: #fff;
-}
-
-/* =========================================================
-   FORMULARIOS
-   ========================================================= */
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0 14px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 15px;
-  box-sizing: border-box;
-  color: #000;
-  background-color: #fff;
-}
-
-input::placeholder {
-  color: #777;
-}
-
-label {
-  font-weight: 600;
-  display: block;
-  margin-top: 8px;
-  color: #000;
-}
-
-/* =========================================================
-   LOGIN / REGISTRO BOX
-   ========================================================= */
-.auth-box {
-  background-color: #fff;
-  max-width: 450px;
-  margin: 40px auto;
-  padding: 35px 40px;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.auth-box h2 {
-  margin-bottom: 20px;
-  color: #000;
-}
-
-.auth-box .error {
-  color: #e63946;
-  font-weight: 600;
-  background: #ffe8e8;
-  border: 1px solid #f5b5b5;
-  padding: 8px;
-  border-radius: 5px;
-}
-
-/* Logo centrado */
-.logo-login {
-  width: 85px;
-  margin-bottom: 10px;
-}
-
-/* =========================================================
-   LANDING PAGE
+   LANDING
    ========================================================= */
 .landing-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 80vh;
-  flex-direction: column;
+  height: 75vh;
   text-align: center;
 }
 
-.logo-center .logo-main {
-  width: 120px;
-  margin-bottom: 10px;
-}
-
-.landing-container h1 {
-  font-size: 38px;
-  margin-bottom: 8px;
-  color: #000;
-}
-
-.landing-container p {
-  font-size: 18px;
-  color: #444;
-  margin-bottom: 25px;
+.logo-center img {
+  width: 180px;
+  height: auto;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 10px rgba(0,191,255,0.4));
 }
 
 .landing-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
+  margin-top: 25px;
+}
+
+.btn-primary, .btn-secondary, .btn {
+  display: inline-block;
+  padding: 12px 30px;
+  margin: 10px;
+  border-radius: 30px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.3s;
+  letter-spacing: 0.3px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #009dff, #007bff);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0,191,255,0.4);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #00bfff, #0065d1);
+  box-shadow: 0 4px 20px rgba(0,191,255,0.7);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.1);
+  color: #e2f4ff;
+  border: 1.5px solid #00bfff;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 191, 255, 0.15);
+  color: #fff;
 }
 
 /* =========================================================
-   TARJETAS DE REGISTRO (Router)
+   REGISTER ROUTER (Tarjetas de selección)
    ========================================================= */
+.router-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+.router-options {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
 .router-card {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #ffffff 0%, #f3f6ff 100%);
-  color: #000; /* letras negras */
-  width: 270px;
+  width: 260px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
   padding: 25px;
+  color: #000; /* 🔥 letras negras */
+  box-shadow: 0 5px 20px rgba(0, 191, 255, 0.2);
+  transition: all 0.3s ease;
   text-align: center;
-  transition: 0.3s ease;
+}
+
+.router-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 191, 255, 0.3);
 }
 
 .router-card h3 {
-  color: #000;
+  color: #004d99;
   margin-bottom: 10px;
 }
 
 .router-card p {
-  color: #333;
   font-size: 14px;
-}
-
-.router-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  color: #333;
 }
 
 /* =========================================================
-   TABLAS, LISTAS Y CARRITO
+   AUTH BOX (Login y Registro)
    ========================================================= */
-table {
-  border-collapse: collapse;
+.auth-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  padding: 40px;
+  width: 400px;
+  margin: 40px auto;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 191, 255, 0.15);
+}
+
+.auth-box h2 {
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.auth-box input, .auth-box select, .auth-box textarea {
   width: 100%;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  font-size: 15px;
-  margin-top: 15px;
-}
-
-th, td {
+  margin: 8px 0;
   padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  background-color: #eaf3ff;
   color: #000;
 }
 
-th {
-  background-color: #f0f2f5;
-  font-weight: 600;
+.auth-box label {
+  text-align: left;
+  display: block;
+  font-size: 14px;
+  color: #fff;
+  margin-top: 10px;
 }
 
-tr:hover {
-  background-color: #f9f9f9;
+.auth-box button {
+  background: linear-gradient(135deg, #009dff, #007bff);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: 0.3s;
+  box-shadow: 0 3px 12px rgba(0,191,255,0.4);
+}
+
+.auth-box button:hover {
+  background: linear-gradient(135deg, #00bfff, #0065d1);
+  box-shadow: 0 3px 15px rgba(0,191,255,0.6);
 }
 
 /* =========================================================
-   FLASH MESSAGES
+   PERFIL Y DETALLES
    ========================================================= */
-.flash-container {
-  max-width: 700px;
-  margin: 10px auto;
+.perfil-container, .detalle-container {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 191, 255, 0.15);
 }
 
-.flash {
-  background-color: #e7f3ff;
-  border-left: 5px solid #007bff;
-  padding: 10px 15px;
-  border-radius: 5px;
-  color: #000;
-  margin-bottom: 10px;
+.perfil-container h2 {
+  color: #00bfff;
+}
+
+.perfil-info p {
+  color: #eee;
 }
 
 /* =========================================================
    FOOTER
    ========================================================= */
 footer {
-  background-color: #ffffff;
-  border-top: 1px solid #ddd;
   text-align: center;
-  padding: 15px 0;
-  color: #000;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #cfd9df;
   font-size: 14px;
+  border-top: 1px solid rgba(0, 191, 255, 0.15);
+  margin-top: auto;
 }
 
 /* =========================================================
    RESPONSIVE
    ========================================================= */
 @media (max-width: 768px) {
-  .landing-container h1 {
-    font-size: 30px;
+  .auth-box, .perfil-container {
+    width: 95%;
+    padding: 25px;
   }
 
   .router-card {
     width: 90%;
-    margin-bottom: 20px;
-  }
-
-  .auth-box {
-    margin: 20px;
-    padding: 25px;
   }
 
   .navbar {
     flex-direction: column;
-    align-items: flex-start;
   }
 }
