@@ -1,16 +1,9 @@
 {% extends "base.html" %}
-
 {% block content %}
-<main class="error-container">
-  <div class="error-box">
-    <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-error">
-    <h1>{{ code }}</h1>
-    <h2>{{ t("Error", "Error", "錯誤") }}</h2>
-    <p>{{ message }}</p>
-
-    <a href="{{ url_for('home') }}" class="btn-primary">
-      {{ t("Volver al inicio", "Go back home", "返回首頁") }}
-    </a>
-  </div>
+<main class="error-container" style="text-align:center;margin:60px 0">
+  <h1>{{ code }}</h1>
+  <h2>{{ t("Error","Error","錯誤") }}</h2>
+  <p>{{ message }}</p>
+  <a href="{{ url_for('home') }}" class="btn">{{ t("Volver al inicio","Go back home","返回首頁") }}</a>
 </main>
 {% endblock %}
