@@ -314,6 +314,7 @@ def targets_for(tipo: str, my_rol: str) -> List[str]:
         "Planta": ["Packing"],
     }
 
+    # --- Lógica de retorno según tipo ---
     if tipo == "compras":
         return compras_vis.get(my_rol, [])
     elif tipo == "ventas":
@@ -323,7 +324,6 @@ def targets_for(tipo: str, my_rol: str) -> List[str]:
     else:
         # Valor por defecto: unión básica
         return list(set(ventas_vis.get(my_rol, []) + servicios_vis.get(my_rol, [])))
-
 
 # =========================================================
 # RUTAS PRINCIPALES
@@ -567,27 +567,47 @@ def register():
 
 
 # =========================================================
-# DASHBOARD
+# DASHBOARD (Panel principal del usuario)
 # =========================================================
+
 @app.route("/dashboard")
 def dashboard():
+    """
+    Muestra el panel principal con opciones según el rol del usuario.
+    """
     if not is_logged():
+        flash(t("Debes iniciar sesión para acceder al panel.",
+                "You must log in to access the dashboard.",
+                "您必須登入才能訪問主頁面。"))
         return redirect(url_for("login"))
-    profile = current_user_profile()
-    usuario = session.get("user")
-    rol = USERS.get(usuario, {}).get("rol", "-")
-    perfil_tipo = USERS.get(usuario, {}).get("perfil_tipo", "-")
-    my_company_view = ViewObj(profile or {"items": []})
+
+    user_email = session["user"]
+    user_data = USERS.get(user_email, {})
+    perfil_data = USER_PROFILES.get(user_email, {})
+
+    rol = user_data.get("rol", "Desconocido")
+    nombre = user_data.get("nombre", "Usuario")
+    empresa = perfil_data.get("empresa", "")
+    descripcion = perfil_data.get("descripcion", "")
+    cart = get_cart()
+
+    # Opciones visibles según tipo de usuario
+    acciones = [
+        {"ruta": "detalles", "param": "compras", "nombre": t("Comprar", "Buy", "採購")},
+        {"ruta": "detalles", "param": "ventas", "nombre": t("Vender", "Sell", "銷售")},
+        {"ruta": "detalles", "param": "servicios", "nombre": t("Servicios", "Services", "服務")},
+        {"ruta": "perfil", "param": "", "nombre": t("Mi Perfil", "My Profile", "我的資料")},
+        {"ruta": "carrito", "param": "", "nombre": t(f"Carrito 🛒 ({len(cart)})", f"Cart 🛒 ({len(cart)})", f"購物車 🛒 ({len(cart)})")},
+    ]
 
     return render_template(
         "dashboard.html",
-        usuario=usuario,
+        nombre=nombre,
         rol=rol,
-        perfil_tipo=perfil_tipo,
-        my_company=my_company_view,
-        cart=get_cart(),
+        empresa=empresa,
+        descripcion=descripcion,
+        acciones=acciones,
     )
-
 
 # =========================================================
 # FILTROS Y DETALLES (Ventas / Compras / Servicios)
@@ -609,54 +629,39 @@ def detalles(tipo):
         my_rol = me.get("rol", "")
         roles_permitidos = set(targets_for(tipo, my_rol))
 
+    # Buscar por nombre o producto
     filtro_texto = (request.args.get("q", "") or "").lower().strip()
     data = []
 
-    # Caso especial Cliente extranjero
-    if tipo == "compras" and my_rol == "Cliente extranjero":
+    # --- Tipo: COMPRAS (ve ofertas de quienes venden) ---
+    if tipo == "compras":
         tag = "oferta"
-        forced_roles = {"Exportador"}
-        for uname, c in USER_PROFILES.items():
-            if c.get("rol") in forced_roles and any(it.get("tipo") == tag for it in c.get("items", [])):
+
+    # --- Tipo: VENTAS (ve demandas de quienes compran) ---
+    elif tipo == "ventas":
+        tag = "demanda"
+
+    # --- Tipo: SERVICIOS (todos pueden verlos) ---
+    else:
+        tag = "servicio"
+
+    # Búsqueda filtrada
+    for uname, c in USER_PROFILES.items():
+        if any(it.get("tipo") == tag for it in c.get("items", [])):
+            if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
                 if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
                     item = c.copy()
                     item["username"] = uname
                     data.append(item)
-        tpl = "detalle_compras.html"
-        return render_template(tpl, data=wrap_list(data), tipo=tipo, query=filtro_texto)
 
-    if tipo == "servicios":
-        for uname, c in USER_PROFILES.items():
-            if any(it.get("tipo") == "servicio" for it in c.get("items", [])):
-                if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
-                    if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
-                        item = c.copy()
-                        item["username"] = uname
-                        data.append(item)
-        tpl = "detalle_servicio.html"
-    else:
-        if tipo == "ventas":
-            tag = "demanda"
-        elif tipo == "compras":
-            tag = "oferta"
-        else:
-            tag = "servicio"
-
-        if tipo == "compras" and my_rol in ("Productor", "Planta"):
-            flash(t("Tu rol no puede comprar fruta. Revisa Ventas o Servicios.",
-                    "Your role cannot buy fruit. Check Sales or Services.",
-                    "你的角色不能購買水果。"))
-
-        for uname, c in USER_PROFILES.items():
-            if any(it.get("tipo") == tag for it in c.get("items", [])):
-                if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
-                    if (not filtro_texto) or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
-                        item = c.copy()
-                        item["username"] = uname
-                        data.append(item)
-        tpl = "detalle_ventas.html" if tipo == "ventas" else "detalle_compras.html"
-
+    # Render según tipo
+    tpl = (
+        "detalle_ventas.html" if tipo == "ventas"
+        else "detalle_compras.html" if tipo == "compras"
+        else "detalle_servicio.html"
+    )
     return render_template(tpl, data=wrap_list(data), tipo=tipo, query=filtro_texto)
+
 # =========================================================
 # CLIENTES Y DETALLES DE PERFIL PÚBLICO
 # =========================================================
@@ -829,58 +834,106 @@ def cliente_mensaje(username):
 
 
 # =========================================================
-# CARRITO DE COMPRAS (ver, agregar, eliminar)
+# CARRITO DE COMPRAS / SERVICIOS
 # =========================================================
-@app.route("/carrito", methods=["GET", "POST"])
+
+@app.route("/carrito")
 def carrito():
-    if request.method == "POST":
-        action = request.form.get("action", "")
-        if action == "clear":
-            clear_cart()
-            flash(t("Carrito vaciado", "Cart cleared", "購物車已清空"))
-            return redirect(url_for("carrito"))
+    """
+    Muestra el contenido actual del carrito del usuario logeado.
+    """
+    if not is_logged():
+        flash(t("Debes iniciar sesión para ver tu carrito.",
+                "You must log in to view your cart.",
+                "您必須登入才能查看購物車。"))
+        return redirect(url_for("login"))
 
-        if action.startswith("remove:"):
-            idx = action.split(":", 1)[1]
-            if remove_from_cart(idx):
-                flash(t("Ítem eliminado", "Item removed", "已刪除"))
-            return redirect(url_for("carrito"))
-
-    return render_template("carrito.html", cart=get_cart())
+    cart = get_cart()
+    return render_template("carrito.html", cart=cart)
 
 
 @app.route("/cart_add", methods=["POST"])
 def cart_add():
-    item_raw = request.form.get("item") or None
-    if item_raw:
-        try:
-            item = json.loads(item_raw)
-            if isinstance(item, dict):
-                add_to_cart(item)
-                flash(t("Agregado al carrito 🛒", "Added to cart 🛒"))
-                return redirect(request.referrer or url_for("carrito"))
-        except Exception:
-            pass
+    """
+    Agrega un ítem al carrito.
+    """
+    if not is_logged():
+        flash(t("Debes iniciar sesión para agregar al carrito.",
+                "You must log in to add to cart.",
+                "您必須登入才能加入購物車。"))
+        return redirect(url_for("login"))
 
-    payload = {
-        "empresa": request.form.get("empresa", "").strip(),
-        "producto": request.form.get("producto", "").strip(),
-        "servicio": request.form.get("servicio", "").strip(),
-        "cantidad": request.form.get("cantidad", "").strip(),
-        "bulto": request.form.get("bulto", "").strip(),
-        "origen": request.form.get("origen", "").strip(),
-        "precio_caja": request.form.get("precio_caja", "").strip(),
-        "precio_kilo": request.form.get("precio_kilo", "").strip(),
-        "username": request.form.get("username", "").strip(),
+    username = request.form.get("username")
+    tipo = request.form.get("tipo")
+    if not username or not tipo:
+        flash(t("Error al agregar al carrito.",
+                "Error adding to cart.",
+                "加入購物車時出錯。"))
+        return redirect(request.referrer or url_for("dashboard"))
+
+    user = USER_PROFILES.get(username)
+    if not user:
+        flash(t("Usuario no encontrado.",
+                "User not found.",
+                "未找到使用者。"))
+        return redirect(request.referrer or url_for("dashboard"))
+
+    item = {
+        "empresa": user.get("empresa"),
+        "rol": user.get("rol"),
+        "tipo": tipo,
+        "username": username,
+        "descripcion": user.get("descripcion", ""),
     }
-    clean = {k: v for k, v in payload.items() if v}
-    if clean:
-        add_to_cart(clean)
-        flash(t("Agregado al carrito 🛒", "Added to cart 🛒"))
-    else:
-        flash(t("No se pudo agregar el ítem.", "Item could not be added."))
-    return redirect(request.referrer or url_for("carrito"))
 
+    add_to_cart(item)
+    flash(t("Agregado al carrito ✅",
+            "Added to cart ✅",
+            "已加入購物車 ✅"))
+    return redirect(request.referrer or url_for("dashboard"))
+
+
+@app.route("/cart/remove/<int:index>", methods=["POST"])
+def cart_remove(index):
+    """
+    Elimina un ítem del carrito.
+    """
+    if remove_from_cart(index):
+        flash(t("Ítem eliminado", "Item removed", "已刪除"))
+    else:
+        flash(t("Error al eliminar el ítem.",
+                "Error removing item.",
+                "刪除項目時出錯。"))
+    return redirect(url_for("carrito"))
+
+
+@app.route("/cart/clear", methods=["POST"])
+def cart_clear():
+    """
+    Vacía completamente el carrito.
+    """
+    clear_cart()
+    flash(t("Carrito vaciado", "Cart cleared", "購物車已清空"))
+    return redirect(url_for("carrito"))
+
+
+@app.route("/checkout", methods=["POST"])
+def checkout():
+    """
+    Simula el proceso de checkout / solicitud de compra.
+    """
+    items = get_cart()
+    if not items:
+        flash(t("Tu carrito está vacío.",
+                "Your cart is empty.",
+                "購物車是空的"))
+        return redirect(url_for("carrito"))
+
+    clear_cart()
+    flash(t("Hemos recibido tu solicitud. Te contactaremos pronto ✅",
+            "We've received your request. We'll contact you soon ✅",
+            "我們已收到您的請求，稍後聯繫您 ✅"))
+    return redirect(url_for("dashboard"))
 
 # =========================================================
 # CENTRO DE AYUDA
