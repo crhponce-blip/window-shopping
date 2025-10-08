@@ -1,27 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="register-container">
-    <div class="auth-box">
-        <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-login">
-        <h2>{{ t("Registro de Usuario", "User Registration", "用戶註冊") }}</h2>
-        <p>{{ t("Selecciona tu tipo de usuario y continúa", "Select your user type and continue", "選擇您的用戶類型") }}</p>
 
-        <form action="{{ url_for('register') }}" method="GET">
-            <label>{{ t("Nacionalidad", "Nationality", "國籍") }}</label>
-            <select name="nac" required>
-                <option value="nacional">{{ t("Nacional", "National", "本國") }}</option>
-                <option value="extranjero">{{ t("Extranjero", "Foreign", "外國") }}</option>
-            </select>
+<div class="router-container">
+  <h2 style="text-align:center; margin-top:30px;">Selecciona tu tipo de registro</h2>
+  <p style="text-align:center;">Antes de continuar, elige si eres usuario nacional o extranjero.</p>
 
-            <label>{{ t("Tipo de Perfil", "Profile Type", "帳戶類型") }}</label>
-            <select name="tipo" required>
-                <option value="compra_venta">{{ t("Compra / Venta", "Buy / Sell", "買賣") }}</option>
-                <option value="servicios">{{ t("Servicios", "Services", "服務") }}</option>
-                <option value="ambos">{{ t("Ambos (Packing / Frigorífico)", "Both (Packing / Cold Storage)", "兩者") }}</option>
-            </select>
-
-            <button type="submit">{{ t("Continuar", "Continue", "繼續") }}</button>
-        </form>
+  <div class="router-options" style="display:flex; justify-content:center; gap:40px; margin-top:50px; flex-wrap:wrap;">
+    <!-- Opción Nacional -->
+    <div class="router-card" style="border:1px solid #ccc; border-radius:10px; padding:30px; width:260px; text-align:center; background:#f9f9f9;">
+      <h3>Usuario Nacional 🇨🇱</h3>
+      <p style="font-size:14px;">Empresas o personas dentro de Chile (Productor, Planta, Packing, Frigorífico, Exportador, etc.)</p>
+      <a href="{{ url_for('register', nac='nacional', tipo='compra_venta') }}" class="btn btn-primary" style="margin-top:15px; display:inline-block;">Registrarme</a>
     </div>
+
+    <!-- Opción Extranjero -->
+    <div class="router-card" style="border:1px solid #ccc; border-radius:10px; padding:30px; width:260px; text-align:center; background:#f9f9f9;">
+      <h3>Usuario Extranjero 🌎</h3>
+      <p style="font-size:14px;">Importadores o compradores internacionales (clientes fuera de Chile).</p>
+      <a href="{{ url_for('register', nac='extranjero', tipo='compra_venta') }}" class="btn btn-primary" style="margin-top:15px; display:inline-block;">Registrarme</a>
+    </div>
+
+    <!-- Opción Servicios -->
+    <div class="router-card" style="border:1px solid #ccc; border-radius:10px; padding:30px; width:260px; text-align:center; background:#f9f9f9;">
+      <h3>Proveedor de Servicios ⚙️</h3>
+      <p style="font-size:14px;">Empresas que ofrecen servicios como transporte, packing, frigorífico, extraportuario o aduanas.</p>
+      <a href="{{ url_for('register', nac='nacional', tipo='servicios') }}" class="btn btn-primary" style="margin-top:15px; display:inline-block;">Registrarme</a>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:60px;">
+    <a href="{{ url_for('home') }}" class="btn btn-secondary">Volver al inicio</a>
+  </div>
 </div>
+
 {% endblock %}
