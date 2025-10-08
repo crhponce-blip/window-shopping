@@ -767,6 +767,32 @@ def perfil():
     return render_template("perfil.html", perfil=ViewObj(prof), mensaje=mensaje)
 
 # =========================================================
+# ENVÍO DE MENSAJES (desde perfil público de otra empresa)
+# =========================================================
+@app.route("/enviar_mensaje", methods=["POST"])
+def enviar_mensaje():
+    if "user" not in session:
+        flash("Debes iniciar sesión para enviar mensajes.")
+        return redirect(url_for("login"))
+
+    remitente = session.get("user")  # correo del usuario logueado
+    mensaje = request.form.get("mensaje", "").strip()
+    destinatario_id = request.args.get("id")
+
+    if not mensaje:
+        flash("El mensaje no puede estar vacío.")
+        return redirect(url_for("perfil"))
+
+    try:
+        enviar_mensaje_db(remitente, destinatario_id, mensaje)
+        flash("Mensaje enviado correctamente.")
+    except Exception as e:
+        print("⚠️ Error al enviar mensaje:", e)
+        flash("No se pudo enviar el mensaje. Intenta nuevamente.")
+
+    return redirect(url_for("perfil"))
+
+# =========================================================
 # CARRITO DE COMPRAS  ✅ (reemplazo/actualizado)
 # =========================================================
 from datetime import datetime  # import local permitido
