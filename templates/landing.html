@@ -1,14 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="landing-container">
-    <div class="logo-center">
-        <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-main">
-        <h1>Window Shopping</h1>
-        <p>{{ t("Conectando exportadores y compradores del mundo", "Connecting exporters and global buyers", "連接全球出口商與買家") }}</p>
-        <div class="landing-buttons">
-            <a href="{{ url_for('login') }}" class="btn-primary">{{ t("Iniciar Sesión", "Login", "登入") }}</a>
-            <a href="{{ url_for('register_router') }}" class="btn-secondary">{{ t("Registrarse", "Register", "註冊") }}</a>
-        </div>
+  <div class="logo-center">
+    <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-main">
+    <h1 style="font-size:2.3em; color:#e6f3ff; text-shadow:0 0 12px rgba(0,191,255,0.4);">
+      Window Shopping
+    </h1>
+    <p style="font-size:1.1em; margin-top:10px; color:#cfe8ff;">
+      {{ t("Conectando exportadores y compradores del mundo",
+            "Connecting exporters and global buyers",
+            "連接全球出口商與買家") }}
+    </p>
+
+    <div class="landing-buttons">
+      <a href="{{ url_for('login') }}" class="btn-primary">
+        {{ t("Iniciar Sesión", "Login", "登入") }}
+      </a>
+      <a href="{{ url_for('register') }}" class="btn-secondary">
+        {{ t("Registrarse", "Register", "註冊") }}
+      </a>
     </div>
+  </div>
 </div>
 {% endblock %}
