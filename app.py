@@ -973,3 +973,48 @@ def enviar_mensaje():
                            destinatario=destinatario,
                            mensaje=mensaje,
                            fecha=ahora.strftime("%d/%m/%Y %H:%M"))
+# =========================================================
+# RUTA: Centro de Ayuda (multilenguaje)
+# =========================================================
+@app.route("/ayuda")
+def ayuda():
+    temas = [
+        {
+            "titulo": t("Registro de usuario", "User Registration", "用戶註冊"),
+            "detalle": t(
+                "Aprende a crear tu cuenta como exportador o comprador internacional en pocos pasos.",
+                "Learn how to create your account as an exporter or international buyer in just a few steps.",
+                "了解如何在幾個步驟內創建出口商或國際買家帳戶。"
+            ),
+        },
+        {
+            "titulo": t("Gestión de productos y servicios", "Product and Service Management", "產品與服務管理"),
+            "detalle": t(
+                "Sube tus productos, publica tus servicios y edita tus ofertas directamente desde tu panel.",
+                "Upload your products, post your services, and edit your offers directly from your dashboard.",
+                "直接從儀表板上傳產品、發布服務並編輯報價。"
+            ),
+        },
+        {
+            "titulo": t("Compras y cotizaciones", "Purchases and Quotations", "購買與報價"),
+            "detalle": t(
+                "Los compradores pueden contactar a exportadores o proveedores de servicios mediante el botón 'Contactar'.",
+                "Buyers can contact exporters or service providers through the 'Contact' button.",
+                "買家可以通過「聯絡」按鈕聯繫出口商或服務供應商。"
+            ),
+        },
+        {
+            "titulo": t("Seguridad y soporte", "Security and Support", "安全與支援"),
+            "detalle": t(
+                "WS garantiza la confidencialidad de tus datos y ofrece soporte personalizado.",
+                "WS ensures data confidentiality and provides personalized support.",
+                "WS 確保您的數據保密並提供個性化支援。"
+            ),
+        },
+    ]
+
+    return render_template(
+        "ayuda.html",
+        temas=temas,
+        title=t("Centro de Ayuda", "Help Center", "幫助中心")
+    )
