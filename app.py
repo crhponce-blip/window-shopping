@@ -385,14 +385,15 @@ def password_reset_request():
           <input name="email" placeholder="Email"/><button>Enviar</button>
         </form>
         """, 200
-
 @app.route("/password_reset/reset", methods=["GET", "POST"])
 def password_reset_form():
     msg = None
     email = session.get("pwd_reset_user")
+
     if not email:
         flash(t("Primero solicita el enlace de restablecimiento.", "Request a reset link first.", "請先申請重設連結"))
         return redirect(url_for("password_reset_request"))
+
     if request.method == "POST":
         p1 = request.form.get("p1", "")
         p2 = request.form.get("p2", "")
@@ -403,7 +404,8 @@ def password_reset_form():
             flash(t("Contraseña actualizada.", "Password updated.", "已更新密碼"))
             session.pop("pwd_reset_user", None)
             return redirect(url_for("login"))
-   try:
+
+    try:
         return render_template("password_reset_form.html", msg=msg)
     except TemplateNotFound:
         # Fallback simple por si aún no subes el template
