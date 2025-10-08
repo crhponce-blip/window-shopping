@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<div>
+<div class="perfil-container" style="margin-top:30px;">
   <h2>{{ comp.nombre }}</h2>
   <p><b>RUT:</b> {{ comp.rut or '-' }}</p>
   <p><b>País:</b> {{ comp.pais }}</p>
@@ -32,5 +32,7 @@
   {% else %}
   <p>Esta empresa aún no ha publicado ítems.</p>
   {% endif %}
+
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary" style="margin-top:20px;">Volver</a>
 </div>
 {% endblock %}
