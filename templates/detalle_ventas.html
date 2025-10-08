@@ -1,59 +1,39 @@
 {% extends "base.html" %}
-{% block title %}{{ t("Empresas que buscan productos o servicios", "Companies requesting products or services", "尋找產品或服務的公司") }}{% endblock %}
-
+{% block title %}{{ t("Empresas que buscan productos o servicios","Companies requesting products or services","尋找產品或服務的公司") }}{% endblock %}
 {% block content %}
-<div class="detalle-container">
-  <div class="detalle-card">
-    <div class="detalle-header">
-      <h2>{{ t("Empresas que buscan productos o servicios", "Companies requesting products or services", "尋找產品或服務的公司") }}</h2>
-      <p class="sub-text">{{ t("Selecciona las solicitudes que deseas atender", "Select the requests you want to attend", "選擇您想響應的請求") }}</p>
-    </div>
+<div class="detalle-container" style="max-width:980px;margin:26px auto">
+  <h2>{{ t("Empresas que buscan productos o servicios","Companies requesting products or services","尋找產品或服務的公司") }}</h2>
+  <form method="GET" style="display:flex;gap:8px;margin:10px 0">
+    <input type="text" name="q" placeholder="{{ t('Buscar empresa o producto...','Search company or product...','搜尋公司或產品...') }}" value="{{ query }}">
+    <button class="btn btn-secondary">{{ t("Buscar","Search","搜尋") }}</button>
+  </form>
 
-    <form method="GET" class="search-form">
-      <input type="text" name="q" placeholder="{{ t('Buscar empresa o producto...', 'Search company or product...', '搜尋公司或產品...') }}" value="{{ query }}">
-      <button type="submit" class="btn btn-primary">{{ t("Buscar", "Search", "搜尋") }}</button>
-    </form>
-
-    <form method="POST" action="{{ url_for('cart_add') }}">
-      <ul class="detalle-lista">
-        {% if data %}
-          {% for c in data %}
-            {% if c.items %}
-              {% for item in c.items %}
-                <li class="detalle-item">
-                  <div class="item-info">
-                    <h3>{{ c.empresa }}</h3>
-                    {% if item.producto %}
-                      <p><strong>{{ t("Producto:", "Product:", "產品：") }}</strong> {{ item.producto }}</p>
-                      {% if item.variedad %}<p><strong>{{ t("Variedad:", "Variety:", "品種：") }}</strong> {{ item.variedad }}</p>{% endif %}
-                      {% if item.cantidad %}<p><strong>{{ t("Cantidad:", "Quantity:", "數量：") }}</strong> {{ item.cantidad }}</p>{% endif %}
-                      {% if item.origen %}<p><strong>{{ t("Origen:", "Origin:", "來源：") }}</strong> {{ item.origen }}</p>{% endif %}
-                      {% if item.precio_caja %}
-                        <p><strong>{{ t("Precio/Caja:", "Price/Box:", "每箱價格：") }}</strong> ${{ item.precio_caja }}</p>
-                      {% endif %}
-                    {% elif item.servicio %}
-                      <p><strong>{{ t("Servicio:", "Service:", "服務：") }}</strong> {{ item.servicio }}</p>
-                    {% endif %}
-                  </div>
-
-                  <div class="item-actions">
-                    <input type="hidden" name="item" value='{{ item | tojson }}'>
-                    <button type="submit" class="btn btn-success">{{ t("Agregar al carrito 🛒", "Add to cart 🛒", "加入購物車 🛒") }}</button>
-                    <a href="{{ url_for('perfil', id=c.id) }}" class="btn btn-secondary">{{ t("Ver perfil", "View profile", "查看資料") }}</a>
-                  </div>
-                </li>
-              {% endfor %}
-            {% endif %}
-          {% endfor %}
-        {% else %}
-          <li class="no-results">{{ t("No hay solicitudes disponibles actualmente.", "No requests available at the moment.", "目前沒有可用請求。") }}</li>
+  <ul style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;list-style:none;padding:0">
+    {% for c in data %}
+      {% for item in c.items %}
+      <li style="background:rgba(255,255,255,.08);padding:14px;border-radius:10px;">
+        <h3 style="margin:0 0 6px">{{ c.empresa }}</h3>
+        {% if item.producto %}
+          <p><b>{{ t("Producto:","Product:","產品：") }}</b> {{ item.producto }}</p>
+          {% if item.variedad %}<p><b>{{ t("Variedad:","Variety:","品種：") }}</b> {{ item.variedad }}</p>{% endif %}
+          {% if item.cantidad %}<p><b>{{ t("Cantidad:","Quantity:","數量：") }}</b> {{ item.cantidad }}</p>{% endif %}
+          {% if item.origen %}<p><b>{{ t("Origen:","Origin:","來源：") }}</b> {{ item.origen }}</p>{% endif %}
+        {% elif item.servicio %}
+          <p><b>{{ t("Servicio:","Service:","服務：") }}</b> {{ item.servicio }}</p>
         {% endif %}
-      </ul>
-    </form>
-
-    <div class="detalle-footer">
-      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">{{ t("Volver al panel", "Back to Dashboard", "返回控制台") }}</a>
-    </div>
-  </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <form method="post" action="{{ url_for('cart_add') }}">
+            <input type="hidden" name="username" value="{{ c.username }}">
+            <input type="hidden" name="tipo" value="ventas">
+            <button class="btn btn-success">{{ t("Agregar al carrito 🛒","Add to cart 🛒","加入購物車 🛒") }}</button>
+          </form>
+          <a class="btn btn-secondary" href="{{ url_for('cliente_detalle', username=c.username) }}">{{ t("Ver perfil","View profile","查看資料") }}</a>
+        </div>
+      </li>
+      {% endfor %}
+    {% else %}
+      <li>{{ t("No hay solicitudes disponibles actualmente.","No requests available at the moment.","目前沒有可用請求。") }}</li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}
