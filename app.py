@@ -417,73 +417,73 @@ def password_reset_form():
         """, 200
 
 # ---------------------------------------------------------
-# REGISTRO DE USUARIOS
+# REGISTRO DE USUARIOS (validación por nacionalidad, tipo y rol)
 # ---------------------------------------------------------
-@app.route("/register_router")
-def register_router():
-    """Pantalla inicial de registro (elige nacionalidad y tipo)."""
-    return render_template("register_router.html")
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Formulario principal de registro (dinámico nacional/extranjero)."""
     error = None
     nacionalidad = request.args.get("nac")
     perfil_tipo = request.args.get("tipo")
 
-    NACIONALIDAD_OPCIONES = ["nacional", "extranjero"]
-    # Agregamos "ambos" (solo válido para Packing y Frigorífico)
-    PERFIL_OPCIONES = ["compra_venta", "servicios", "ambos"]
-    ROLES_COMPRA_VENTA = ["Productor", "Planta", "Packing", "Frigorífico", "Exportador", "Cliente extranjero"]
-    ROLES_SERVICIOS = ["Packing", "Frigorífico", "Transporte", "Agencia de Aduanas", "Extraportuario"]
+    # --- Definición de roles según tu lógica ---
+    ROLES_COMPRA_VENTA = ["Productor", "Planta", "Packing", "Frigorífico", "Exportador"]
+    ROLES_SERVICIOS = ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"]
+    ROLES_AMBOS = ["Packing", "Frigorífico"]
 
     if request.method == "POST":
-        nacionalidad = request.form.get("nacionalidad") or nacionalidad or "nacional"
-        perfil_tipo = request.form.get("perfil_tipo") or perfil_tipo or "compra_venta"
+        nacionalidad = request.form.get("nacionalidad") or "nacional"
+        perfil_tipo = request.form.get("perfil_tipo") or "compra_venta"
 
-        # Forzar cliente extranjero si aplica
-        if nacionalidad == "extranjero":
-            perfil_tipo = "compra_venta"  # extranjeros no pueden servicios/ambos
-        username = (request.form.get("username", "") or "").strip().lower()
-        password = (request.form.get("password", "") or "").strip()
-        email = (request.form.get("email", "") or "").strip()
-        telefono = (request.form.get("phone", "") or "").strip()
-        direccion = (request.form.get("address", "") or "").strip()
-        pais = (request.form.get("pais", "") or "").strip()
-        rol = (request.form.get("rol", "") or "").strip()
+        username = (request.form.get("username") or "").strip().lower()
+        password = (request.form.get("password") or "").strip()
+        empresa = (request.form.get("empresa") or "").strip()
+        telefono = (request.form.get("phone") or "").strip()
+        direccion = (request.form.get("address") or "").strip()
+        pais = (request.form.get("pais") or "").strip()
+        rol = (request.form.get("rol") or "").strip()
 
-        # Si selecciona "ambos" validar que el rol lo soporte
-        if perfil_tipo == "ambos" and rol not in ("Packing", "Frigorífico"):
-            # Si no lo soporta, lo degradamos a su tipo más lógico:
-            perfil_tipo = "compra_venta" if rol in ("Productor", "Planta", "Exportador", "Cliente extranjero") else "servicios"
-
-        # Documentos: Nacional vs Extranjero
-        rut = (request.form.get("rut", "") or "").strip() if nacionalidad == "nacional" else None
-        # Para extranjero: priorizamos EORI y Otros (puedes ignorar USCI/TaxID si quieres)
-        eori = (request.form.get("eori", "") or "").strip() if nacionalidad == "extranjero" else None
-        otros_id = (request.form.get("otros_id", "") or "").strip() if nacionalidad == "extranjero" else None
-
-        # Archivo RUT
-        rut_file_path = None
-        if nacionalidad == "nacional" and "rut_file" in request.files:
-            f = request.files["rut_file"]
-            if f and f.filename and allowed_file(f.filename):
-                fname = f"{uuid.uuid4().hex}_{secure_filename(f.filename)}"
-                f.save(os.path.join(UPLOAD_FOLDER, fname))
-                rut_file_path = f"uploads/{fname}"
-
-        # País por defecto
-        if not pais:
-            pais = "CL" if nacionalidad == "nacional" else "US"
-
+        # --- Validación de campos obligatorios ---
         if not username or not password:
             error = t("Completa los campos obligatorios.", "Please fill required fields.")
         elif username in USERS:
             error = t("El usuario ya existe.", "User already exists.")
         else:
+            # --- Asignar rol automáticamente para extranjeros ---
             if nacionalidad == "extranjero":
                 rol = "Cliente extranjero"
+                perfil_tipo = "compra_venta"
 
+            # --- Validación de roles por tipo ---
+            elif nacionalidad == "nacional":
+                if perfil_tipo == "compra_venta" and rol not in ROLES_COMPRA_VENTA:
+                    error = t("Rol inválido para perfil de compra/venta.",
+                              "Invalid role for buy/sell profile.")
+                elif perfil_tipo == "servicios" and rol not in ROLES_SERVICIOS:
+                    error = t("Rol inválido para perfil de servicios.",
+                              "Invalid role for services profile.")
+                elif perfil_tipo == "ambos" and rol not in ROLES_AMBOS:
+                    error = t("Solo Packing o Frigorífico pueden registrar ambos perfiles.",
+                        "Only Packing or Cold Storage can register as both.")
+
+        # --- Si no hay error, proceder a registrar ---
+        if not error:
+            # Guardar archivo RUT si corresponde
+            rut_file_path = None
+            if nacionalidad == "nacional" and "rut_file" in request.files:
+                f = request.files["rut_file"]
+                if f and f.filename and allowed_file(f.filename):
+                    fname = f"{uuid.uuid4().hex}_{secure_filename(f.filename)}"
+                    f.save(os.path.join(UPLOAD_FOLDER, fname))
+                    rut_file_path = f"uploads/{fname}"
+
+            rut = (request.form.get("rut") or "").strip() if nacionalidad == "nacional" else None
+            eori = (request.form.get("eori") or "").strip() if nacionalidad == "extranjero" else None
+            otros_id = (request.form.get("otros_id") or "").strip() if nacionalidad == "extranjero" else None
+
+            if not pais:
+                pais = "CL" if nacionalidad == "nacional" else "US"
+
+            # --- Crear usuario y perfil ---
             USERS[username] = {
                 "password": password,
                 "rol": rol,
@@ -491,18 +491,19 @@ def register():
                 "pais": pais,
             }
             USER_PROFILES[username] = {
-                "empresa": username.split("@")[0].replace(".", " ").title(),
+                "empresa": empresa or username.split("@")[0].replace(".", " ").title(),
                 "rut": rut,
                 "rut_file": rut_file_path,
                 "rol": rol,
                 "perfil_tipo": perfil_tipo,
                 "pais": pais,
-                "email": email or username,
-                "telefono": telefono or "",
-                "direccion": direccion or "",
+                "email": username,
+                "telefono": telefono,
+                "direccion": direccion,
                 "descripcion": "Nuevo perfil registrado.",
                 "items": [],
-                "eori": eori, "otros_id": otros_id
+                "eori": eori,
+                "otros_id": otros_id,
             }
 
             session["user"] = username
@@ -514,11 +515,8 @@ def register():
         error=error,
         nacionalidad=nacionalidad,
         perfil_tipo=perfil_tipo,
-        nacionalidad_opciones=NACIONALIDAD_OPCIONES,
-        perfil_opciones=PERFIL_OPCIONES,
-        roles_cv=[r for r in ROLES_COMPRA_VENTA if r != "Cliente extranjero"],
-        roles_srv=ROLES_SERVICIOS,
-        roles_all_cv=ROLES_COMPRA_VENTA,
+        roles_all_cv=["Productor", "Planta", "Packing", "Frigorífico", "Exportador", "Cliente extranjero"],
+        roles_srv=["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"],
     )
 
 # =========================================================
