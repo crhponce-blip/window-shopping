@@ -767,30 +767,67 @@ def perfil():
     return render_template("perfil.html", perfil=ViewObj(prof), mensaje=mensaje)
 
 # =========================================================
-# ENVÍO DE MENSAJES (desde perfil público de otra empresa)
+# PERFIL PÚBLICO (ver perfil de otra empresa)
 # =========================================================
-@app.route("/enviar_mensaje", methods=["POST"])
-def enviar_mensaje():
-    if "user" not in session:
-        flash("Debes iniciar sesión para enviar mensajes.")
+@app.route("/perfil_publico/<id>")
+def perfil_publico(id):
+    if not is_logged():
         return redirect(url_for("login"))
 
-    remitente = session.get("user")  # correo del usuario logueado
-    mensaje = request.form.get("mensaje", "").strip()
-    destinatario_id = request.args.get("id")
+    # Busca el perfil por ID (email)
+    prof = USER_PROFILES.get(id)
+    if not prof:
+        abort(404)
 
-    if not mensaje:
-        flash("El mensaje no puede estar vacío.")
-        return redirect(url_for("perfil"))
+    # Control de enfriamiento de mensajes (3 días)
+    puede_enviar, _ = _can_message(id)
 
-    try:
-        enviar_mensaje_db(remitente, destinatario_id, mensaje)
-        flash("Mensaje enviado correctamente.")
-    except Exception as e:
-        print("⚠️ Error al enviar mensaje:", e)
-        flash("No se pudo enviar el mensaje. Intenta nuevamente.")
+    return render_template(
+        "perfil.html",  # o un template público separado si prefieres
+        perfil=ViewObj(prof),
+        mensaje_enviado=False,
+        cooldown_activo=not puede_enviar
+    )
 
-    return redirect(url_for("perfil"))
+# =========================================================
+# ENVÍO DE MENSAJES (actualizado, redirige a mensaje_enviado.html)
+# =========================================================
+@app.route("/enviar_mensaje/<id>", methods=["POST"])
+def enviar_mensaje(id):
+    if not is_logged():
+        return redirect(url_for("login"))
+
+    destinatario = USER_PROFILES.get(id)
+    if not destinatario:
+        abort(404)
+
+    remitente = session.get("user")
+    contenido = (request.form.get("mensaje") or "").strip()
+
+    if not contenido:
+        flash(t("El mensaje no puede estar vacío.", "Message cannot be empty.", "訊息不能為空"))
+        return redirect(request.referrer or url_for("home"))
+
+    # Enfriamiento: 3 días entre mensajes
+    puede, _ = _can_message(id)
+    if not puede:
+        flash(t("Solo puedes enviar un mensaje cada 3 días ⏳",
+                 "You can only send one message every 3 days ⏳",
+                 "您每3天只能發送一次訊息 ⏳"))
+        return redirect(request.referrer or url_for("home"))
+
+    # Guarda el timestamp de envío en la sesión
+    hist = _msg_history()
+    hist[id] = datetime.utcnow().isoformat()
+    session["msg_history"] = hist
+
+    # Renderiza confirmación visual
+    return render_template(
+        "mensaje_enviado.html",
+        destinatario=destinatario.get("empresa", id),
+        mensaje=contenido,
+        fecha=datetime.now().strftime("%d/%m/%Y %H:%M")
+    )
 
 # =========================================================
 # CARRITO DE COMPRAS  ✅ (reemplazo/actualizado)
@@ -1038,45 +1075,7 @@ def cliente_mensaje(username):
         f"Your message to {prof.get('empresa', username)} was sent."
     ))
     return redirect(url_for("cliente_detalle", username=username))
-# =========================================================
-# RUTA: Enviar mensaje desde un perfil (limitado a 1 cada 3 días)
-# =========================================================
-from datetime import datetime, timedelta
 
-ULTIMO_ENVIO = {}
-
-@app.route("/enviar_mensaje", methods=["POST"])
-def enviar_mensaje():
-    if not is_logged():
-        return redirect(url_for("login"))
-
-    remitente = current_user_email()
-    destinatario = (request.form.get("destinatario") or "").strip()
-    mensaje = (request.form.get("mensaje") or "").strip()
-
-    if not destinatario or not mensaje:
-        flash(t("El mensaje está incompleto. Intenta nuevamente.",
-                "The message is incomplete. Please try again.",
-                "訊息不完整，請再試一次。"))
-        return redirect(request.referrer or url_for("home"))
-
-    ahora = datetime.now()
-    limite = ULTIMO_ENVIO.get(remitente)
-
-    if limite and (ahora - limite).days < 3:
-        dias_restantes = 3 - (ahora - limite).days
-        flash(t(f"Ya enviaste un mensaje recientemente. Podrás enviar otro en {dias_restantes} día(s).",
-                f"You already sent a message recently. You can send another in {dias_restantes} day(s).",
-                f"您最近已發送過訊息。您可以在 {dias_restantes} 天後再次發送。"))
-        return redirect(request.referrer or url_for("home"))
-
-    # Registrar nuevo envío
-    ULTIMO_ENVIO[remitente] = ahora
-
-    return render_template("mensaje_enviado.html",
-                           destinatario=destinatario,
-                           mensaje=mensaje,
-                           fecha=ahora.strftime("%d/%m/%Y %H:%M"))
 # =========================================================
 # RUTA: Centro de Ayuda (multilenguaje)
 # =========================================================
