@@ -846,14 +846,15 @@ def cart_bulk_add():
                 "Nothing selected to add."))
     return redirect(request.referrer or url_for("carrito"))
 
-
 # =========================================================
 # ELIMINAR DE VISTA (ocultar tarjetas seleccionadas)
-# - En el template de detalles, postear a /hide_from_view con:
-#   name="hide_keys" value="usuario::clave"  (puedes usar cualquier string estable)
 # =========================================================
 @app.route("/hide_from_view", methods=["POST"])
 def hide_from_view():
+    """
+    Permite ocultar elementos temporalmente de la vista (detalle o lista),
+    guardando sus claves en la sesión. Evita duplicados de endpoint.
+    """
     keys = request.form.getlist("hide_keys") or request.form.getlist("selected_keys")
     if not keys:
         # fallback: si venían JSON, intentar extraer "key"
@@ -868,16 +869,17 @@ def hide_from_view():
 
     if not keys:
         flash(t("No se seleccionó nada para ocultar.",
-                "Nothing selected to hide."))
+                "Nothing selected to hide.",
+                "未選擇要隱藏的項目"))
         return redirect(request.referrer or url_for("home"))
 
     hidden = set(_hidden_keys())
     hidden.update(keys)
     _save_hidden(list(hidden))
     flash(t("Elementos ocultados en esta vista.",
-            "Items hidden from this view."))
+            "Items hidden from this view.",
+            "已隱藏這些項目"))
     return redirect(request.referrer or url_for("home"))
-
 
 @app.route("/unhide_all", methods=["POST"])
 def unhide_all():
@@ -885,7 +887,6 @@ def unhide_all():
     flash(t("Se restauraron todos los elementos ocultos.",
             "All hidden items were restored."))
     return redirect(request.referrer or url_for("home"))
-
 
 # =========================================================
 # PERFIL PÚBLICO Y MENSAJERÍA CON ENFRIAMIENTO (3 días)
