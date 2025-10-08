@@ -1,74 +1,89 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="register-container">
-    <div class="auth-box">
-        <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-login">
-        <h2>{{ t("Completa tu registro", "Complete your registration", "完成註冊") }}</h2>
+  <div class="auth-box">
+    <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" class="logo-login">
+    <h2>{{ t("Completa tu registro", "Complete your registration", "完成註冊") }}</h2>
 
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
 
-        <form method="POST" enctype="multipart/form-data">
-            <label>{{ t("Email (Usuario)", "Email (Username)", "電子郵件") }}</label>
-            <input type="email" name="username" required>
+    {% if perfil_tipo == "ambos" %}
+      <div style="background:#e8f4ff; border-left:4px solid #007bff; padding:15px; margin-bottom:20px; text-align:left;">
+        <strong>Registro Mixto (Ambos)</strong><br>
+        Solo pueden registrarse <b>Packing</b> y <b>Frigoríficos</b>.
+        Este tipo de cuenta permite operar tanto en <b>compraventa</b> de frutas
+        como en <b>prestación de servicios</b>.
+      </div>
+    {% endif %}
 
-            <label>{{ t("Contraseña", "Password", "密碼") }}</label>
-            <input type="password" name="password" required>
+    <form method="POST" enctype="multipart/form-data">
+      <label>{{ t("Email (Usuario)", "Email (Username)", "電子郵件") }}</label>
+      <input type="email" name="username" required placeholder="correo@empresa.cl">
 
-            <label>{{ t("Nombre de Empresa", "Company Name", "公司名稱") }}</label>
-            <input type="text" name="empresa" placeholder="Ej: Frutas Chile Ltda.">
+      <label>{{ t("Contraseña", "Password", "密碼") }}</label>
+      <input type="password" name="password" required placeholder="•••••••">
 
-            <label>{{ t("Teléfono", "Phone", "電話") }}</label>
-            <input type="text" name="phone" placeholder="+56 9 ...">
+      <label>{{ t("Nombre de Empresa", "Company Name", "公司名稱") }}</label>
+      <input type="text" name="empresa" placeholder="Ej: Frutas Chile Ltda.">
 
-            <label>{{ t("Dirección", "Address", "地址") }}</label>
-            <input type="text" name="address" placeholder="Ej: Santiago, Chile">
+      <label>{{ t("Teléfono", "Phone", "電話") }}</label>
+      <input type="text" name="phone" placeholder="+56 9 1234 5678">
 
-            {% if nacionalidad == "nacional" %}
-                <label>RUT</label>
-                <input type="text" name="rut" placeholder="76.123.456-7">
+      <label>{{ t("Dirección", "Address", "地址") }}</label>
+      <input type="text" name="address" placeholder="Ej: Santiago, Chile">
 
-                <label>{{ t("Adjuntar RUT (PDF/JPG)", "Attach RUT (PDF/JPG)", "上傳RUT文件") }}</label>
-                <input type="file" name="rut_file" accept=".pdf,.jpg,.jpeg,.png">
-            {% else %}
-                <label>EORI</label>
-                <input type="text" name="eori" placeholder="Ej: EU123456789000">
+      {% if nacionalidad == "nacional" %}
+        <label>RUT</label>
+        <input type="text" name="rut" placeholder="76.123.456-7">
 
-                <label>{{ t("Otros ID (Opcional)", "Other ID (Optional)", "其他識別碼") }}</label>
-                <input type="text" name="otros_id" placeholder="Ej: Registro aduanero local">
-            {% endif %}
+        <label>{{ t("Adjuntar RUT (PDF/JPG)", "Attach RUT (PDF/JPG)", "上傳RUT文件") }}</label>
+        <input type="file" name="rut_file" accept=".pdf,.jpg,.jpeg,.png">
+      {% else %}
+        <label>EORI</label>
+        <input type="text" name="eori" placeholder="Ej: EU123456789000">
 
-            {% if nacionalidad == "extranjero" %}
-                <label>{{ t("Rol", "Role", "角色") }}</label>
-                <input type="text" name="rol" value="Cliente Extranjero" readonly style="background:#eaeaea; color:#555;">
-            {% else %}
-                <label>{{ t("Rol", "Role", "角色") }}</label>
-                <select name="rol" required style="color:black">
-                    {% if perfil_tipo == "compra_venta" %}
-                        {% for r in ["Productor","Planta","Packing","Frigorífico","Exportador"] %}
-                            <option value="{{ r }}">{{ r }}</option>
-                        {% endfor %}
-                    {% elif perfil_tipo == "servicios" %}
-                        {% for r in ["Packing","Frigorífico","Transporte","Extraportuario","Agencia de Aduanas"] %}
-                            <option value="{{ r }}">{{ r }}</option>
-                        {% endfor %}
-                    {% elif perfil_tipo == "ambos" %}
-                        {% for r in ["Packing","Frigorífico"] %}
-                            <option value="{{ r }}">{{ r }}</option>
-                        {% endfor %}
-                    {% endif %}
-                </select>
-            {% endif %}
+        <label>{{ t("Otros ID (Opcional)", "Other ID (Optional)", "其他識別碼") }}</label>
+        <input type="text" name="otros_id" placeholder="Ej: Registro aduanero local">
+      {% endif %}
 
-            <label>{{ t("País", "Country", "國家") }}</label>
-            <input type="text" name="pais" placeholder="Ej: Chile o China">
+      {% if nacionalidad == "extranjero" %}
+        <label>{{ t("Rol", "Role", "角色") }}</label>
+        <input type="text" name="rol" value="Cliente Extranjero" readonly style="background:#eaeaea; color:#555;">
+      {% else %}
+        <label>{{ t("Rol", "Role", "角色") }}</label>
+        <select name="rol" required style="color:black">
+          <option value="">-- Selecciona tu rol --</option>
+          {% if perfil_tipo == "compra_venta" %}
+            {% for r in ["Productor","Planta","Packing","Frigorífico","Exportador"] %}
+              <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
+          {% elif perfil_tipo == "servicios" %}
+            {% for r in ["Packing","Frigorífico","Transporte","Extraportuario","Agencia de Aduanas"] %}
+              <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
+          {% elif perfil_tipo == "ambos" %}
+            {% for r in ["Packing","Frigorífico"] %}
+              <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      {% endif %}
 
-            <input type="hidden" name="nacionalidad" value="{{ nacionalidad }}">
-            <input type="hidden" name="perfil_tipo" value="{{ perfil_tipo }}">
+      <label>{{ t("País", "Country", "國家") }}</label>
+      <input type="text" name="pais" value="{{ 'Chile' if nacionalidad == 'nacional' else '' }}" placeholder="Ej: Chile o China">
 
-            <button type="submit">{{ t("Registrar", "Register", "註冊") }}</button>
-        </form>
-    </div>
+      <input type="hidden" name="nacionalidad" value="{{ nacionalidad }}">
+      <input type="hidden" name="perfil_tipo" value="{{ perfil_tipo }}">
+
+      <button type="submit" style="margin-top:20px;">{{ t("Registrar", "Register", "註冊") }}</button>
+      <div style="margin-top:10px;">
+        <a href="{{ url_for('register_router') }}" class="btn btn-secondary">{{ t("Volver", "Back", "返回") }}</a>
+      </div>
+    </form>
+  </div>
 </div>
+
 {% endblock %}
