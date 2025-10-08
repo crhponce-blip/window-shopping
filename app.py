@@ -403,8 +403,8 @@ def password_reset_form():
             flash(t("Contraseña actualizada.", "Password updated.", "已更新密碼"))
             session.pop("pwd_reset_user", None)
             return redirect(url_for("login"))
-    try:
-  return render_template("password_reset_form.html", msg=msg)
+   try:
+        return render_template("password_reset_form.html", msg=msg)
     except TemplateNotFound:
         # Fallback simple por si aún no subes el template
         return """
