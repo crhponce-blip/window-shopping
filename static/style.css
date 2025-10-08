@@ -1,5 +1,7 @@
 /* =========================================================
-   WINDOW SHOPPING - ESTILO GENERAL (2025)
+   WINDOW SHOPPING - VERSIÓN "DE PANA" (2025)
+   Mezcla de WS Blue Pro + Light Blue, mejor contraste,
+   brillos suaves, glassmorphism y animaciones sutiles.
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
@@ -22,6 +24,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.8s ease-in-out;
 }
 
 /* =========================================================
@@ -33,12 +36,14 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 15px 40px;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 191, 255, 0.05);
   color: #fff;
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid rgba(0, 191, 255, 0.2);
 }
 
 .navbar a {
@@ -50,7 +55,8 @@ body {
 }
 
 .navbar a:hover {
-  color: #00bfff;
+  color: #00cfff;
+  text-shadow: 0 0 8px #00bfff;
 }
 
 .lang-switch a {
@@ -68,6 +74,7 @@ footer {
   background: rgba(0, 0, 0, 0.35);
   color: #cfd9df;
   font-size: 14px;
+  border-top: 1px solid rgba(0, 191, 255, 0.15);
   margin-top: auto;
 }
 
@@ -90,6 +97,14 @@ p {
   color: #d9e4ef;
 }
 
+.content-container,
+.dashboard-container,
+.auth-box,
+.perfil-container,
+.detalle-container {
+  animation: slideUp 0.6s ease-out;
+}
+
 /* =========================================================
    LANDING PAGE
    ========================================================= */
@@ -106,13 +121,14 @@ p {
   width: 180px;
   height: auto;
   margin-bottom: 12px;
+  filter: drop-shadow(0 0 10px rgba(0,191,255,0.4));
 }
 
 .landing-buttons {
   margin-top: 25px;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary, .btn-secondary, .btn {
   display: inline-block;
   padding: 12px 30px;
   margin: 10px;
@@ -122,27 +138,29 @@ p {
   cursor: pointer;
   text-decoration: none;
   transition: 0.3s;
+  letter-spacing: 0.3px;
 }
 
 .btn-primary {
-  background: #007bff;
+  background: linear-gradient(135deg, #009dff, #007bff);
   color: white;
-  box-shadow: 0 4px 10px rgba(0,123,255,0.4);
+  box-shadow: 0 4px 15px rgba(0,191,255,0.4);
 }
 
 .btn-primary:hover {
-  background: #0065d1;
-  box-shadow: 0 4px 15px rgba(0,123,255,0.6);
+  background: linear-gradient(135deg, #00bfff, #0065d1);
+  box-shadow: 0 4px 20px rgba(0,191,255,0.7);
 }
 
 .btn-secondary {
-  background: transparent;
-  color: white;
+  background: rgba(255,255,255,0.1);
+  color: #e2f4ff;
   border: 1.5px solid #00bfff;
 }
 
 .btn-secondary:hover {
-  background: rgba(0, 191, 255, 0.2);
+  background: rgba(0, 191, 255, 0.15);
+  color: #fff;
 }
 
 /* =========================================================
@@ -157,12 +175,14 @@ p {
 }
 
 .auth-box {
-  background: rgba(0, 0, 0, 0.55);
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
   padding: 40px;
   width: 400px;
   text-align: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 191, 255, 0.15);
 }
 
 .auth-box h2 {
@@ -183,7 +203,7 @@ p {
 }
 
 .auth-box button {
-  background: #007bff;
+  background: linear-gradient(135deg, #009dff, #007bff);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -191,15 +211,18 @@ p {
   cursor: pointer;
   margin-top: 15px;
   transition: 0.3s;
+  box-shadow: 0 3px 12px rgba(0,191,255,0.4);
 }
 
 .auth-box button:hover {
-  background: #005ecb;
+  background: linear-gradient(135deg, #00bfff, #0065d1);
+  box-shadow: 0 3px 15px rgba(0,191,255,0.6);
 }
 
 .logo-login {
   width: 120px;
   margin-bottom: 10px;
+  filter: drop-shadow(0 0 10px rgba(0,191,255,0.5));
 }
 
 /* =========================================================
@@ -209,6 +232,7 @@ p {
 .flash-container {
   text-align: center;
   margin-bottom: 20px;
+  animation: fadeIn 0.8s ease-in;
 }
 
 .flash {
@@ -218,6 +242,7 @@ p {
   margin-bottom: 5px;
   color: #fff;
   font-size: 14px;
+  box-shadow: 0 2px 10px rgba(0,191,255,0.1);
 }
 
 .error {
@@ -231,12 +256,14 @@ p {
    ========================================================= */
 
 .dashboard-container {
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 15px;
   max-width: 900px;
   margin: auto;
   padding: 30px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 191, 255, 0.15);
 }
 
 .dashboard-actions {
@@ -245,19 +272,18 @@ p {
 }
 
 .dashboard-actions .btn {
-  display: inline-block;
-  margin: 8px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  background: #0099ff;
+  background: linear-gradient(135deg, #008cff, #00bfff);
   color: #fff;
-  text-decoration: none;
+  border-radius: 8px;
+  padding: 10px 25px;
   font-weight: 500;
   transition: 0.3s;
+  box-shadow: 0 3px 10px rgba(0,191,255,0.3);
 }
 
 .dashboard-actions .btn:hover {
-  background: #00bfff;
+  background: linear-gradient(135deg, #00bfff, #007bff);
+  box-shadow: 0 4px 15px rgba(0,191,255,0.6);
 }
 
 /* =========================================================
@@ -265,13 +291,15 @@ p {
    ========================================================= */
 
 .perfil-container, .detalle-container, .error-container {
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 15px;
   max-width: 900px;
   margin: auto;
   padding: 30px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
   text-align: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 191, 255, 0.15);
 }
 
 .perfil-container input, .perfil-container textarea, .perfil-container select {
@@ -301,10 +329,32 @@ p {
   justify-content: space-between;
   align-items: center;
   transition: 0.2s;
+  border: 1px solid rgba(0,191,255,0.1);
 }
 
 .listado li:hover {
   background: rgba(0, 191, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   ANIMACIONES
+   ========================================================= */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =========================================================
