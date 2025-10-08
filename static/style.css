@@ -1,241 +1,371 @@
 /* =========================================================
-   WINDOW SHOPPING - WS BLUE (versión final estable)
+   ESTILO GLOBAL WINDOW SHOPPING (WS)
    ========================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
-
 body {
-  background: linear-gradient(135deg, #081b33, #0a2342, #103b68);
-  background-attachment: fixed;
-  color: #f2f5f9;
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #071932, #0c2952);
+  color: #fff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+main {
+  flex: 1;
+  padding: 40px 20px;
+}
+
 /* =========================================================
-   NAVBAR
+   NAVBAR SUPERIOR
    ========================================================= */
 .navbar {
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 191, 255, 0.2);
+  padding: 12px 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  position: sticky;
+  top: 0;
+  z-index: 999;
 }
 
-.navbar a {
-  color: #fff;
+.nav-left a {
+  color: #00c3ff;
   text-decoration: none;
-  margin-left: 18px;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.nav-right a {
+  color: white;
+  margin-left: 20px;
+  text-decoration: none;
   transition: 0.3s;
 }
 
-.navbar a:hover {
-  color: #00cfff;
-  text-shadow: 0 0 8px #00bfff;
+.nav-right a:hover {
+  color: #00c3ff;
+}
+
+.lang-switch a {
+  color: #bbb;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.lang-switch a:hover {
+  color: #00c3ff;
 }
 
 /* =========================================================
-   LANDING
+   LANDING PAGE
    ========================================================= */
 .landing-container {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 75vh;
+  min-height: 90vh;
+  flex-direction: column;
   text-align: center;
+  color: #fff;
 }
 
 .logo-center img {
-  width: 180px;
-  height: auto;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 0 10px rgba(0,191,255,0.4));
-}
-
-.landing-buttons {
-  margin-top: 25px;
-}
-
-.btn-primary, .btn-secondary, .btn {
-  display: inline-block;
-  padding: 12px 30px;
-  margin: 10px;
-  border-radius: 30px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: 0.3s;
-  letter-spacing: 0.3px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #009dff, #007bff);
-  color: white;
-  box-shadow: 0 4px 15px rgba(0,191,255,0.4);
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #00bfff, #0065d1);
-  box-shadow: 0 4px 20px rgba(0,191,255,0.7);
-}
-
-.btn-secondary {
-  background: rgba(255,255,255,0.1);
-  color: #e2f4ff;
-  border: 1.5px solid #00bfff;
-}
-
-.btn-secondary:hover {
-  background: rgba(0, 191, 255, 0.15);
-  color: #fff;
-}
-
-/* =========================================================
-   REGISTER ROUTER (Tarjetas de selección)
-   ========================================================= */
-.router-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px;
-}
-
-.router-options {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-}
-
-.router-card {
-  width: 260px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 15px;
-  padding: 25px;
-  color: #000; /* 🔥 letras negras */
-  box-shadow: 0 5px 20px rgba(0, 191, 255, 0.2);
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.router-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 191, 255, 0.3);
-}
-
-.router-card h3 {
-  color: #004d99;
-  margin-bottom: 10px;
-}
-
-.router-card p {
-  font-size: 14px;
-  color: #333;
-}
-
-/* =========================================================
-   AUTH BOX (Login y Registro)
-   ========================================================= */
-.auth-box {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-  padding: 40px;
-  width: 400px;
-  margin: 40px auto;
-  text-align: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 191, 255, 0.15);
-}
-
-.auth-box h2 {
-  color: #fff;
+  width: 120px;
   margin-bottom: 20px;
 }
 
-.auth-box input, .auth-box select, .auth-box textarea {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  background-color: #eaf3ff;
-  color: #000;
+.logo-center h1 {
+  font-size: 2.6em;
+  color: #00c3ff;
+  margin-bottom: 10px;
 }
 
-.auth-box label {
-  text-align: left;
-  display: block;
-  font-size: 14px;
-  color: #fff;
-  margin-top: 10px;
+.logo-center p {
+  font-size: 1.1em;
+  margin-bottom: 30px;
 }
 
-.auth-box button {
-  background: linear-gradient(135deg, #009dff, #007bff);
-  color: white;
+.landing-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 12px 25px;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
-  margin-top: 15px;
-  transition: 0.3s;
-  box-shadow: 0 3px 12px rgba(0,191,255,0.4);
+  transition: all 0.3s ease;
 }
 
-.auth-box button:hover {
-  background: linear-gradient(135deg, #00bfff, #0065d1);
-  box-shadow: 0 3px 15px rgba(0,191,255,0.6);
+.btn-primary {
+  background: #00c3ff;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #008fc7;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #002b49;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
 }
 
 /* =========================================================
-   PERFIL Y DETALLES
+   DASHBOARD
    ========================================================= */
-.perfil-container, .detalle-container {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 15px;
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 30px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+.dashboard-container {
   text-align: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 191, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 40px;
+  margin: 30px auto;
+  width: 90%;
+  max-width: 850px;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.3);
 }
 
-.perfil-container h2 {
-  color: #00bfff;
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.dashboard-actions .btn {
+  background: #00c3ff;
+  color: #fff;
+  border-radius: 8px;
+  padding: 12px 25px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.dashboard-actions .btn:hover {
+  background: #0096c7;
+}
+
+.company-data {
+  margin-top: 40px;
+  background: rgba(0,0,0,0.3);
+  padding: 25px;
+  border-radius: 10px;
+  color: #eaeaea;
+}
+
+/* =========================================================
+   DETALLE (compras / ventas / servicios)
+   ========================================================= */
+.detalle-container {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 40px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 850px;
+  margin: 40px auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.detalle-container h2 {
+  color: #00c3ff;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.detalle-container form {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.detalle-container input[type="text"] {
+  border-radius: 8px;
+  padding: 10px;
+  border: none;
+  width: 250px;
+  margin-right: 10px;
+}
+
+.detalle-container button {
+  background: #00c3ff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.detalle-container button:hover {
+  background: #0096c7;
+}
+
+.listado {
+  list-style: none;
+  padding: 0;
+}
+
+.listado li {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #eaeaea;
+}
+
+.listado a {
+  color: #00c3ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.listado a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   PERFIL
+   ========================================================= */
+.perfil-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 50px 0;
+}
+
+.perfil-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 40px;
+  width: 85%;
+  max-width: 800px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+.perfil-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid #00c3ff;
+  margin-bottom: 15px;
+}
+
+.perfil-nombre {
+  color: #00c3ff;
+  margin-bottom: 5px;
+}
+
+.perfil-rol {
+  color: #ccc;
+  font-size: 0.95em;
 }
 
 .perfil-info p {
-  color: #eee;
+  margin: 5px 0;
+  color: #eaeaea;
+}
+
+.divider {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 25px 0;
+}
+
+.add-item-form input, 
+.add-item-form select {
+  display: block;
+  margin: 8px 0;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.add-item-form button {
+  background: #00c3ff;
+  color: #fff;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.add-item-form button:hover {
+  background: #0096c7;
+}
+
+.items-list {
+  list-style: none;
+  padding: 0;
+}
+
+.items-list li {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+.alert {
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.alert.success {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.alert.warning {
+  background: rgba(241, 196, 15, 0.2);
+  color: #f1c40f;
+}
+
+/* =========================================================
+   MENSAJE ENVIADO
+   ========================================================= */
+.content-container h2 {
+  color: #00c3ff;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 20px;
+  color: #eaeaea;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
 /* =========================================================
    FOOTER
    ========================================================= */
 footer {
+  background: rgba(0, 0, 0, 0.9);
   text-align: center;
   padding: 15px;
-  background: rgba(0, 0, 0, 0.35);
-  color: #cfd9df;
-  font-size: 14px;
-  border-top: 1px solid rgba(0, 191, 255, 0.15);
+  font-size: 0.9em;
+  color: #ccc;
   margin-top: auto;
 }
 
@@ -243,16 +373,22 @@ footer {
    RESPONSIVE
    ========================================================= */
 @media (max-width: 768px) {
-  .auth-box, .perfil-container {
+  .dashboard-container,
+  .detalle-container,
+  .perfil-card {
     width: 95%;
     padding: 25px;
   }
 
-  .router-card {
-    width: 90%;
+  .dashboard-actions {
+    flex-direction: column;
   }
 
-  .navbar {
-    flex-direction: column;
+  .nav-right a {
+    margin-left: 10px;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 10px 18px;
   }
 }
