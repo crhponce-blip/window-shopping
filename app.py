@@ -632,7 +632,7 @@ def detalles(tipo):
         tpl = "detalle_compras.html"  # usamos plantilla de compras para mantener coherencia visual
         return render_template(tpl, data=wrap_list(data), tipo=tipo, query=filtro_texto)
 
-    if tipo == "servicios":
+if tipo == "servicios":
     for uname, c in USER_PROFILES.items():
         if any(it.get("tipo") == "servicio" for it in c.get("items", [])):
             if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
