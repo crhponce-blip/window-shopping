@@ -6,6 +6,30 @@
   <title>Window Shopping | WS</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo_ws.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* Flash notifications (azul difuminado, flotante) */
+    .flash-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    .flash {
+      background: linear-gradient(135deg, #1a3b5d, #002b49);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      animation: fadeInOut 4s ease forwards;
+      font-size: 15px;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-10px); }
+      10%, 90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
+  </style>
 </head>
 <body>
 
@@ -24,10 +48,13 @@
       {% if 'user' in session %}
         <a href="{{ url_for('dashboard') }}">{{ t('Inicio', 'Home', '首頁') }}</a>
         <a href="{{ url_for('perfil') }}">{{ t('Perfil', 'Profile', '個人資料') }}</a>
+        <a href="{{ url_for('carrito') }}">{{ t('Carrito', 'Cart', '購物車') }}</a>
+        <a href="{{ url_for('ayuda') }}">{{ t('Ayuda', 'Help', '幫助') }}</a>
         <a href="{{ url_for('logout') }}">{{ t('Cerrar sesión', 'Logout', '登出') }}</a>
       {% else %}
         <a href="{{ url_for('login') }}">{{ t('Iniciar sesión', 'Login', '登入') }}</a>
         <a href="{{ url_for('register') }}">{{ t('Registrarse', 'Register', '註冊') }}</a>
+        <a href="{{ url_for('ayuda') }}">{{ t('Ayuda', 'Help', '幫助') }}</a>
       {% endif %}
       <span class="lang-switch">
         <a href="{{ url_for('set_lang', lang='es') }}">ES</a> |
