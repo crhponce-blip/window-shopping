@@ -1,38 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="perfil-container" style="margin-top:30px;">
+<div class="perfil-container" style="max-width:900px;margin:26px auto;">
   <h2>{{ comp.nombre }}</h2>
   <p><b>RUT:</b> {{ comp.rut or '-' }}</p>
-  <p><b>País:</b> {{ comp.pais }}</p>
+  <p><b>{{ t("País","Country","國家") }}:</b> {{ comp.pais }}</p>
   <p><b>Email:</b> {{ comp.email }}</p>
-  <p><b>Teléfono:</b> {{ comp.telefono }}</p>
-  <p><b>Dirección:</b> {{ comp.direccion }}</p>
+  <p><b>{{ t("Teléfono","Phone","電話") }}:</b> {{ comp.telefono }}</p>
+  <p><b>{{ t("Dirección","Address","地址") }}:</b> {{ comp.direccion }}</p>
   <p>{{ comp.descripcion }}</p>
 
-  <hr style="margin:25px 0; opacity:0.3;">
-  <h3>Ítems de la empresa</h3>
-
+  <hr style="margin:18px 0;opacity:.3">
+  <h3>{{ t("Ítems de la empresa","Company items","公司項目") }}</h3>
   {% if comp.items %}
-  <table>
-    <tr>
-      <th>Tipo</th>
-      <th>Producto / Servicio</th>
-      <th>Cantidad / Capacidad</th>
-      <th>Ubicación / Origen</th>
-    </tr>
-    {% for it in comp.items %}
-    <tr>
-      <td>{{ it.tipo }}</td>
-      <td>{{ it.producto or it.servicio }}</td>
-      <td>{{ it.cantidad or it.capacidad }}</td>
-      <td>{{ it.origen or it.ubicacion }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+    <table>
+      <tr>
+        <th>{{ t("Tipo","Type","類型") }}</th>
+        <th>{{ t("Producto / Servicio","Product / Service","產品 / 服務") }}</th>
+        <th>{{ t("Cantidad / Capacidad","Quantity / Capacity","數量 / 容量") }}</th>
+        <th>{{ t("Ubicación / Origen","Location / Origin","位置 / 來源") }}</th>
+      </tr>
+      {% for it in comp.items %}
+        <tr>
+          <td>{{ it.tipo }}</td>
+          <td>{{ it.producto or it.servicio }}</td>
+          <td>{{ it.cantidad or it.capacidad }}</td>
+          <td>{{ it.origen or it.ubicacion }}</td>
+        </tr>
+      {% endfor %}
+    </table>
   {% else %}
-  <p>Esta empresa aún no ha publicado ítems.</p>
+    <p>{{ t("Esta empresa aún no ha publicado ítems.","This company has not posted items yet.","該公司尚未發佈項目。") }}</p>
   {% endif %}
 
-  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary" style="margin-top:20px;">Volver</a>
+  <form method="post" action="{{ url_for('cliente_mensaje', username=username) }}" style="margin-top:16px;display:grid;gap:8px">
+    <textarea name="mensaje" placeholder="{{ t('Escribe tu mensaje...','Write your message...','寫下你的訊息...') }}" rows="3" required></textarea>
+    <button class="btn">{{ t("Enviar mensaje","Send message","發送訊息") }}</button>
+  </form>
+
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary" style="margin-top:16px">{{ t("Volver","Back","返回") }}</a>
 </div>
 {% endblock %}
