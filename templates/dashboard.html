@@ -9,8 +9,8 @@
         <a href="{{ url_for('detalles', tipo='compras') }}" class="btn">{{ t("Comprar", "Buy", "採購") }}</a>
         <a href="{{ url_for('detalles', tipo='ventas') }}" class="btn">{{ t("Vender", "Sell", "銷售") }}</a>
         <a href="{{ url_for('detalles', tipo='servicios') }}" class="btn">{{ t("Servicios", "Services", "服務") }}</a>
+        <a href="{{ url_for('perfil') }}" class="btn">{{ t("Mi Perfil", "My Profile", "我的資料") }}</a>
         <a href="{{ url_for('carrito') }}" class="btn">{{ t("Carrito", "Cart", "購物車") }} ({{ cart|length }})</a>
-        <a href="{{ url_for('ayuda') }}" class="btn">{{ t("Ayuda", "Help", "幫助") }}</a>
     </div>
 
     <div class="company-data">
