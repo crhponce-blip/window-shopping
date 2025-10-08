@@ -1,32 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="content-container">
-  <h2>{{ t("Centro de Ayuda", "Help Center", "幫助中心") }}</h2>
-  <p>
-    {{ t("Aquí encontrarás información básica para usar la plataforma Window Shopping (WS):",
-          "Here you will find basic information to use the Window Shopping (WS) platform:",
-          "在這裡，您可以找到使用 Window Shopping (WS) 平台的基本信息：") }}
-  </p>
+<div class="content-container" style="max-width:900px;margin:30px auto">
+  <h2>{{ t("Centro de Ayuda","Help Center","幫助中心") }}</h2>
+  <p>{{ t("Aquí encontrarás información básica para usar la plataforma Window Shopping (WS):",
+           "Here you will find basic information to use the Window Shopping (WS) platform:",
+           "在這裡，您可以找到使用 WS 平台的基本資訊：") }}</p>
 
-  <div class="card-grid">
+  <div class="card-grid" style="display:grid;gap:12px;margin-top:12px">
     {% for t in temas %}
-    <div class="card" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);padding:20px;margin-bottom:15px;border-radius:10px;">
-      <h3>{{ t.titulo }}</h3>
-      <p>{{ t.detalle }}</p>
-    </div>
+      <div class="card" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);padding:20px;border-radius:10px;">
+        <h3>{{ t.titulo }}</h3>
+        <p>{{ t.detalle }}</p>
+      </div>
     {% endfor %}
   </div>
 
-  <div style="margin-top:30px;">
-    <p>
-      {{ t("¿Aún necesitas ayuda?", "Still need help?", "還需要幫助嗎？") }}
-      {{ t("Escríbenos a", "Write to us at", "請發送郵件至") }}
-      <b>soporte@windowshopping.cl</b>
-    </p>
+  <div style="margin-top:20px;">
+    <p>{{ t("¿Aún necesitas ayuda?","Still need help?","還需要幫助嗎？") }} {{ t("Escríbenos a","Write to us at","請發送郵件至") }} <b>soporte@windowshopping.cl</b></p>
   </div>
 
-  <a href="{{ url_for('dashboard') }}" class="btn" style="margin-top:20px;">
-    {{ t("Volver al inicio", "Back to Dashboard", "返回主頁") }}
-  </a>
+  <a href="{{ url_for('dashboard') }}" class="btn" style="margin-top:14px">{{ t("Volver al inicio","Back to Dashboard","返回主頁") }}</a>
 </div>
 {% endblock %}
