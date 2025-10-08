@@ -18,40 +18,42 @@
           </tr>
         </thead>
         <tbody>
-          {% for i, item in enumerate(cart) %}
-          <tr>
-            <td>{{ item.get("empresa", "—") }}</td>
-            <td>
-              {% if item.tipo == "servicio" %}
-                {{ t("Servicio", "Service", "服務") }}
-              {% else %}
-                {{ t("Producto", "Product", "產品") }}
-              {% endif %}
-            </td>
-            <td>
-              {% if item.tipo == "servicio" %}
-                {{ item.servicio }}{% if item.ubicacion %} - {{ item.ubicacion }}{% endif %}
-              {% else %}
-                {{ item.producto }}{% if item.variedad %} ({{ item.variedad }}){% endif %}{% if item.origen %} - {{ item.origen }}{% endif %}
-              {% endif %}
-            </td>
-            <td>
-              {% if item.precio_caja %}
-                ${{ item.precio_caja }}
-              {% elif item.precio_kilo %}
-                ${{ item.precio_kilo }}
-              {% else %}
-                —
-              {% endif %}
-            </td>
-            <td>
-              <form method="POST" action="{{ url_for('cart_remove', index=i) }}">
-                <button type="submit" class="btn btn-secondary btn-sm">
-                  {{ t("Eliminar", "Remove", "刪除") }}
-                </button>
-              </form>
-            </td>
-          </tr>
+          {% for i in range(cart|length) %}
+            {% set item = cart[i] %}
+            <tr>
+              <td>{{ item.get("empresa", "—") }}</td>
+              <td>
+                {% if item.tipo == "servicio" %}
+                  {{ t("Servicio", "Service", "服務") }}
+                {% else %}
+                  {{ t("Producto", "Product", "產品") }}
+                {% endif %}
+              </td>
+              <td>
+                {% if item.tipo == "servicio" %}
+                  {{ item.servicio }}{% if item.ubicacion %} - {{ item.ubicacion }}{% endif %}
+                {% else %}
+                  {{ item.producto }}{% if item.variedad %} ({{ item.variedad }}){% endif %}
+                  {% if item.origen %} - {{ item.origen }}{% endif %}
+                {% endif %}
+              </td>
+              <td>
+                {% if item.precio_caja %}
+                  ${{ item.precio_caja }}
+                {% elif item.precio_kilo %}
+                  ${{ item.precio_kilo }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>
+                <form method="POST" action="{{ url_for('cart_remove', index=i) }}">
+                  <button type="submit" class="btn btn-secondary btn-sm">
+                    {{ t("Eliminar", "Remove", "刪除") }}
+                  </button>
+                </form>
+              </td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>
