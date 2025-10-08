@@ -1,23 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="dashboard-container">
-  <h2>{{ t("Panel de Control", "Dashboard", "控制台") }}</h2>
-  <p>{{ t("Bienvenido/a", "Welcome", "歡迎") }} <strong>{{ usuario }}</strong></p>
-  <p>{{ t("Rol", "Role", "角色") }}: <strong>{{ rol }}</strong> | {{ t("Perfil", "Profile", "檔案") }}: <strong>{{ perfil_tipo }}</strong></p>
+<div style="max-width:980px;margin:30px auto">
+  <h2>{{ t("Panel de Control","Dashboard","控制台") }}</h2>
+  <p>{{ t("Bienvenido/a","Welcome","歡迎") }} <strong>{{ nombre }}</strong></p>
+  <p>{{ t("Rol","Role","角色") }}: <strong>{{ rol }}</strong></p>
+  {% if empresa %}<p><strong>{{ empresa }}</strong> — {{ descripcion }}</p>{% endif %}
 
-  <div class="dashboard-actions">
-    <a href="{{ url_for('detalles', tipo='compras') }}" class="btn">{{ t("Comprar", "Buy", "採購") }}</a>
-    <a href="{{ url_for('detalles', tipo='ventas') }}" class="btn">{{ t("Vender", "Sell", "銷售") }}</a>
-    <a href="{{ url_for('detalles', tipo='servicios') }}" class="btn">{{ t("Servicios", "Services", "服務") }}</a>
-    <a href="{{ url_for('perfil') }}" class="btn">{{ t("Mi Perfil", "My Profile", "我的資料") }}</a>
-    <a href="{{ url_for('carrito') }}" class="btn">{{ t("Carrito", "Cart", "購物車") }} ({{ cart|length }})</a>
-  </div>
-
-  <div class="company-data">
-    <h3>{{ t("Datos de tu empresa", "Your Company Data", "公司資料") }}</h3>
-    <p><strong>{{ my_company.empresa }}</strong></p>
-    <p>{{ my_company.descripcion }}</p>
-    <p><small>{{ my_company.email }} | {{ my_company.telefono }}</small></p>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px">
+    {% for a in acciones %}
+      <a class="btn" href="{{ url_for(a.ruta, tipo=a.param) if a.param else url_for(a.ruta) }}">{{ a.nombre }}</a>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}
