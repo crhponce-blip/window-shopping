@@ -275,59 +275,44 @@ def targets_for(tipo: str, my_rol: str) -> List[str]:
     tipo = tipo.lower()
 
     # --- COMPRAS ---
-    # (Quiénes puedo ver cuando QUIERO COMPRAR fruta)
     compras_vis = {
-        # Packing compra a Planta y Frigorífico
-        "Packing": ["Planta", "Frigorífico"],
-        # Frigorífico compra a Planta y Packing
-        "Frigorífico": ["Planta", "Packing"],
-        # Exportador compra a Exportador/Planta/Packing/Frigorífico
-        "Exportador": ["Exportador", "Packing", "Frigorífico", "Planta"],
-        # Cliente extranjero: al entrar a "compras" quiere ver EXPORTADORES vendiendo (se maneja especial abajo)
+        "Productor": ["Packing"],
+        "Planta": ["Packing"],
+        "Packing": ["Frigorífico", "Exportador"],
+        "Frigorífico": ["Exportador"],
+        "Exportador": ["Cliente extranjero"],
         "Cliente extranjero": ["Exportador"],
-        # Productor / Planta NO compran (se bloqueará con aviso en la vista)
-        "Productor": [],
-        "Planta": [],
-        "default": ["Productor", "Planta", "Packing", "Frigorífico", "Exportador"],
     }
 
     # --- VENTAS ---
-    # (A quiénes veo cuando QUIERO VENDER fruta)
     ventas_vis = {
-        # Packing vende a Exportador y Frigorífico (y puede ver otros Packing)
-        "Packing": ["Exportador", "Frigorífico", "Packing"],
-        # Frigorífico vende a Packing y Exportador (NO a otros frigoríficos)
-        "Frigorífico": ["Packing", "Exportador"],
-        # Exportador vende a Cliente extranjero y a Exportadores
-        "Exportador": ["Exportador", "Cliente extranjero"],
-        # Productor/Planta venden a Exportadores, Packing, Frigorífico
-        "Productor": ["Exportador", "Packing", "Frigorífico"],
-        "Planta": ["Exportador", "Packing", "Frigorífico"],
-        "default": ["Exportador", "Packing", "Frigorífico", "Cliente extranjero"],
+        "Productor": ["Packing", "Frigorífico"],
+        "Planta": ["Packing"],
+        "Packing": ["Exportador", "Frigorífico"],
+        "Frigorífico": ["Exportador"],
+        "Exportador": ["Cliente extranjero"],
+        "Cliente extranjero": [],
     }
 
     # --- SERVICIOS ---
-    # (A quiénes veo cuando QUIERO COMPRAR servicio)
     servicios_vis = {
-        # Todos los compradores de servicio ven a los prestadores:
-        # Packing, Frigorífico, Transporte, Extraportuario, Agencia de Aduanas
-        "Planta": ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"],
-        "Productor": ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"],
-        "Packing": ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"],
-        "Frigorífico": ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"],
-        "Exportador": ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"],
-        # Cliente extranjero típicamente no compra servicios locales -> vacío o restringido
-        "Cliente extranjero": [],
-        "default": ["Packing", "Frigorífico", "Transporte", "Extraportuario", "Agencia de Aduanas"],
+        "Packing": ["Exportador", "Frigorífico"],
+        "Frigorífico": ["Exportador", "Packing"],
+        "Exportador": ["Packing", "Frigorífico", "Cliente extranjero"],
+        "Cliente extranjero": ["Exportador"],
+        "Productor": ["Packing"],
+        "Planta": ["Packing"],
     }
 
-    mapping = {"compras": compras_vis, "ventas": ventas_vis, "servicios": servicios_vis}.get(tipo, {})
-    # Ajuste: si el usuario es mixto (Packing o Frigorífico con perfil ambos)
-if my_rol in ("Packing", "Frigorífico") and tipo == "ventas":
-    # Puede ver tanto demandas de fruta como solicitudes de servicios
-    return list(set(ventas_vis["Packing"] + servicios_vis["Packing"]))
-
-    return mapping.get(my_rol, mapping.get("default", []))
+    if tipo == "compras":
+        return compras_vis.get(my_rol, [])
+    elif tipo == "ventas":
+        return ventas_vis.get(my_rol, [])
+    elif tipo == "servicios":
+        return servicios_vis.get(my_rol, [])
+    else:
+        # Valor por defecto: devolver unión básica
+        return list(set(ventas_vis.get(my_rol, []) + servicios_vis.get(my_rol, [])))
 
 # =========================================================
 # RUTAS PRINCIPALES
