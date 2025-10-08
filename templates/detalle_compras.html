@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="detalle-container">
-    <h2>{{ t("Compras disponibles", "Available Purchases", "可購買項目") }}</h2>
-    <form method="GET">
-        <input type="text" name="q" placeholder="{{ t('Buscar...', 'Search...', '搜尋...') }}" value="{{ query }}">
-        <button type="submit">{{ t("Buscar", "Search", "搜尋") }}</button>
-    </form>
+  <h2>{{ t("Compras disponibles", "Available Purchases", "可購買項目") }}</h2>
+  <form method="GET">
+    <input type="text" name="q" placeholder="{{ t('Buscar...', 'Search...', '搜尋...') }}" value="{{ query }}">
+    <button type="submit">{{ t("Buscar", "Search", "搜尋") }}</button>
+  </form>
 
-    <form method="POST" action="{{ url_for('cart_add_bulk') }}">
-        <ul class="listado">
-            {% for c in data %}
-                {% for item in c.items %}
-                    <li>
-                        <input type="checkbox" name="sel" value='{{ item | tojson }}'>
-                        <strong>{{ c.empresa }}</strong> - {{ item.producto }} ({{ item.cantidad }})
-                        <small>{{ item.origen }} | {{ item.precio_caja or "" }}</small>
-                    </li>
-                {% endfor %}
-            {% endfor %}
-        </ul>
-        <button type="submit">{{ t("Agregar seleccionados al carrito", "Add selected to cart", "加入購物車") }}</button>
-    </form>
+  <form method="POST" action="{{ url_for('cart_add') }}">
+    <ul class="listado">
+      {% for c in data %}
+        {% for item in c.items %}
+          <li>
+            <input type="checkbox" name="sel" value='{{ item | tojson }}'>
+            <strong>{{ c.empresa }}</strong> - {{ item.producto }} ({{ item.cantidad }})
+            <small>{{ item.origen }} | {{ item.precio_caja or "" }}</small>
+          </li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+    <button type="submit">{{ t("Agregar seleccionados al carrito", "Add selected to cart", "加入購物車") }}</button>
+  </form>
 </div>
 {% endblock %}
