@@ -1,44 +1,41 @@
 {% extends "base.html" %}
+{% block title %}{{ t("Selecciona tu tipo de registro", "Select Registration Type", "選擇註冊類型") }}{% endblock %}
+
 {% block content %}
-
 <div class="router-container">
-  <h2 style="text-align:center; margin-top:30px;">Selecciona tu tipo de registro</h2>
-  <p style="text-align:center;">Antes de continuar, elige si eres usuario nacional, extranjero o mixto (ambos).</p>
+  <div class="router-header">
+    <h2>{{ t("Selecciona tu tipo de registro", "Select your registration type", "選擇註冊類型") }}</h2>
+    <p>{{ t("Antes de continuar, elige si eres usuario nacional, extranjero o mixto (ambos).", "Before continuing, choose if you are national, foreign, or mixed user.") }}</p>
+  </div>
 
-  <div class="router-options" style="display:flex; justify-content:center; gap:40px; margin-top:50px; flex-wrap:wrap;">
-
-    <!-- Opción Nacional -->
-    <div class="router-card" style="border:1px solid #ccc; border-radius:10px; padding:30px; width:260px; text-align:center; background:#f9f9f9;">
-      <h3>Usuario Nacional 🇨🇱</h3>
-      <p style="font-size:14px;">Empresas o personas dentro de Chile (Productor, Planta, Packing, Frigorífico, Exportador, etc.)</p>
-      <a href="{{ url_for('register', nac='nacional', tipo='compra_venta') }}" class="btn btn-primary" style="margin-top:15px; display:inline-block;">Registrarme</a>
+  <div class="router-options">
+    <div class="router-card">
+      <h3>🇨🇱 {{ t("Usuario Nacional", "National User") }}</h3>
+      <p>{{ t("Empresas o personas dentro de Chile (Productor, Planta, Packing, Frigorífico, Exportador, etc.)", "Companies or persons within Chile (Producer, Plant, Packing, Cold Storage, Exporter, etc.)") }}</p>
+      <a href="{{ url_for('register', nac='nacional', tipo='compra_venta') }}" class="btn btn-primary">Registrarme</a>
     </div>
 
-    <!-- Opción Extranjero -->
-    <div class="router-card" style="border:1px solid #ccc; border-radius:10px; padding:30px; width:260px; text-align:center; background:#f9f9f9;">
-      <h3>Usuario Extranjero 🌎</h3>
-      <p style="font-size:14px;">Importadores o compradores internacionales (clientes fuera de Chile).</p>
-      <a href="{{ url_for('register', nac='extranjero', tipo='compra_venta') }}" class="btn btn-primary" style="margin-top:15px; display:inline-block;">Registrarme</a>
+    <div class="router-card">
+      <h3>🌎 {{ t("Usuario Extranjero", "Foreign User") }}</h3>
+      <p>{{ t("Importadores o compradores internacionales que buscan proveedores en Chile.", "International importers or buyers seeking suppliers in Chile.") }}</p>
+      <a href="{{ url_for('register', nac='extranjero', tipo='compra_venta') }}" class="btn btn-primary">Registrarme</a>
     </div>
 
-    <!-- Opción Servicios -->
-    <div class="router-card" style="border:1px solid #ccc; border-radius:10px; padding:30px; width:260px; text-align:center; background:#f9f9f9;">
-      <h3>Proveedor de Servicios ⚙️</h3>
-      <p style="font-size:14px;">Empresas que ofrecen servicios como transporte, frigorífico, extraportuario o aduanas.</p>
-      <a href="{{ url_for('register', nac='nacional', tipo='servicios') }}" class="btn btn-primary" style="margin-top:15px; display:inline-block;">Registrarme</a>
+    <div class="router-card">
+      <h3>⚙️ {{ t("Proveedor de Servicios", "Service Provider") }}</h3>
+      <p>{{ t("Empresas chilenas que ofrecen servicios logísticos o complementarios (transporte, frigorífico, extraportuario, aduana).", "Chilean companies offering logistics or complementary services.") }}</p>
+      <a href="{{ url_for('register', nac='nacional', tipo='servicios') }}" class="btn btn-primary">Registrarme</a>
     </div>
 
-    <!-- Opción Mixto (Ambos) -->
-    <div class="router-card" style="border:1px solid #ccc; border-radius:10px; padding:30px; width:260px; text-align:center; background:#f9f9f9;">
-      <h3>Mixto (Ambos) 🔁</h3>
-      <p style="font-size:14px;">Solo para <b>Packing</b> y <b>Frigoríficos</b> que quieren operar tanto en compraventa como servicios.</p>
-      <a href="{{ url_for('register', nac='nacional', tipo='ambos') }}" class="btn btn-primary" style="margin-top:15px; display:inline-block;">Registrarme</a>
+    <div class="router-card">
+      <h3>🔁 {{ t("Mixto (Ambos)", "Mixed (Both)") }}</h3>
+      <p>{{ t("Solo para Packing y Frigoríficos que operan en compraventa y servicios.", "Only for Packing and Cold Storages operating in both buy/sell and services.") }}</p>
+      <a href="{{ url_for('register', nac='nacional', tipo='ambos') }}" class="btn btn-primary">Registrarme</a>
     </div>
   </div>
 
-  <div style="text-align:center; margin-top:60px;">
-    <a href="{{ url_for('home') }}" class="btn btn-secondary">Volver al inicio</a>
+  <div class="router-footer">
+    <a href="{{ url_for('home') }}" class="btn btn-secondary">{{ t("Volver al inicio", "Return Home", "返回首頁") }}</a>
   </div>
 </div>
-
 {% endblock %}
