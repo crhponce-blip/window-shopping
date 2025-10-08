@@ -9,13 +9,11 @@
       <p class="sub-text">{{ t("Selecciona las solicitudes que deseas atender", "Select the requests you want to attend", "選擇您想響應的請求") }}</p>
     </div>
 
-    <!-- 🔍 Buscador -->
     <form method="GET" class="search-form">
       <input type="text" name="q" placeholder="{{ t('Buscar empresa o producto...', 'Search company or product...', '搜尋公司或產品...') }}" value="{{ query }}">
       <button type="submit" class="btn btn-primary">{{ t("Buscar", "Search", "搜尋") }}</button>
     </form>
 
-    <!-- 🛒 Listado de empresas -->
     <form method="POST" action="{{ url_for('cart_add') }}">
       <ul class="detalle-lista">
         {% if data %}
@@ -35,20 +33,13 @@
                       {% endif %}
                     {% elif item.servicio %}
                       <p><strong>{{ t("Servicio:", "Service:", "服務：") }}</strong> {{ item.servicio }}</p>
-                      {% if item.ubicacion %}<p><strong>{{ t("Ubicación:", "Location:", "位置：") }}</strong> {{ item.ubicacion }}</p>{% endif %}
-                      {% if item.capacidad %}<p><strong>{{ t("Capacidad:", "Capacity:", "容量：") }}</strong> {{ item.capacidad }}</p>{% endif %}
                     {% endif %}
                   </div>
 
-                  <!-- Botón Agregar -->
                   <div class="item-actions">
                     <input type="hidden" name="item" value='{{ item | tojson }}'>
-                    <button type="submit" class="btn btn-success">
-                      {{ t("Agregar al carrito 🛒", "Add to cart 🛒", "加入購物車 🛒") }}
-                    </button>
-                    <a href="{{ url_for('perfil', id=c.id) }}" class="btn btn-secondary">
-                      {{ t("Ver perfil", "View profile", "查看資料") }}
-                    </a>
+                    <button type="submit" class="btn btn-success">{{ t("Agregar al carrito 🛒", "Add to cart 🛒", "加入購物車 🛒") }}</button>
+                    <a href="{{ url_for('perfil', id=c.id) }}" class="btn btn-secondary">{{ t("Ver perfil", "View profile", "查看資料") }}</a>
                   </div>
                 </li>
               {% endfor %}
@@ -61,131 +52,8 @@
     </form>
 
     <div class="detalle-footer">
-      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
-        {{ t("Volver al panel", "Back to Dashboard", "返回控制台") }}
-      </a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">{{ t("Volver al panel", "Back to Dashboard", "返回控制台") }}</a>
     </div>
   </div>
 </div>
-
-<style>
-.detalle-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 90vh;
-  background: linear-gradient(145deg, #071932, #0c2952);
-  color: white;
-  font-family: 'Poppins', sans-serif;
-  padding: 40px 0;
-}
-
-.detalle-card {
-  background: rgba(255, 255, 255, 0.08);
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  width: 900px;
-  text-align: left;
-}
-
-.detalle-header h2 {
-  color: #00c3ff;
-  font-size: 1.8em;
-  text-align: center;
-}
-
-.sub-text {
-  text-align: center;
-  color: #ccc;
-  margin-bottom: 20px;
-}
-
-.search-form {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 25px;
-}
-
-.search-form input {
-  width: 60%;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-}
-
-.detalle-lista {
-  list-style: none;
-  padding: 0;
-}
-
-.detalle-item {
-  background: rgba(255, 255, 255, 0.1);
-  margin-bottom: 20px;
-  border-radius: 10px;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-
-.item-info p {
-  margin: 4px 0;
-  color: #e6e6e6;
-}
-
-.item-info h3 {
-  color: #00c3ff;
-  margin-bottom: 10px;
-}
-
-.item-actions {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-}
-
-.btn-success {
-  background-color: #2ecc71;
-  border: none;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.btn-success:hover {
-  background-color: #27ae60;
-}
-
-.btn-secondary {
-  background-color: #555;
-  color: white;
-  text-align: center;
-  padding: 10px 15px;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: background-color 0.2s ease;
-}
-
-.btn-secondary:hover {
-  background-color: #777;
-}
-
-.no-results {
-  text-align: center;
-  color: #ccc;
-  font-style: italic;
-  padding: 30px 0;
-}
-
-.detalle-footer {
-  text-align: center;
-  margin-top: 25px;
-}
-</style>
 {% endblock %}
