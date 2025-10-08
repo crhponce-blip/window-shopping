@@ -806,7 +806,6 @@ def carrito():
     # GET
     return render_template("carrito.html", cart=get_cart())
 
-
 # =========================================================
 # AGREGAR AL CARRITO (Ítem único desde tarjetas)
 # =========================================================
@@ -823,7 +822,7 @@ def cart_add():
         "precio_caja": (request.form.get("precio_caja") or "").strip(),
         "precio_kilo": (request.form.get("precio_kilo") or "").strip(),
         "username": (request.form.get("username") or "").strip(),
-        "key": (request.form.get("key") or "").strip(),  # opcional, para relacionar con 'ocultar'
+        "key": (request.form.get("key") or "").strip(),  # opcional
     }
     clean = {k: v for k, v in payload.items() if v}
     if clean:
@@ -833,6 +832,38 @@ def cart_add():
         flash(t("No se pudo agregar el ítem.", "Item could not be added.", "無法加入項目"))
     return redirect(request.referrer or url_for("carrito"))
 
+
+# =========================================================
+# NUEVO ENDPOINT ✅ para múltiples ítems (detalles_compras / ventas / servicios)
+# =========================================================
+@app.route("/cart_add_bulk", methods=["POST"])
+def cart_add_bulk():
+    """
+    Permite agregar varios ítems seleccionados desde los formularios
+    de detalle_compras, detalle_ventas o detalle_servicio.
+    """
+    seleccionados = request.form.getlist("sel") or request.form.getlist("selected")
+    if not seleccionados:
+        flash(t("No seleccionaste ningún producto.", "No items selected.", "未選擇任何項目"))
+        return redirect(request.referrer or url_for("dashboard"))
+
+    agregados = 0
+    for raw in seleccionados:
+        try:
+            item = json.loads(raw)
+            if isinstance(item, dict):
+                add_to_cart(item)
+                agregados += 1
+        except Exception:
+            continue
+
+    if agregados:
+        flash(t(f"Se agregaron {agregados} ítems al carrito 🛒",
+                f"{agregados} items added to cart 🛒",
+                f"已將 {agregados} 個項目加入購物車 🛒"))
+    else:
+        flash(t("No se pudo agregar ningún ítem.", "No items could be added.", "無法加入任何項目"))
+    return redirect(request.referrer or url_for("dashboard"))
 
 # =========================================================
 # AGREGAR VARIOS AL CARRITO (checkbox de lista)
