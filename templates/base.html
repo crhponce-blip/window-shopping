@@ -7,7 +7,6 @@
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo_ws.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
-    /* Flash notifications (azul difuminado, flotante) */
     .flash-container {
       position: fixed;
       top: 20px;
@@ -33,9 +32,6 @@
 </head>
 <body>
 
-  <!-- =========================================================
-       NAVBAR SUPERIOR
-  ========================================================= -->
   <nav class="navbar">
     <div class="nav-left">
       <a href="{{ url_for('home') }}" class="nav-logo">
@@ -47,13 +43,13 @@
     <div class="nav-right">
       {% if 'user' in session %}
         <a href="{{ url_for('dashboard') }}">{{ t('Inicio', 'Home', '首頁') }}</a>
-        <a href="{{ url_for('perfil') }}">{{ t('Perfil', 'Profile', '個人資料') }}</a>
+        <a href="{{ url_for('perfil') }}">{{ t('Mi Perfil', 'My Profile', '我的資料') }}</a>
         <a href="{{ url_for('carrito') }}">{{ t('Carrito', 'Cart', '購物車') }}</a>
         <a href="{{ url_for('ayuda') }}">{{ t('Ayuda', 'Help', '幫助') }}</a>
         <a href="{{ url_for('logout') }}">{{ t('Cerrar sesión', 'Logout', '登出') }}</a>
       {% else %}
         <a href="{{ url_for('login') }}">{{ t('Iniciar sesión', 'Login', '登入') }}</a>
-        <a href="{{ url_for('register') }}">{{ t('Registrarse', 'Register', '註冊') }}</a>
+        <a href="{{ url_for('register_router') }}">{{ t('Registrarse', 'Register', '註冊') }}</a>
         <a href="{{ url_for('ayuda') }}">{{ t('Ayuda', 'Help', '幫助') }}</a>
       {% endif %}
       <span class="lang-switch">
@@ -64,9 +60,6 @@
     </div>
   </nav>
 
-  <!-- =========================================================
-       CONTENIDO PRINCIPAL
-  ========================================================= -->
   <main>
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -77,16 +70,11 @@
         </div>
       {% endif %}
     {% endwith %}
-
     {% block content %}{% endblock %}
   </main>
 
-  <!-- =========================================================
-       FOOTER
-  ========================================================= -->
   <footer>
     <p>© 2025 Window Shopping | Plataforma de Comercio Internacional</p>
   </footer>
-
 </body>
 </html>
