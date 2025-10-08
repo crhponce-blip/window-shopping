@@ -4,14 +4,20 @@
 {% block content %}
 <div class="detalle-container">
   <div class="detalle-card">
+    
+    <!-- ENCABEZADO -->
     <div class="detalle-header">
       <h2>{{ producto.nombre }}</h2>
-      <p class="categoria">{{ t("Categoría", "Category", "類別") }}: {{ producto.categoria }}</p>
+      <p class="categoria">
+        {{ t("Categoría", "Category", "類別") }}: {{ producto.categoria }}
+      </p>
     </div>
 
+    <!-- CUERPO -->
     <div class="detalle-body">
       <img src="{{ producto.imagen or url_for('static', filename='img/default_product.png') }}" alt="{{ producto.nombre }}">
       <p class="descripcion">{{ producto.descripcion }}</p>
+
       <p><strong>{{ t("Precio", "Price", "價格") }}:</strong> ${{ producto.precio }}</p>
       <p><strong>{{ t("Disponibilidad", "Availability", "可用性") }}:</strong> 
         {% if producto.stock > 0 %}
@@ -21,14 +27,15 @@
         {% endif %}
       </p>
       <p><strong>{{ t("Vendedor", "Seller", "賣家") }}:</strong>
-        <a href="{{ url_for('perfil', id=producto.vendedor_id) }}" class="link">
+        <a href="{{ url_for('perfil_publico', id=producto.vendedor_id) }}" class="link">
           {{ producto.vendedor_nombre }}
         </a>
       </p>
     </div>
 
+    <!-- ACCIONES -->
     <div class="detalle-actions">
-      <form action="{{ url_for('agregar_al_carrito') }}" method="POST" class="inline-form">
+      <form action="{{ url_for('cart_add') }}" method="POST" class="inline-form">
         <input type="hidden" name="producto_id" value="{{ producto.id }}">
         <button type="submit" class="btn btn-success">
           {{ t("Agregar al carrito", "Add to Cart", "加入購物車") }}
@@ -43,6 +50,7 @@
       </form>
     </div>
 
+    <!-- MENSAJE AL VENDEDOR -->
     <div class="detalle-footer">
       {% if not cooldown_activo %}
       <form method="POST" action="{{ url_for('enviar_mensaje', id=producto.vendedor_id) }}">
@@ -60,6 +68,7 @@
   </div>
 </div>
 
+<!-- 🎨 ESTILOS -->
 <style>
 .detalle-container {
   display: flex;
