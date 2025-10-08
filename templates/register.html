@@ -1,30 +1,91 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>📝 Registro</h2>
+<div class="card" style="max-width:900px;margin:30px auto;background:rgba(255,255,255,.08);padding:20px;border-radius:12px;">
+  <h2>{{ t("Registro","Registration","註冊") }}</h2>
 
-<form method="post">
-  <label>Nombre:</label>
-  <input type="text" name="nombre" required><br>
+  {% set nac = nacionalidad or request.args.get('nac') or 'nacional' %}
+  {% set tipo = perfil_tipo or request.args.get('tipo') or 'compra_venta' %}
 
-  <label>Correo:</label>
-  <input type="email" name="email" required><br>
+  <form method="post" enctype="multipart/form-data" style="display:grid;gap:12px">
+    <input type="hidden" name="nacionalidad" value="{{ nac }}">
+    <input type="hidden" name="perfil_tipo" value="{{ tipo }}">
 
-  <label>Contraseña:</label>
-  <input type="password" name="password" required><br>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+      <div>
+        <label>Email</label>
+        <input name="username" type="email" required placeholder="correo@empresa.com">
+      </div>
+      <div>
+        <label>{{ t("Contraseña","Password","密碼") }}</label>
+        <input name="password" type="password" required>
+      </div>
+      <div>
+        <label>{{ t("Empresa","Company","公司") }}</label>
+        <input name="empresa" required>
+      </div>
+      <div>
+        <label>{{ t("Teléfono","Phone","電話") }}</label>
+        <input name="phone">
+      </div>
+      <div>
+        <label>{{ t("Dirección","Address","地址") }}</label>
+        <input name="address">
+      </div>
+      <div>
+        <label>{{ t("País (código ISO)","Country (ISO code)","國家（ISO）") }}</label>
+        <input name="pais" placeholder="{{ 'CL' if nac=='nacional' else 'US' }}">
+      </div>
+    </div>
 
-  <label>Rol:</label>
-  <select name="rol" required>
-    <option value="">Selecciona un rol</option>
-    <option value="Productor">Productor</option>
-    <option value="Planta">Planta</option>
-    <option value="Packing">Packing</option>
-    <option value="Frigorífico">Frigorífico</option>
-    <option value="Exportador">Exportador</option>
-    <option value="Cliente extranjero">Cliente extranjero</option>
-  </select><br><br>
+    {% if nac == 'nacional' %}
+      <div style="margin-top:8px">
+        <label>RUT</label>
+        <input name="rut" placeholder="11.111.111-1">
+      </div>
+      <div>
+        <label>PDF RUT (SII)</label>
+        <input type="file" name="rut_file" accept=".pdf,.png,.jpg,.jpeg">
+      </div>
+    {% else %}
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+        <div>
+          <label>EORI / TAX ID</label>
+          <input name="eori">
+        </div>
+        <div>
+          <label>{{ t("Otro ID","Other ID","其他證號") }}</label>
+          <input name="otros_id">
+        </div>
+      </div>
+    {% endif %}
 
-  <button type="submit">Crear Cuenta</button>
-</form>
+    {% set ROLES_CV = ["Productor","Planta","Packing","Frigorífico","Exportador"] %}
+    {% set ROLES_SR = ["Packing","Frigorífico","Transporte","Extraportuario","Agencia de Aduanas"] %}
+    {% set ROLES_AMB = ["Packing","Frigorífico"] %}
 
-<p>¿Ya tienes una cuenta? <a href="{{ url_for('login') }}">Inicia sesión aquí</a>.</p>
+    <div>
+      <label>{{ t("Rol","Role","角色") }}</label>
+      <select name="rol" required>
+        {% if nac == 'extranjero' %}
+          <option value="Cliente extranjero">{{ t("Cliente extranjero","Foreign client","海外客戶") }}</option>
+        {% else %}
+          {% if tipo == 'compra_venta' %}
+            {% for r in ROLES_CV %}<option>{{ r }}</option>{% endfor %}
+          {% elif tipo == 'servicios' %}
+            {% for r in ROLES_SR %}<option>{{ r }}</option>{% endfor %}
+          {% elif tipo == 'ambos' %}
+            {% for r in ROLES_AMB %}<option>{{ r }}</option>{% endfor %}
+          {% endif %}
+        {% endif %}
+      </select>
+    </div>
+
+    {% if error %}<p style="color:#f87171">{{ error }}</p>{% endif %}
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" type="submit">{{ t("Crear cuenta","Create account","建立帳戶") }}</button>
+      <a class="btn btn-secondary" href="{{ url_for('register_router') }}">{{ t("Cambiar tipo","Change type","更改類型") }}</a>
+    </div>
+  </form>
+</div>
 {% endblock %}
