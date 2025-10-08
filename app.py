@@ -404,7 +404,7 @@ def password_reset_form():
             session.pop("pwd_reset_user", None)
             return redirect(url_for("login"))
     try:
-        return render_template("password_reset_form.html", msg=msg)
+  return render_template("password_reset_form.html", msg=msg)
     except TemplateNotFound:
         # Fallback simple por si aún no subes el template
         return """
@@ -415,6 +415,18 @@ def password_reset_form():
           <button>Actualizar</button>
         </form>
         """, 200
+
+# =========================================================
+# SELECCIÓN DE REGISTRO (Router Nacional / Extranjero / Ambos)
+# =========================================================
+@app.route("/register_router")
+def register_router():
+    """
+    Pantalla intermedia para elegir el tipo de usuario antes del formulario.
+    Se invoca desde el botón 'Registrarse' en landing.html.
+    """
+    return render_template("register_router.html")
+
 # ---------------------------------------------------------
 # REGISTRO DE USUARIOS (validación por nacionalidad, tipo y rol)
 # ---------------------------------------------------------
