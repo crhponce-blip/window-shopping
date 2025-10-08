@@ -5,25 +5,25 @@
 <div class="perfil-container">
   <div class="perfil-card">
     <div class="perfil-avatar">
-      <img src="{{ usuario.imagen or url_for('static', filename='img/default_user.png') }}" alt="avatar">
+      <img src="{{ perfil.imagen or url_for('static', filename='img/default_user.png') }}" alt="avatar">
     </div>
-    <h2 class="perfil-nombre">{{ usuario.nombre }}</h2>
-    <p class="perfil-rol">{{ t("Rol", "Role", "角色") }}: <strong>{{ usuario.rol }}</strong></p>
+    <h2 class="perfil-nombre">{{ perfil.nombre }}</h2>
+    <p class="perfil-rol">{{ t("Rol", "Role", "角色") }}: <strong>{{ perfil.rol }}</strong></p>
 
     <div class="perfil-info">
-      <p><strong>{{ t("Correo", "Email", "電子郵件") }}:</strong> {{ usuario.email }}</p>
-      {% if usuario.telefono %}
-      <p><strong>{{ t("Teléfono", "Phone", "電話") }}:</strong> {{ usuario.telefono }}</p>
+      <p><strong>{{ t("Correo", "Email", "電子郵件") }}:</strong> {{ perfil.email }}</p>
+      {% if perfil.telefono %}
+      <p><strong>{{ t("Teléfono", "Phone", "電話") }}:</strong> {{ perfil.telefono }}</p>
       {% endif %}
-      {% if usuario.empresa %}
-      <p><strong>{{ t("Empresa", "Company", "公司") }}:</strong> {{ usuario.empresa }}</p>
+      {% if perfil.empresa %}
+      <p><strong>{{ t("Empresa", "Company", "公司") }}:</strong> {{ perfil.empresa }}</p>
       {% endif %}
     </div>
 
     <hr class="divider">
 
     <div class="perfil-actions">
-      <form method="POST" action="{{ url_for('enviar_mensaje', id=usuario.id) }}">
+      <form method="POST" action="{{ url_for('enviar_mensaje', id=perfil.id) }}">
         <textarea name="mensaje" class="mensaje-input" placeholder="{{ t('Escribe tu mensaje...', 'Write your message...', '輸入您的訊息...') }}" required></textarea>
         <button type="submit" class="btn btn-primary">
           {{ t("Enviar Mensaje", "Send Message", "發送訊息") }}
@@ -46,125 +46,4 @@
     </a>
   </div>
 </div>
-
-<style>
-.perfil-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 90vh;
-  background: linear-gradient(145deg, #071932, #0c2952);
-  color: white;
-  font-family: 'Poppins', sans-serif;
-}
-
-.perfil-card {
-  background: rgba(255, 255, 255, 0.08);
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  width: 420px;
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
-}
-
-.perfil-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-.perfil-avatar img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #00c3ff;
-  margin-bottom: 15px;
-}
-
-.perfil-nombre {
-  font-size: 1.8em;
-  color: #00c3ff;
-  margin-bottom: 5px;
-}
-
-.perfil-rol {
-  font-size: 1.1em;
-  color: #bbb;
-  margin-bottom: 20px;
-}
-
-.perfil-info p {
-  margin: 5px 0;
-  color: #eee;
-  font-size: 0.95em;
-}
-
-.divider {
-  border: none;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 20px 0;
-}
-
-.mensaje-input {
-  width: 100%;
-  height: 100px;
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 1em;
-  resize: none;
-  margin-bottom: 15px;
-}
-
-.alert {
-  margin-top: 20px;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 0.95em;
-}
-
-.alert.success {
-  background: rgba(46, 204, 113, 0.2);
-  color: #2ecc71;
-}
-
-.alert.warning {
-  background: rgba(241, 196, 15, 0.2);
-  color: #f1c40f;
-}
-
-.btn {
-  padding: 10px 15px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: #00c3ff;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #0096c7;
-}
-
-.btn-secondary {
-  background: #555;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background: #777;
-}
-
-.volver {
-  display: inline-block;
-  margin-top: 25px;
-}
-</style>
 {% endblock %}
