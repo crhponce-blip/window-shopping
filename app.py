@@ -973,30 +973,3 @@ def enviar_mensaje():
                            destinatario=destinatario,
                            mensaje=mensaje,
                            fecha=ahora.strftime("%d/%m/%Y %H:%M"))
-
-
-# =========================================================
-# RUTA: Ocultar ítem de vista previa (sin eliminarlo)
-# =========================================================
-@app.route("/hide_from_view", methods=["POST"])
-def hide_from_view():
-    if not is_logged():
-        return redirect(url_for("login"))
-
-    item_id = (request.form.get("item_id") or "").strip()
-    if not item_id:
-        flash(t("No se seleccionó ningún ítem para ocultar.",
-                "No item was selected to hide.",
-                "未選擇要隱藏的項目。"))
-        return redirect(request.referrer or url_for("dashboard"))
-
-    ocultos = session.get("ocultos", [])
-    if item_id not in ocultos:
-        ocultos.append(item_id)
-        session["ocultos"] = ocultos
-
-    flash(t("Ítem ocultado temporalmente de la vista.",
-            "Item temporarily hidden from view.",
-            "項目已暫時從視圖中隱藏。"))
-
-    return render_template("ocultar_item.html", item_id=item_id)
