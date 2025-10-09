@@ -1,13 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="success-box" style="max-width:600px;margin:50px auto;text-align:center;">
-  <h2 style="color:#22c55e">{{ t("¡Registro exitoso!","Registration successful!","註冊完成！") }}</h2>
-  <p>{{ t("Tu cuenta fue creada correctamente. Ya puedes acceder a tu panel principal o explorar las secciones de compra, venta y servicios.",
-           "Your account has been created. You can access the dashboard or explore buy/sell/services.",
-           "您的帳戶已建立，現在可前往主頁或瀏覽購買、銷售與服務。") }}</p>
-  <div style="margin-top:18px;display:flex;gap:10px;justify-content:center">
-    <a href="{{ url_for('dashboard') }}" class="btn">{{ t("Ir al Panel","Go to Dashboard","前往主頁") }}</a>
-    <a href="{{ url_for('home') }}" class="btn btn-secondary">{{ t("Volver al Inicio","Back to Home","返回首頁") }}</a>
-  </div>
-</div>
+<section class="registro-ok" style="text-align:center; padding:50px;">
+  <h2>✅ {{ t("Registro exitoso", "Registration successful", "註冊成功") }}</h2>
+  <p>{{ t("Tu cuenta ha sido creada correctamente.", "Your account has been created successfully.", "您的帳戶已成功建立。") }}</p>
+  <a href="{{ url_for('login') }}" class="btn">{{ t("Iniciar sesión", "Login", "登入") }}</a>
+</section>
 {% endblock %}
