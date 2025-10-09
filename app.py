@@ -42,7 +42,8 @@ def t(es: str, en: str, zh: Optional[str] = None) -> str:
 def inject_globals():
     return dict(
         t=t,
-        LANGS=[("es", "ES"), ("en", "EN"), ("zh", "中文")]
+        LANGS=[("es", "ES"), ("en", "EN"), ("zh", "中文")],
+        is_logged=is_logged
     )
 
 @app.route("/set_lang/<lang>")
