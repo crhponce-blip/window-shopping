@@ -1,15 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="clientes-section">
+<section class="clientes-section glass-card">
   <h2>{{ t("Empresas registradas", "Registered Companies", "已註冊的公司") }}</h2>
+
   {% if clientes %}
     <ul class="clientes-list">
       {% for c in clientes %}
       <li class="cliente-card">
-        <h3>{{ c.empresa }}</h3>
-        <p>{{ t("Rol", "Role", "角色") }}: {{ c.rol }}</p>
-        <p>{{ t("Descripción", "Description", "描述") }}: {{ c.descripcion }}</p>
-        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn">
+        <div class="cliente-info">
+          <h3>{{ c.empresa }}</h3>
+          <p><strong>{{ t("Rol", "Role", "角色") }}:</strong> {{ c.rol }}</p>
+          <p><strong>{{ t("Descripción", "Description", "描述") }}:</strong> {{ c.descripcion }}</p>
+        </div>
+        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn-primary">
           🔍 {{ t("Ver detalles", "View details", "查看詳情") }}
         </a>
       </li>
