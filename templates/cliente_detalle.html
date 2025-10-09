@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="detalle-cliente">
+<section class="detalle-cliente glass-card">
   <h2>{{ c.empresa }}</h2>
   <p><strong>{{ t("Rol", "Role", "角色") }}:</strong> {{ c.rol }}</p>
   <p><strong>{{ t("Descripción", "Description", "描述") }}:</strong> {{ c.descripcion }}</p>
@@ -8,7 +8,7 @@
 
   <h3>{{ t("Productos o servicios", "Products or Services", "產品或服務") }}</h3>
   {% if c.items %}
-    <ul>
+    <ul class="item-list">
       {% for i in c.items %}
       <li>{{ i.nombre }} — {{ t("Tipo", "Type", "類型") }}: {{ i.tipo }}</li>
       {% endfor %}
@@ -18,9 +18,9 @@
   {% endif %}
 
   {% if session.user %}
-  <form action="{{ url_for('enviar_mensaje', username=c.username) }}" method="post">
+  <form action="{{ url_for('enviar_mensaje', username=c.username) }}" method="post" class="mensaje-form">
     <textarea name="mensaje" placeholder="{{ t('Escribe un mensaje','Write a message','寫一條消息') }}" required></textarea>
-    <button type="submit" class="btn">{{ t("Enviar mensaje","Send message","發送消息") }}</button>
+    <button type="submit" class="btn-primary">{{ t("Enviar mensaje","Send message","發送消息") }}</button>
   </form>
   {% endif %}
 </section>
