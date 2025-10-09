@@ -1,91 +1,80 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card" style="max-width:900px;margin:30px auto;background:rgba(255,255,255,.08);padding:20px;border-radius:12px;">
-  <h2>{{ t("Registro","Registration","註冊") }}</h2>
 
-  {% set nac = nacionalidad or request.args.get('nac') or 'nacional' %}
-  {% set tipo = perfil_tipo or request.args.get('tipo') or 'compra_venta' %}
+<section class="form-container">
+    <h2>{{ t("Registro de empresa o usuario", "Company or User Registration", "公司或用戶註冊") }}</h2>
 
-  <form method="post" enctype="multipart/form-data" style="display:grid;gap:12px">
-    <input type="hidden" name="nacionalidad" value="{{ nac }}">
-    <input type="hidden" name="perfil_tipo" value="{{ tipo }}">
+    <form action="{{ url_for('register') }}" method="POST" class="form-box">
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
-      <div>
-        <label>Email</label>
-        <input name="username" type="email" required placeholder="correo@empresa.com">
-      </div>
-      <div>
-        <label>{{ t("Contraseña","Password","密碼") }}</label>
-        <input name="password" type="password" required>
-      </div>
-      <div>
-        <label>{{ t("Empresa","Company","公司") }}</label>
-        <input name="empresa" required>
-      </div>
-      <div>
-        <label>{{ t("Teléfono","Phone","電話") }}</label>
-        <input name="phone">
-      </div>
-      <div>
-        <label>{{ t("Dirección","Address","地址") }}</label>
-        <input name="address">
-      </div>
-      <div>
-        <label>{{ t("País (código ISO)","Country (ISO code)","國家（ISO）") }}</label>
-        <input name="pais" placeholder="{{ 'CL' if nac=='nacional' else 'US' }}">
-      </div>
-    </div>
+        <!-- NOMBRE -->
+        <label for="nombre">{{ t("Nombre de la empresa o usuario", "Company or User Name", "公司或用戶名稱") }}</label>
+        <input type="text" id="nombre" name="nombre" required placeholder="{{ t('Ejemplo: Exportadora Andina', 'Example: Andean Exporter', '例如：安第斯出口公司') }}">
 
-    {% if nac == 'nacional' %}
-      <div style="margin-top:8px">
-        <label>RUT</label>
-        <input name="rut" placeholder="11.111.111-1">
-      </div>
-      <div>
-        <label>PDF RUT (SII)</label>
-        <input type="file" name="rut_file" accept=".pdf,.png,.jpg,.jpeg">
-      </div>
-    {% else %}
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
-        <div>
-          <label>EORI / TAX ID</label>
-          <input name="eori">
-        </div>
-        <div>
-          <label>{{ t("Otro ID","Other ID","其他證號") }}</label>
-          <input name="otros_id">
-        </div>
-      </div>
-    {% endif %}
+        <!-- EMAIL -->
+        <label for="email">{{ t("Correo electrónico", "Email", "電子郵件") }}</label>
+        <input type="email" id="email" name="email" required placeholder="{{ t('Ejemplo: contacto@empresa.cl', 'Example: contact@company.com', '例如：contact@company.com') }}">
 
-    {% set ROLES_CV = ["Productor","Planta","Packing","Frigorífico","Exportador"] %}
-    {% set ROLES_SR = ["Packing","Frigorífico","Transporte","Extraportuario","Agencia de Aduanas"] %}
-    {% set ROLES_AMB = ["Packing","Frigorífico"] %}
+        <!-- CONTRASEÑA -->
+        <label for="password">{{ t("Contraseña", "Password", "密碼") }}</label>
+        <input type="password" id="password" name="password" required placeholder="{{ t('Ingresa una contraseña', 'Enter a password', '輸入密碼') }}">
 
-    <div>
-      <label>{{ t("Rol","Role","角色") }}</label>
-      <select name="rol" required>
-        {% if nac == 'extranjero' %}
-          <option value="Cliente extranjero">{{ t("Cliente extranjero","Foreign client","海外客戶") }}</option>
-        {% else %}
-          {% if tipo == 'compra_venta' %}
-            {% for r in ROLES_CV %}<option>{{ r }}</option>{% endfor %}
-          {% elif tipo == 'servicios' %}
-            {% for r in ROLES_SR %}<option>{{ r }}</option>{% endfor %}
-          {% elif tipo == 'ambos' %}
-            {% for r in ROLES_AMB %}<option>{{ r }}</option>{% endfor %}
-          {% endif %}
-        {% endif %}
-      </select>
-    </div>
+        <!-- PERFIL PRINCIPAL -->
+        <label for="perfil">{{ t("Selecciona tu tipo de perfil", "Select your profile type", "選擇您的個人資料類型") }}</label>
+        <select id="perfil" name="perfil" required>
+            <option value="cliente_extranjero">{{ t("Cliente extranjero (solo compras)", "Foreign client (only purchases)", "外國客戶（僅購買）") }}</option>
+            <option value="nacional_compraventa">{{ t("Nacional - Compra/Venta", "National - Buy/Sell", "國內 - 買賣") }}</option>
+            <option value="nacional_servicios">{{ t("Nacional - Servicios", "National - Services", "國內 - 服務") }}</option>
+            <option value="nacional_mixto">{{ t("Nacional - Mixto (Fruta y Servicios)", "National - Mixed (Fruit & Services)", "國內 - 混合（水果與服務）") }}</option>
+        </select>
 
-    {% if error %}<p style="color:#f87171">{{ error }}</p>{% endif %}
+        <!-- ROL DINÁMICO -->
+        <label for="rol">{{ t("Selecciona tu rol", "Select your role", "選擇您的角色") }}</label>
+        <select id="rol" name="rol" required>
+            <option value="Productor">{{ t("Productor (Planta)", "Producer (Plant)", "生產商（工廠）") }}</option>
+            <option value="Packing">{{ t("Packing", "Packing", "包裝廠") }}</option>
+            <option value="Frigorífico">{{ t("Frigorífico", "Cold Storage", "冷藏庫") }}</option>
+            <option value="Exportador">{{ t("Exportador", "Exporter", "出口商") }}</option>
+            <option value="Agencia de aduana">{{ t("Agencia de aduana", "Customs Agency", "報關行") }}</option>
+            <option value="Extraportuario">{{ t("Extraportuario", "Extra-port Service", "港外服務") }}</option>
+            <option value="Transporte">{{ t("Transporte", "Transport", "運輸") }}</option>
+            <option value="Cliente extranjero">{{ t("Cliente extranjero", "Foreign Client", "外國客戶") }}</option>
+        </select>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
-      <button class="btn" type="submit">{{ t("Crear cuenta","Create account","建立帳戶") }}</button>
-      <a class="btn btn-secondary" href="{{ url_for('register_router') }}">{{ t("Cambiar tipo","Change type","更改類型") }}</a>
-    </div>
-  </form>
-</div>
+        <!-- BOTÓN DE ENVÍO -->
+        <button type="submit" class="btn btn-primary">{{ t("Crear cuenta", "Create Account", "建立帳號") }}</button>
+    </form>
+
+    <p class="form-footer">
+        {{ t("¿Ya tienes una cuenta?", "Already have an account?", "已經有帳號了？") }}
+        <a href="{{ url_for('login') }}">{{ t("Inicia sesión aquí", "Log in here", "點此登入") }}</a>
+    </p>
+</section>
+
+<script>
+    // =========================================================
+    // SCRIPT PARA AJUSTAR ROLES SEGÚN EL PERFIL SELECCIONADO
+    // =========================================================
+    const perfilSelect = document.getElementById('perfil');
+    const rolSelect = document.getElementById('rol');
+
+    const rolesPorPerfil = {
+        "cliente_extranjero": ["Cliente extranjero"],
+        "nacional_compraventa": ["Productor", "Packing", "Frigorífico", "Exportador"],
+        "nacional_servicios": ["Agencia de aduana", "Extraportuario", "Transporte", "Packing", "Frigorífico"],
+        "nacional_mixto": ["Packing", "Frigorífico"]
+    };
+
+    perfilSelect.addEventListener('change', function() {
+        const seleccion = this.value;
+        const roles = rolesPorPerfil[seleccion] || [];
+        rolSelect.innerHTML = '';
+        roles.forEach(function(rol) {
+            const option = document.createElement('option');
+            option.value = rol;
+            option.textContent = rol;
+            rolSelect.appendChild(option);
+        });
+    });
+</script>
+
 {% endblock %}
