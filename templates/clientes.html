@@ -1,21 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="max-width:980px;margin:26px auto">
-  <h2>{{ t("Clientes","Clients","客戶") }}</h2>
+<section class="clientes-section">
+  <h2>{{ t("Empresas registradas", "Registered Companies", "已註冊的公司") }}</h2>
   {% if clientes %}
-  <table>
-    <tr><th>{{ t("Empresa","Company","公司") }}</th><th>{{ t("País","Country","國家") }}</th><th>Email</th><th></th></tr>
-    {% for c in clientes %}
-      <tr>
-        <td>{{ c.empresa }}</td>
-        <td>{{ c.pais }}</td>
-        <td>{{ c.email }}</td>
-        <td><a class="btn btn-secondary" href="{{ url_for('cliente_detalle', username=c.username) }}">{{ t("Ver perfil","View profile","查看資料") }}</a></td>
-      </tr>
-    {% endfor %}
-  </table>
+    <ul class="clientes-list">
+      {% for c in clientes %}
+      <li class="cliente-card">
+        <h3>{{ c.empresa }}</h3>
+        <p>{{ t("Rol", "Role", "角色") }}: {{ c.rol }}</p>
+        <p>{{ t("Descripción", "Description", "描述") }}: {{ c.descripcion }}</p>
+        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn">
+          🔍 {{ t("Ver detalles", "View details", "查看詳情") }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
   {% else %}
-    <p>{{ t("No se encontraron clientes.","No clients found.","未找到客戶。") }}</p>
+    <p>{{ t("No hay empresas registradas actualmente.", "No companies registered yet.", "目前沒有註冊公司。") }}</p>
   {% endif %}
-</div>
+</section>
 {% endblock %}
