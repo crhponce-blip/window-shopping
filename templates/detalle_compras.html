@@ -1,36 +1,46 @@
 {% extends "base.html" %}
-{% block title %}{{ t("Ofertas disponibles","Available Offers","可供應商品") }}{% endblock %}
 {% block content %}
-<div class="detalle-container" style="max-width:980px;margin:26px auto">
-  <h2>{{ t("Ofertas de productos disponibles","Available Product Offers","可購買商品清單") }}</h2>
-  <form method="GET" style="display:flex;gap:8px;margin:10px 0">
-    <input type="text" name="q" placeholder="{{ t('Buscar producto o empresa...','Search product or company...','搜尋產品或公司...') }}" value="{{ query }}">
-    <button class="btn btn-secondary">{{ t("Buscar","Search","搜尋") }}</button>
-  </form>
 
-  <ul style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;list-style:none;padding:0">
-    {% for c in data %}
-      {% for item in c.items if item.tipo in ['oferta','producto'] %}
-      <li style="background:rgba(255,255,255,.08);padding:14px;border-radius:10px;">
-        <h3 style="margin:0 0 6px">{{ c.empresa }}</h3>
-        <p><b>{{ t("Producto:","Product:","產品：") }}</b> {{ item.producto }}</p>
-        {% if item.variedad %}<p><b>{{ t("Variedad:","Variety:","品種：") }}</b> {{ item.variedad }}</p>{% endif %}
-        {% if item.cantidad %}<p><b>{{ t("Cantidad:","Quantity:","數量：") }}</b> {{ item.cantidad }}</p>{% endif %}
-        {% if item.origen %}<p><b>{{ t("Origen:","Origin:","來源：") }}</b> {{ item.origen }}</p>{% endif %}
-        {% if item.precio_caja %}<p><b>{{ t("Precio/Caja:","Price/Box:","每箱價格：") }}</b> {{ item.precio_caja }}</p>{% endif %}
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-          <form method="post" action="{{ url_for('cart_add') }}">
-            <input type="hidden" name="username" value="{{ c.username }}">
-            <input type="hidden" name="tipo" value="compras">
-            <button class="btn btn-success">{{ t("Agregar al carrito 🛒","Add to cart 🛒","加入購物車 🛒") }}</button>
-          </form>
-          <a class="btn btn-secondary" href="{{ url_for('cliente_detalle', username=c.username) }}">{{ t("Ver perfil","View profile","查看資料") }}</a>
-        </div>
-      </li>
-      {% endfor %}
+<section class="detalle-container">
+    <h2>🛒 {{ t("Ofertas disponibles", "Available Offers", "可用的報價") }}</h2>
+
+    <!-- BUSCADOR -->
+    <form method="get" action="{{ url_for('compras') }}" class="search-bar">
+        <input type="text" name="q" placeholder="{{ t('Buscar por empresa o descripción...', 'Search by company or description...', '按公司或描述搜尋...') }}" value="{{ request.args.get('q', '') }}">
+        <button type="submit" class="btn btn-primary">{{ t("Buscar", "Search", "搜尋") }}</button>
+    </form>
+
+    <!-- MENSAJE SI NO HAY DATOS -->
+    {% if not data %}
+        <p class="no-results">{{ t("No hay ofertas disponibles para tu perfil.", "No offers available for your profile.", "目前沒有可用的報價。") }}</p>
     {% else %}
-      <li>{{ t("No hay ofertas disponibles actualmente.","No offers available at the moment.","目前沒有可用的商品供應。") }}</li>
-    {% endfor %}
-  </ul>
-</div>
+        <!-- LISTADO DE OFERTAS -->
+        <div class="detalle-list">
+            {% for empresa in data %}
+                <div class="detalle-card">
+                    <h3>{{ empresa.empresa }}</h3>
+                    <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ empresa.rol }}</p>
+                    <p><strong>{{ t("Descripción:", "Description:", "描述：") }}</strong> {{ empresa.descripcion }}</p>
+
+                    {% if empresa.items %}
+                        <ul>
+                            {% for item in empresa.items %}
+                                {% if item.tipo == "oferta" %}
+                                    <li>{{ item.nombre }} - {{ item.detalle }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <form method="post" action="{{ url_for('agregar_carrito', username=empresa.username) }}">
+                        <button type="submit" class="btn btn-secondary">
+                            🛍️ {{ t("Agregar al carrito", "Add to Cart", "加入購物車") }}
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>
+
 {% endblock %}
