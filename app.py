@@ -140,7 +140,7 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
     # =========================
     # Productor / Planta (compraventa)
     # =========================
-    "productor1@demo.cl": {
+    "productor1@demo.cl": 
         "empresa": "Productores del Valle SpA",
         "rut": "76.111.111-1",
         "rol": "Productor",
