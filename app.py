@@ -1,5 +1,6 @@
 # === app.py (Parte 1/6) ===
 # Configuración base, i18n y datos semilla (incluye clientes extranjeros con DEMANDA)
+
 import os
 import uuid
 from datetime import timedelta
@@ -7,7 +8,7 @@ from typing import List, Dict, Any, Optional
 from werkzeug.utils import secure_filename
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    session, abort, flash
+    session, abort, flash, send_from_directory
 )
 
 # =========================================================
@@ -25,6 +26,20 @@ ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg"}
 
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
+
+# =========================================================
+# SOPORTE DE ARCHIVOS Y FAVICON
+# =========================================================
+@app.route("/favicon.ico")
+def favicon():
+    """Evita errores 404 del navegador por el ícono"""
+    ico_path = os.path.join(app.root_path, "static")
+    try:
+        return send_from_directory(ico_path, "favicon.ico", mimetype="image/vnd.microsoft.icon")
+    except Exception:
+        return ("", 204)
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # =========================================================
 # I18N / MULTI-IDIOMA (ES / EN / ZH)
@@ -88,12 +103,11 @@ def norm_money(val: str) -> str:
     if val.startswith("$"):
         return val
     return f"${val}"
-
 # =========================================================
 # USUARIOS Y PERFILES (SEMILLA)
-# - Incluye 2 empresas por tipo/rol según tus reglas
-# - Cliente extranjero: items de TIPO "demanda"
-# - Packing/Frigorífico mixtos incluidos
+# Incluye 2 empresas por tipo/rol según tus reglas
+# Cliente extranjero: items de tipo "demanda"
+# Packing/Frigorífico mixtos incluidos
 # =========================================================
 
 USERS: Dict[str, Dict[str, Any]] = {
@@ -132,16 +146,20 @@ USERS: Dict[str, Dict[str, Any]] = {
     "frigorificomix1@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "ambos", "pais": "CL"},
     "frigorificomix2@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "ambos", "pais": "CL"},
 
-    # --- Clientes extranjeros (solo compras pero con DEMANDA) ---
+    # --- Clientes extranjeros (solo compras con DEMANDA) ---
     "clienteusa1@ext.com": {"password": "1234", "rol": "Cliente extranjero", "perfil_tipo": "compra_venta", "pais": "US"},
     "clienteusa2@ext.com": {"password": "1234", "rol": "Cliente extranjero", "perfil_tipo": "compra_venta", "pais": "US"},
 }
 
+# =========================================================
+# PERFILES DETALLADOS (USER_PROFILES)
+# =========================================================
+
 USER_PROFILES: Dict[str, Dict[str, Any]] = {
-    # =========================
-    # Productor / Planta (compraventa)
-    # =========================
-    "productor1@demo.cl": {  # <-- FIX (faltaba '{')
+    # ======================================================
+    # PRODUCTOR / PLANTA
+    # ======================================================
+    "productor1@demo.cl": {
         "empresa": "Productores del Valle SpA",
         "rut": "76.111.111-1",
         "rol": "Productor",
@@ -156,7 +174,7 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
             {"tipo": "oferta", "producto": "Arándano", "variedad": "Duke", "cantidad": "80", "bulto": "pallets", "origen": "VI Región", "precio_caja": "$15"},
             {"tipo": "servicio", "servicio": "Mano de obra cosecha", "capacidad": "10 cuadrillas", "ubicacion": "V-VI Región"}
         ],
-    },  # <-- FIX (faltaba '},')
+    },
     "productor2@demo.cl": {
         "empresa": "Agro Cordillera Ltda.",
         "rut": "76.222.222-2",
@@ -173,9 +191,9 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         ],
     },
 
-    # =========================
-    # Packing (compraventa)
-    # =========================
+    # ======================================================
+    # PACKING (compraventa)
+    # ======================================================
     "packingcv1@demo.cl": {
         "empresa": "Packing Maule SpA",
         "rut": "77.333.333-3",
@@ -206,10 +224,9 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
             {"tipo": "servicio", "servicio": "QA y etiquetado", "capacidad": "15.000 cajas/día", "ubicacion": "Ovalle"},
         ],
     },
-
-    # =========================
-    # Frigorífico (compraventa)
-    # =========================
+   # ======================================================
+    # FRIGORÍFICO (compraventa)
+    # ======================================================
     "frigorificocv1@demo.cl": {
         "empresa": "Frío Centro SpA",
         "rut": "80.111.111-1",
@@ -241,9 +258,9 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         ],
     },
 
-    # =========================
-    # Exportadores (compraventa)
-    # =========================
+    # ======================================================
+    # EXPORTADORES (compraventa)
+    # ======================================================
     "export1@demo.cl": {
         "empresa": "Exportadora Andes SpA",
         "rut": "78.111.111-1",
@@ -275,9 +292,9 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         ],
     },
 
-    # =========================
-    # Packing (servicios)
-    # =========================
+    # ======================================================
+    # PACKING (servicios)
+    # ======================================================
     "packingserv1@demo.cl": {
         "empresa": "PackSmart Servicios",
         "rut": "79.111.111-1",
@@ -309,9 +326,9 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         ],
     },
 
-    # =========================
-    # Frigorífico (servicios)
-    # =========================
+    # ======================================================
+    # FRIGORÍFICO (servicios)
+    # ======================================================
     "frigorificoserv1@demo.cl": {
         "empresa": "FríoPort Servicios",
         "rut": "80.333.333-3",
@@ -343,9 +360,9 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         ],
     },
 
-    # =========================
-    # Agencia de Aduanas (servicios)
-    # =========================
+    # ======================================================
+    # AGENCIA DE ADUANAS (servicios)
+    # ======================================================
     "aduana1@demo.cl": {
         "empresa": "Agencia Andes",
         "rut": "82.111.111-1",
@@ -369,15 +386,15 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "email": "aduana2@demo.cl",
         "telefono": "+56 2 2900 2222",
         "direccion": "San Antonio",
-        "descripcion": "Ventanilla única y asesoria OEA.",
+        "descripcion": "Ventanilla única y asesoría OEA.",
         "items": [
             {"tipo": "servicio", "servicio": "Asesoría OEA", "capacidad": "Media", "ubicacion": "San Antonio"},
         ],
     },
 
-    # =========================
-    # Extraportuario (servicios)
-    # =========================
+    # ======================================================
+    # EXTRAPORTUARIO (servicios)
+    # ======================================================
     "extraport1@demo.cl": {
         "empresa": "Servicios Extraport Valpo",
         "rut": "83.111.111-1",
@@ -403,16 +420,15 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "direccion": "San Antonio",
         "descripcion": "Servicios logísticos en puerto.",
         "items": [
-            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "50/día", "ubicacion": "San Antonio"},  # <-- FIX (ubicación -> ubicacion para consistencia)
-        ]
-    },  # <-- FIX (faltaba coma/cierre correcto del bloque)
-}  # <-- FIX (cierre correcto de USER_PROFILES)
-        
-          # =========================================================
+            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "50/día", "ubicacion": "San Antonio"},
+        ],
+    },
+}
+# =========================================================
 # DATOS SIMULADOS: USUARIOS Y PUBLICACIONES
 # =========================================================
 
-USERS = {
+USERS_SIM = {
     "cliente1": {"usuario": "cliente1", "rol": "Cliente extranjero", "tipo": "compras", "empresa": "Importadora Asia Ltd.", "password": "1234"},
     "export1": {"usuario": "export1", "rol": "Exportador", "tipo": "compraventa", "empresa": "Exportadora Andes SpA", "password": "1234"},
     "export2": {"usuario": "export2", "rol": "Exportador", "tipo": "compraventa", "empresa": "Exportadora del Pacífico", "password": "1234"},
@@ -429,7 +445,10 @@ USERS = {
     "trans1": {"usuario": "trans1", "rol": "Transporte", "tipo": "servicios", "empresa": "Transporte Global", "password": "1234"},
 }
 
-# Publicaciones simuladas (ofertas, demandas, servicios)
+# =========================================================
+# PUBLICACIONES SIMULADAS (ofertas, demandas, servicios)
+# =========================================================
+
 PUBLICACIONES = [
     {"usuario": "export1", "tipo": "oferta", "rol": "Exportador", "empresa": "Exportadora Andes SpA", "producto": "Trufas Negras Chilenas", "precio": "USD 800/kg"},
     {"usuario": "export2", "tipo": "oferta", "rol": "Exportador", "empresa": "Exportadora del Pacífico", "producto": "Cerezas Premium", "precio": "USD 7/kg"},
@@ -440,34 +459,34 @@ PUBLICACIONES = [
 ]
 
 # =========================================================
-# FUNCIONES AUXILIARES
+# FUNCIONES AUXILIARES (idioma, login, etc.)
 # =========================================================
 
-def is_logged():
-    """Verifica si hay sesión activa"""
-    return "user" in session
-
-def get_lang():
+def get_lang() -> str:
     """Obtiene el idioma activo"""
     return session.get("lang", "es")
 
-def t(es, en, zh):
+def t(es: str, en: str, zh: Optional[str] = None) -> str:
     """Traducción rápida según idioma"""
     lang = get_lang()
     if lang == "en":
         return en
     elif lang == "zh":
-        return zh
+        return zh or es
     return es
+
+def is_logged() -> bool:
+    """Verifica si hay sesión activa"""
+    return "user" in session
+
 # =========================================================
-# RUTAS DE AUTENTICACIÓN Y NAVEGACIÓN PRINCIPAL
+# RUTAS PRINCIPALES Y AUTENTICACIÓN
 # =========================================================
 
 @app.route("/")
 def home():
     """Página principal"""
     return render_template("home.html")
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -476,7 +495,9 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
-        if username in USERS and USERS[username]["password"] == password:
+        # Se valida tanto con USERS como con USERS_SIM
+        user_obj = USERS.get(username) or USERS_SIM.get(username)
+        if user_obj and user_obj.get("password") == password:
             session["user"] = username
             flash(t("Inicio de sesión exitoso", "Login successful", "登入成功"))
             return redirect(url_for("home"))
@@ -486,49 +507,58 @@ def login():
 
     return render_template("login.html")
 
-
 @app.route("/logout")
 def logout():
-    """Cierra sesión"""
+    """Cerrar sesión"""
     session.pop("user", None)
     flash(t("Sesión cerrada correctamente", "Logged out successfully", "成功登出"))
     return redirect(url_for("home"))
-
+# =========================================================
+# RUTA DE REGISTRO (REGISTER + REGISTER_ROUTER)
+# =========================================================
 
 @app.route("/register", methods=["GET", "POST"])
-def register():
+@app.route("/register_router", methods=["GET", "POST"])
+def register_router():
     """
-    Registro de nuevos usuarios.
-    Se define el rol, tipo de usuario (compras, ventas, servicios, mixto)
-    y se agregan automáticamente a la base simulada USERS.
+    Registro de nuevos usuarios con subida opcional de archivo (logo, certificado, etc.)
+    Se valida duplicado y se guarda localmente en /static/uploads
     """
     if request.method == "POST":
         usuario = request.form.get("usuario", "").strip()
         password = request.form.get("password", "").strip()
         empresa = request.form.get("empresa", "").strip()
-        rol = request.form.get("rol", "")
-        tipo = request.form.get("tipo", "")
+        rol = request.form.get("rol", "").strip()
+        tipo = request.form.get("tipo", "").strip()
+        file = request.files.get("archivo")
 
         if not all([usuario, password, empresa, rol, tipo]):
             flash(t("Todos los campos son obligatorios", "All fields are required", "所有欄位均為必填"))
-            return redirect(url_for("register"))
+            return redirect(url_for("register_router"))
 
-        if usuario in USERS:
+        if usuario in USERS or usuario in USERS_SIM:
             flash(t("El nombre de usuario ya existe", "Username already exists", "用戶名已存在"))
-            return redirect(url_for("register"))
+            return redirect(url_for("register_router"))
 
+        # Guardado del archivo
+        filename = None
+        if file and allowed_file(file.filename):
+            filename = secure_filename(f"{uuid.uuid4().hex}_{file.filename}")
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+
+        # Agregar al diccionario global
         USERS[usuario] = {
             "usuario": usuario,
             "password": password,
             "empresa": empresa,
             "rol": rol,
             "tipo": tipo,
+            "archivo": filename,
         }
 
         flash(t("Usuario registrado exitosamente", "User registered successfully", "用戶註冊成功"))
         return redirect(url_for("login"))
 
-    # Lista de roles disponibles
     roles = [
         "Cliente extranjero",
         "Productor(planta)",
@@ -539,14 +569,13 @@ def register():
         "Extraportuario",
         "Transporte",
     ]
-
     tipos = ["compras", "ventas", "servicios", "mixto", "compraventa"]
 
     return render_template("register.html", roles=roles, tipos=tipos)
 
 
 # =========================================================
-# RUTA DE PERFIL
+# RUTA PERFIL
 # =========================================================
 @app.route("/perfil")
 def perfil():
@@ -555,16 +584,20 @@ def perfil():
         flash(t("Debes iniciar sesión para acceder al perfil", "You must log in to access the profile", "請先登入以訪問個人資料"))
         return redirect(url_for("login"))
 
-    user = USERS.get(session["user"], {})
-    return render_template("perfil.html", user=user)
+    user = USERS.get(session["user"]) or USERS_SIM.get(session["user"])
+    profile = USER_PROFILES.get(session["user"], {})
+    return render_template("perfil.html", user=user, profile=profile)
+
+
 # =========================================================
 # DETALLES DE PUBLICACIONES (VENTAS / COMPRAS / SERVICIOS)
 # =========================================================
+
 @app.route("/detalles/<tipo>", methods=["GET", "POST"])
 def detalles(tipo):
     """
     Muestra los detalles disponibles según el tipo y el rol del usuario logueado.
-    Incluye buscador y filtro dinámico según los flujos definidos.
+    Incluye buscador y filtro dinámico según las reglas de visibilidad.
     """
     tipo = tipo.lower()
     if tipo not in ("ventas", "compras", "servicios"):
@@ -574,26 +607,22 @@ def detalles(tipo):
         flash(t("Debes iniciar sesión para ver los detalles", "You must log in to view details", "請先登入以查看詳情"))
         return redirect(url_for("login"))
 
-    me = USERS.get(session["user"], {})
+    me = USERS.get(session["user"]) or USERS_SIM.get(session["user"])
     my_rol = me.get("rol", "")
     filtro_texto = (request.args.get("q", "") or "").lower().strip()
 
-    # ---------------------------------------------------------
-    # VISIBILIDAD SEGÚN ROL Y TIPO
-    # ---------------------------------------------------------
     visibles = []
-
     for pub in PUBLICACIONES:
         p_rol = pub["rol"]
         p_tipo = pub["tipo"]
         p_empresa = pub["empresa"].lower()
 
-        # Aplica el filtro de texto
+        # Filtro de texto
         if filtro_texto and filtro_texto not in p_empresa:
             continue
 
-        # Reglas de visibilidad según el flujo que definiste:
-        if tipo == "ventas":  # vender (ver demandas)
+        # Lógica de visibilidad según tipo y rol
+        if tipo == "ventas":  # Ver demandas
             if my_rol == "Productor(planta)" and p_rol in ["Packing", "Frigorífico", "Exportador"]:
                 visibles.append(pub)
             elif my_rol == "Packing" and p_rol in ["Frigorífico", "Exportador"]:
@@ -603,7 +632,7 @@ def detalles(tipo):
             elif my_rol == "Exportador" and p_rol in ["Exportador", "Cliente extranjero"]:
                 visibles.append(pub)
 
-        elif tipo == "compras":  # comprar (ver ofertas)
+        elif tipo == "compras":  # Ver ofertas
             if my_rol == "Packing" and p_rol in ["Productor(planta)", "Frigorífico"]:
                 visibles.append(pub)
             elif my_rol == "Frigorífico" and p_rol in ["Productor(planta)", "Packing"]:
@@ -613,7 +642,7 @@ def detalles(tipo):
             elif my_rol == "Cliente extranjero" and p_rol == "Exportador":
                 visibles.append(pub)
 
-        elif tipo == "servicios":
+        elif tipo == "servicios":  # Ver servicios disponibles
             if my_rol == "Productor(planta)" and p_rol in ["Packing", "Frigorífico", "Transporte"]:
                 visibles.append(pub)
             elif my_rol == "Packing" and p_rol in ["Frigorífico", "Transporte"]:
@@ -633,9 +662,7 @@ def detalles(tipo):
             elif my_rol == "Frigorífico" and me.get("tipo") == "mixto" and p_rol in ["Productor(planta)", "Packing", "Exportador"]:
                 visibles.append(pub)
 
-    # ---------------------------------------------------------
-    # RENDERIZAR PLANTILLA
-    # ---------------------------------------------------------
+    # Selección de plantilla
     if tipo == "ventas":
         titulo = t("Detalle de Ventas", "Sales Details", "銷售詳情")
         plantilla = "detalle_ventas.html"
@@ -716,41 +743,6 @@ def cart_clear():
     save_cart([])
     flash(t("Carrito vaciado correctamente", "Cart cleared successfully", "購物車已清空"))
     return redirect(url_for("carrito"))
-# =========================================================
-# DATOS FICTICIOS DE EMPRESAS Y PUBLICACIONES
-# =========================================================
-
-PUBLICACIONES = [
-    # --- Productores (planta) ---
-    {"empresa": "AgroVerde Ltda.", "rol": "Productor(planta)", "tipo": "ventas"},
-    {"empresa": "Campos del Sur SpA", "rol": "Productor(planta)", "tipo": "ventas"},
-
-    # --- Packing (compraventa / servicio / mixto) ---
-    {"empresa": "Packing Maule", "rol": "Packing", "tipo": "compraventa"},
-    {"empresa": "AgroPack Chile", "rol": "Packing", "tipo": "servicios"},
-    {"empresa": "Valle Frutal", "rol": "Packing", "tipo": "mixto"},
-    {"empresa": "EcoPack Export", "rol": "Packing", "tipo": "mixto"},
-
-    # --- Frigoríficos (compraventa / mixto) ---
-    {"empresa": "FrigoSur", "rol": "Frigorífico", "tipo": "compraventa"},
-    {"empresa": "ColdAndes", "rol": "Frigorífico", "tipo": "mixto"},
-    {"empresa": "FrostChile", "rol": "Frigorífico", "tipo": "mixto"},
-    {"empresa": "FrioMaule", "rol": "Frigorífico", "tipo": "servicios"},
-
-    # --- Exportadores ---
-    {"empresa": "ExportaMaule", "rol": "Exportador", "tipo": "compraventa"},
-    {"empresa": "GlobalChile Exports", "rol": "Exportador", "tipo": "compraventa"},
-
-    # --- Servicios: agencia de aduana, transporte, extraportuario ---
-    {"empresa": "AduanaExpress", "rol": "Agencia de aduana", "tipo": "servicios"},
-    {"empresa": "Portuaria Sur", "rol": "Extraportuario", "tipo": "servicios"},
-    {"empresa": "LogisTrans", "rol": "Transporte", "tipo": "servicios"},
-    {"empresa": "RutaAndina", "rol": "Transporte", "tipo": "servicios"},
-
-    # --- Clientes extranjeros ---
-    {"empresa": "AsiaFresh Import Co.", "rol": "Cliente extranjero", "tipo": "compras"},
-    {"empresa": "Gourmet Asia Ltd.", "rol": "Cliente extranjero", "tipo": "compras"},
-]
 
 
 # =========================================================
@@ -780,5 +772,6 @@ def server_error(e):
 # =========================================================
 # EJECUCIÓN FINAL DE LA APLICACIÓN
 # =========================================================
+
 if __name__ == "__main__":
     app.run(debug=True)
