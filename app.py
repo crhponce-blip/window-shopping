@@ -1,14 +1,13 @@
-# === app.py (completo y corregido) ===
+# === app.py (Parte 1/6) ===
+# Configuración base, i18n y datos semilla (incluye clientes extranjeros con DEMANDA)
 import os
 import uuid
-import json
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import List, Dict, Any, Optional
 from werkzeug.utils import secure_filename
-from jinja2 import TemplateNotFound
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    session, abort, flash, send_from_directory
+    session, abort, flash
 )
 
 # =========================================================
@@ -24,22 +23,20 @@ UPLOAD_FOLDER = os.path.join(STATIC_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg"}
 
-
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
 
-
 # =========================================================
-# SISTEMA DE IDIOMAS (ES / EN / ZH)
+# I18N / MULTI-IDIOMA (ES / EN / ZH)
 # =========================================================
-def t(es, en, zh=None):
+def t(es: str, en: str, zh: Optional[str] = None) -> str:
+    """Devuelve texto según idioma de sesión."""
     lang = session.get("lang", "es")
     if lang == "en":
         return en
     if lang == "zh" and zh:
         return zh
     return es
-
 
 @app.context_processor
 def inject_globals():
@@ -48,200 +45,25 @@ def inject_globals():
         LANGS=[("es", "ES"), ("en", "EN"), ("zh", "中文")]
     )
 
-# =========================================================
-# USUARIOS Y PERFILES DE PRUEBA
-# =========================================================
-USERS: Dict[str, Dict[str, Any]] = {
-    # Compra/Venta
-    "productor@demo.cl": {"password": "1234", "rol": "Productor", "perfil_tipo": "compra_venta", "pais": "CL"},
-    "planta@demo.cl": {"password": "1234", "rol": "Planta", "perfil_tipo": "compra_venta", "pais": "CL"},
-    "packing@demo.cl": {"password": "1234", "rol": "Packing", "perfil_tipo": "servicios", "pais": "CL"},
-    "frigorifico@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "servicios", "pais": "CL"},
-    "exportador@demo.cl": {"password": "1234", "rol": "Exportador", "perfil_tipo": "compra_venta", "pais": "CL"},
-    "cliente@usa.com": {"password": "1234", "rol": "Cliente extranjero", "perfil_tipo": "compra_venta", "pais": "US"},
-    # Otros roles de servicio
-    "transporte@demo.cl": {"password": "1234", "rol": "Transporte", "perfil_tipo": "servicios", "pais": "CL"},
-    "aduana@demo.cl": {"password": "1234", "rol": "Agencia de Aduanas", "perfil_tipo": "servicios", "pais": "CL"},
-    "extraport@demo.cl": {"password": "1234", "rol": "Extraportuario", "perfil_tipo": "servicios", "pais": "CL"},
-}
-
-USER_PROFILES: Dict[str, Dict[str, Any]] = {
-    "productor@demo.cl": {
-        "empresa": "Agro Los Andes",
-        "rut": "76.000.111-2",
-        "rol": "Productor",
-        "perfil_tipo": "compra_venta",
-        "pais": "CL",
-        "email": "ventas@agroandes.cl",
-        "telefono": "+56 9 6000 1111",
-        "direccion": "Parcela 5, San Felipe",
-        "descripcion": "Productores de uva de mesa y arándano.",
-        "items": [
-            {"tipo": "oferta", "producto": "Uva Red Globe", "bulto": "pallets", "cantidad": "100", "origen": "V Región", "precio_caja": "$12"},
-            {"tipo": "oferta", "producto": "Arándano Duke", "bulto": "pallets", "cantidad": "60", "origen": "VI Región", "precio_caja": "$15"},
-        ],
-    },
-    "planta@demo.cl": {
-        "empresa": "Planta Frutal Rengo",
-        "rut": "77.123.456-8",
-        "rol": "Planta",
-        "perfil_tipo": "compra_venta",
-        "pais": "CL",
-        "email": "contacto@planta.cl",
-        "telefono": "+56 9 6000 2222",
-        "direccion": "Camino Interior, Rengo",
-        "descripcion": "Recepción y proceso de fruta fresca.",
-        "items": [
-            {"tipo": "demanda", "producto": "Ciruela D’Agen", "bulto": "pallets", "cantidad": "80", "origen": "VI Región"},
-            {"tipo": "oferta", "producto": "Cajas plásticas 10kg", "bulto": "unidades", "cantidad": "20000", "origen": "R.M."},
-        ],
-    },
-    "packing@demo.cl": {
-        "empresa": "PackSmart SPA",
-        "rut": "79.456.789-0",
-        "rol": "Packing",
-        "perfil_tipo": "servicios",
-        "pais": "CL",
-        "email": "info@packsmart.cl",
-        "telefono": "+56 9 6000 3333",
-        "direccion": "Ruta 5 km 185, Rancagua",
-        "descripcion": "Servicios de embalaje y QA.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Embalaje exportación", "capacidad": "25.000 cajas/día", "ubicacion": "Rancagua"},
-            {"tipo": "oferta", "producto": "Ciruela Angeleno", "bulto": "pallets", "cantidad": "50", "origen": "R.M.", "precio_caja": "$11"},
-        ],
-    },
-    "frigorifico@demo.cl": {
-        "empresa": "FríoCenter Ltda.",
-        "rut": "80.222.333-4",
-        "rol": "Frigorífico",
-        "perfil_tipo": "servicios",
-        "pais": "CL",
-        "email": "contacto@friocenter.cl",
-        "telefono": "+56 9 6000 4444",
-        "direccion": "Puerto Central, Valparaíso",
-        "descripcion": "Almacenaje en frío y logística portuaria.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Preenfriado", "capacidad": "6 túneles", "ubicacion": "Valparaíso"},
-            {"tipo": "servicio", "servicio": "Cámara fría", "capacidad": "1500 pallets", "ubicacion": "Valparaíso"},
-        ],
-    },
-    "exportador@demo.cl": {
-        "empresa": "OCExport Chile",
-        "rut": "78.345.678-9",
-        "rol": "Exportador",
-        "perfil_tipo": "compra_venta",
-        "pais": "CL",
-        "email": "export@ocexport.cl",
-        "telefono": "+56 2 2345 6789",
-        "direccion": "Av. Apoquindo 1234, Las Condes",
-        "descripcion": "Exportador multiproducto a Asia, EU y EEUU.",
-        "items": [
-            {"tipo": "demanda", "producto": "Cereza Santina", "bulto": "pallets", "cantidad": "120", "origen": "VII Región"},
-            {"tipo": "demanda", "producto": "Uva Thompson", "bulto": "pallets", "cantidad": "80", "origen": "V Región"},
-        ],
-    },
-    "cliente@usa.com": {
-        "empresa": "GlobalBuyer Co.",
-        "rol": "Cliente extranjero",
-        "perfil_tipo": "compra_venta",
-        "pais": "US",
-        "email": "contact@globalbuyer.com",
-        "telefono": "+1 305 555 0100",
-        "direccion": "Miami, FL, USA",
-        "descripcion": "Importador y distribuidor de frutas frescas.",
-        "items": [
-            {"tipo": "demanda", "producto": "Ciruela D’Agen", "bulto": "pallets", "cantidad": "200", "origen": "CL"},
-            {"tipo": "demanda", "producto": "Cereza Lapins", "bulto": "pallets", "cantidad": "300", "origen": "CL"},
-        ],
-        "eori": None,
-        "otros_id": None,
-    },
-    "transporte@demo.cl": {
-        "empresa": "TransVeloz SPA",
-        "rut": "81.555.666-7",
-        "rol": "Transporte",
-        "perfil_tipo": "servicios",
-        "pais": "CL",
-        "email": "operaciones@transveloz.cl",
-        "telefono": "+56 9 5000 1111",
-        "direccion": "San Bernardo, RM",
-        "descripcion": "Transporte nacional y refrigerado de fruta.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Transporte reefer", "capacidad": "35 camiones", "ubicacion": "RM"},
-            {"tipo": "servicio", "servicio": "Flete marítimo local", "capacidad": "20 contenedores", "ubicacion": "Valparaíso"},
-        ],
-    },
-    "aduana@demo.cl": {
-        "empresa": "AduanasFast Ltda.",
-        "rut": "82.555.666-7",
-        "rol": "Agencia de Aduanas",
-        "perfil_tipo": "servicios",
-        "pais": "CL",
-        "email": "agencia@aduanasfast.cl",
-        "telefono": "+56 2 2987 6543",
-        "direccion": "Valparaíso",
-        "descripcion": "Tramitación documental y asesoría exportadora.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Despacho de exportación", "capacidad": "Alta", "ubicacion": "Valparaíso"},
-            {"tipo": "servicio", "servicio": "Asesoría logística", "capacidad": "Media", "ubicacion": "Valparaíso"},
-        ],
-    },
-    "extraport@demo.cl": {
-        "empresa": "PortHelper SPA",
-        "rut": "83.777.888-9",
-        "rol": "Extraportuario",
-        "perfil_tipo": "servicios",
-        "pais": "CL",
-        "email": "info@porthelper.cl",
-        "telefono": "+56 9 7000 2222",
-        "direccion": "San Antonio",
-        "descripcion": "Consolidación, desconsolidación y contenedores.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "120/día", "ubicacion": "San Antonio"},
-            {"tipo": "servicio", "servicio": "Desconsolidado", "capacidad": "80/día", "ubicacion": "San Antonio"},
-        ],
-    },
-}
-# --- Fin de diccionario USER_PROFILES —
+@app.route("/set_lang/<lang>")
+def set_lang(lang):
+    """Cambia el idioma de la sesión (endpoint único)."""
+    session["lang"] = lang if lang in ("es", "en", "zh") else "es"
+    return redirect(request.referrer or url_for("home"))
 
 # =========================================================
-# CLASES Y FUNCIONES AUXILIARES
+# UTILIDADES DE SESIÓN Y NORMALIZACIÓN
 # =========================================================
-class ViewObj:
-    """Convierte un diccionario en objeto con atributos accesibles por punto."""
-    def __init__(self, data: dict):
-        for k, v in data.items():
-            setattr(self, k, v)
-        if hasattr(self, "items") and not isinstance(getattr(self, "items"), list):
-            setattr(self, "items", data.get("items", []))
-
-
-def wrap_list(dict_list: List[Dict[str, Any]]) -> List[ViewObj]:
-    return [ViewObj(d) for d in dict_list]
-
-
-# ---------------------------------------------------------
-# Sesión y carrito
-# ---------------------------------------------------------
 def is_logged() -> bool:
     return "user" in session
 
-
-def current_user_profile() -> Optional[Dict[str, Any]]:
-    u = session.get("user")
-    return USER_PROFILES.get(u)
-
-
 def get_cart() -> List[Dict[str, Any]]:
     return session.setdefault("cart", [])
-
 
 def add_to_cart(item_dict: Dict[str, Any]) -> None:
     cart = get_cart()
     cart.append(item_dict)
     session["cart"] = cart
-
 
 def remove_from_cart(index) -> bool:
     cart = get_cart()
@@ -255,14 +77,9 @@ def remove_from_cart(index) -> bool:
         pass
     return False
 
-
 def clear_cart() -> None:
     session["cart"] = []
 
-
-# ---------------------------------------------------------
-# Normalizador de dinero
-# ---------------------------------------------------------
 def norm_money(val: str) -> str:
     val = (val or "").strip()
     if not val:
@@ -270,355 +87,692 @@ def norm_money(val: str) -> str:
     if val.startswith("$"):
         return val
     return f"${val}"
+
 # =========================================================
-# REGLAS DE VISIBILIDAD ENTRE ROLES (según flujo definido)
+# USUARIOS Y PERFILES (SEMILLA)
+# - Incluye 2 empresas por tipo/rol según tus reglas
+# - Cliente extranjero: items de TIPO "demanda"
+# - Packing/Frigorífico mixtos incluidos
 # =========================================================
-def targets_for(tipo: str, my_rol: str) -> List[str]:
-    """
-    Define a qué roles puede ver cada tipo de usuario
-    según el flujo de compra, venta y servicios.
-    """
-    tipo = tipo.lower()
 
-    # --- COMPRAS ---
-    compras_vis = {
-        "Productor": ["Packing"],
-        "Planta": ["Packing"],
-        "Packing": ["Frigorífico", "Exportador"],
-        "Frigorífico": ["Exportador"],
-        "Exportador": ["Cliente extranjero"],
-        "Cliente extranjero": ["Exportador"],
-    }
+USERS: Dict[str, Dict[str, Any]] = {
+    # --- Compraventa nacionales ---
+    "productor1@demo.cl": {"password": "1234", "rol": "Productor", "perfil_tipo": "compra_venta", "pais": "CL"},
+    "productor2@demo.cl": {"password": "1234", "rol": "Productor", "perfil_tipo": "compra_venta", "pais": "CL"},
 
-    # --- VENTAS ---
-    ventas_vis = {
-        "Productor": ["Packing", "Frigorífico"],
-        "Planta": ["Packing"],
-        "Packing": ["Exportador", "Frigorífico"],
-        "Frigorífico": ["Exportador"],
-        "Exportador": ["Cliente extranjero"],
-        "Cliente extranjero": [],
-    }
+    "packingcv1@demo.cl": {"password": "1234", "rol": "Packing", "perfil_tipo": "compra_venta", "pais": "CL"},
+    "packingcv2@demo.cl": {"password": "1234", "rol": "Packing", "perfil_tipo": "compra_venta", "pais": "CL"},
 
-    # --- SERVICIOS ---
-    servicios_vis = {
-        "Packing": ["Exportador", "Frigorífico"],
-        "Frigorífico": ["Exportador", "Packing"],
-        "Exportador": ["Packing", "Frigorífico", "Cliente extranjero"],
-        "Cliente extranjero": ["Exportador"],
-        "Productor": ["Packing"],
-        "Planta": ["Packing"],
-    }
+    "frigorificocv1@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "compra_venta", "pais": "CL"},
+    "frigorificocv2@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "compra_venta", "pais": "CL"},
 
-    # --- Lógica de retorno según tipo ---
-    if tipo == "compras":
-        return compras_vis.get(my_rol, [])
-    elif tipo == "ventas":
-        return ventas_vis.get(my_rol, [])
-    elif tipo == "servicios":
-        return servicios_vis.get(my_rol, [])
-    else:
-        # Valor por defecto: unión básica
-        return list(set(ventas_vis.get(my_rol, []) + servicios_vis.get(my_rol, [])))
+    "export1@demo.cl": {"password": "1234", "rol": "Exportador", "perfil_tipo": "compra_venta", "pais": "CL"},
+    "export2@demo.cl": {"password": "1234", "rol": "Exportador", "perfil_tipo": "compra_venta", "pais": "CL"},
+
+    # --- Servicios nacionales ---
+    "packingserv1@demo.cl": {"password": "1234", "rol": "Packing", "perfil_tipo": "servicios", "pais": "CL"},
+    "packingserv2@demo.cl": {"password": "1234", "rol": "Packing", "perfil_tipo": "servicios", "pais": "CL"},
+
+    "frigorificoserv1@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "servicios", "pais": "CL"},
+    "frigorificoserv2@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "servicios", "pais": "CL"},
+
+    "aduana1@demo.cl": {"password": "1234", "rol": "Agencia de Aduanas", "perfil_tipo": "servicios", "pais": "CL"},
+    "aduana2@demo.cl": {"password": "1234", "rol": "Agencia de Aduanas", "perfil_tipo": "servicios", "pais": "CL"},
+
+    "extraport1@demo.cl": {"password": "1234", "rol": "Extraportuario", "perfil_tipo": "servicios", "pais": "CL"},
+    "extraport2@demo.cl": {"password": "1234", "rol": "Extraportuario", "perfil_tipo": "servicios", "pais": "CL"},
+
+    "transporte1@demo.cl": {"password": "1234", "rol": "Transporte", "perfil_tipo": "servicios", "pais": "CL"},
+    "transporte2@demo.cl": {"password": "1234", "rol": "Transporte", "perfil_tipo": "servicios", "pais": "CL"},
+
+    # --- Mixtos (solo Packing y Frigorífico) ---
+    "packingmix1@demo.cl": {"password": "1234", "rol": "Packing", "perfil_tipo": "ambos", "pais": "CL"},
+    "packingmix2@demo.cl": {"password": "1234", "rol": "Packing", "perfil_tipo": "ambos", "pais": "CL"},
+    "frigorificomix1@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "ambos", "pais": "CL"},
+    "frigorificomix2@demo.cl": {"password": "1234", "rol": "Frigorífico", "perfil_tipo": "ambos", "pais": "CL"},
+
+    # --- Clientes extranjeros (solo compras pero con DEMANDA) ---
+    "clienteusa1@ext.com": {"password": "1234", "rol": "Cliente extranjero", "perfil_tipo": "compra_venta", "pais": "US"},
+    "clienteusa2@ext.com": {"password": "1234", "rol": "Cliente extranjero", "perfil_tipo": "compra_venta", "pais": "US"},
+}
+
+USER_PROFILES: Dict[str, Dict[str, Any]] = {
+    # =========================
+    # Productor / Planta (compraventa)
+    # =========================
+    "productor1@demo.cl": {
+        "empresa": "Productores del Valle SpA",
+        "rut": "76.111.111-1",
+        "rol": "Productor",
+        "perfil_tipo": "compra_venta",
+        "pais": "CL",
+        "email": "productor1@demo.cl",
+        "telefono": "+56 9 7000 1111",
+        "direccion": "San Felipe, V Región",
+        "descripcion": "Uva de mesa, arándano y ciruela. Exportación directa y vía packing.",
+        "items": [
+            {"tipo": "oferta", "producto": "Uva Red Globe", "variedad": "Red Globe", "cantidad": "120", "bulto": "pallets", "origen": "V Región", "precio_caja": "$12"},
+            {"tipo": "oferta", "producto": "Arándano", "variedad": "Duke", "cantidad": "80", "bulto": "pallets", "origen": "VI Región", "precio_caja": "$15"},
+            {"tipo": "servicio", "servicio": "Mano de obra cosecha", "capacidad": "10 cuadrillas", "ubicacion": "V-VI Región"}
+        ],
+    },
+    "productor2@demo.cl": {
+        "empresa": "Agro Cordillera Ltda.",
+        "rut": "76.222.222-2",
+        "rol": "Productor",
+        "perfil_tipo": "compra_venta",
+        "pais": "CL",
+        "email": "productor2@demo.cl",
+        "telefono": "+56 9 7000 2222",
+        "direccion": "Rengo, VI Región",
+        "descripcion": "Cereza y ciruela D’Agen para fresco e industria.",
+        "items": [
+            {"tipo": "oferta", "producto": "Cereza", "variedad": "Santina", "cantidad": "150", "bulto": "pallets", "origen": "VI Región", "precio_caja": "$25"},
+            {"tipo": "oferta", "producto": "Ciruela D’Agen", "variedad": "D’Agen", "cantidad": "100", "bulto": "pallets", "origen": "VI Región", "precio_kilo": "$1.2"},
+        ],
+    },
+
+    # =========================
+    # Packing (compraventa)
+    # =========================
+    "packingcv1@demo.cl": {
+        "empresa": "Packing Maule SpA",
+        "rut": "77.333.333-3",
+        "rol": "Packing",
+        "perfil_tipo": "compra_venta",
+        "pais": "CL",
+        "email": "packingcv1@demo.cl",
+        "telefono": "+56 9 7100 3333",
+        "direccion": "Curicó, VII Región",
+        "descripcion": "Packing con línea de calibrado, también comercializamos fruta.",
+        "items": [
+            {"tipo": "oferta", "producto": "Ciruela Angeleno", "variedad": "Angeleno", "cantidad": "60", "bulto": "pallets", "origen": "VII Región", "precio_caja": "$11"},
+            {"tipo": "servicio", "servicio": "Embalaje exportación", "capacidad": "20.000 cajas/día", "ubicacion": "Curicó"},
+        ],
+    },
+    "packingcv2@demo.cl": {
+        "empresa": "Packing Limarí Ltda.",
+        "rut": "77.444.444-4",
+        "rol": "Packing",
+        "perfil_tipo": "compra_venta",
+        "pais": "CL",
+        "email": "packingcv2@demo.cl",
+        "telefono": "+56 9 7100 4444",
+        "direccion": "Ovalle, IV Región",
+        "descripcion": "Packing multiproducto con frío propio.",
+        "items": [
+            {"tipo": "oferta", "producto": "Uva Thompson", "variedad": "Thompson", "cantidad": "50", "bulto": "pallets", "origen": "IV Región", "precio_caja": "$13"},
+            {"tipo": "servicio", "servicio": "QA y etiquetado", "capacidad": "15.000 cajas/día", "ubicacion": "Ovalle"},
+        ],
+    },
+
+    # =========================
+    # Frigorífico (compraventa)
+    # =========================
+    "frigorificocv1@demo.cl": {
+        "empresa": "Frío Centro SpA",
+        "rut": "80.111.111-1",
+        "rol": "Frigorífico",
+        "perfil_tipo": "compra_venta",
+        "pais": "CL",
+        "email": "frigorificocv1@demo.cl",
+        "telefono": "+56 9 7200 1111",
+        "direccion": "Valparaíso",
+        "descripcion": "Cámara fría y trading puntual de fruta.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Preenfriado", "capacidad": "5 túneles", "ubicacion": "Valparaíso"},
+            {"tipo": "oferta", "producto": "Manzana Fuji", "variedad": "Fuji", "cantidad": "40", "bulto": "pallets", "origen": "RM", "precio_caja": "$9"},
+        ],
+    },
+    "frigorificocv2@demo.cl": {
+        "empresa": "Frío Pacífico Ltda.",
+        "rut": "80.222.222-2",
+        "rol": "Frigorífico",
+        "perfil_tipo": "compra_venta",
+        "pais": "CL",
+        "email": "frigorificocv2@demo.cl",
+        "telefono": "+56 9 7200 2222",
+        "direccion": "San Antonio",
+        "descripcion": "Frigorífico multipropósito con zona extraport.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Cámara fría", "capacidad": "1200 pallets", "ubicacion": "San Antonio"},
+            {"tipo": "oferta", "producto": "Kiwi Hayward", "variedad": "Hayward", "cantidad": "70", "bulto": "pallets", "origen": "V Región", "precio_caja": "$10"},
+        ],
+    },
+
+    # =========================
+    # Exportadores (compraventa)
+    # =========================
+    "export1@demo.cl": {
+        "empresa": "Exportadora Andes SpA",
+        "rut": "78.111.111-1",
+        "rol": "Exportador",
+        "perfil_tipo": "compra_venta",
+        "pais": "CL",
+        "email": "export1@demo.cl",
+        "telefono": "+56 2 2345 1111",
+        "direccion": "Las Condes, RM",
+        "descripcion": "Exportación a Asia y USA. Compramos cereza, uva y ciruela.",
+        "items": [
+            {"tipo": "demanda", "producto": "Cereza Santina", "variedad": "Santina", "cantidad": "120", "bulto": "pallets", "origen": "CL"},
+            {"tipo": "demanda", "producto": "Uva Thompson", "variedad": "Thompson", "cantidad": "80", "bulto": "pallets", "origen": "CL"},
+        ],
+    },
+    "export2@demo.cl": {
+        "empresa": "Exportadora del Pacífico Ltda.",
+        "rut": "78.222.222-2",
+        "rol": "Exportador",
+        "perfil_tipo": "compra_venta",
+        "pais": "CL",
+        "email": "export2@demo.cl",
+        "telefono": "+56 2 2345 2222",
+        "direccion": "Providencia, RM",
+        "descripcion": "FOB/CIF multi-mercado. Buscamos arándano y manzana.",
+        "items": [
+            {"tipo": "demanda", "producto": "Arándano Duke", "variedad": "Duke", "cantidad": "100", "bulto": "pallets", "origen": "CL"},
+            {"tipo": "demanda", "producto": "Manzana Gala", "variedad": "Gala", "cantidad": "60", "bulto": "pallets", "origen": "CL"},
+        ],
+    },
+
+    # =========================
+    # Packing (servicios)
+    # =========================
+    "packingserv1@demo.cl": {
+        "empresa": "PackSmart Servicios",
+        "rut": "79.111.111-1",
+        "rol": "Packing",
+        "perfil_tipo": "servicios",
+        "pais": "CL",
+        "email": "packingserv1@demo.cl",
+        "telefono": "+56 9 7300 1111",
+        "direccion": "Rancagua",
+        "descripcion": "Servicios de embalaje y QA.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Embalaje exportación", "capacidad": "25.000 cajas/día", "ubicacion": "Rancagua"},
+            {"tipo": "servicio", "servicio": "QA + etiquetado", "capacidad": "15.000 cajas/día", "ubicacion": "Rancagua"},
+        ],
+    },
+    "packingserv2@demo.cl": {
+        "empresa": "PackPro Services",
+        "rut": "79.222.222-2",
+        "rol": "Packing",
+        "perfil_tipo": "servicios",
+        "pais": "CL",
+        "email": "packingserv2@demo.cl",
+        "telefono": "+56 9 7300 2222",
+        "direccion": "Talca",
+        "descripcion": "Servicios para fruta de carozo y pomáceas.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Reembalaje", "capacidad": "10.000 cajas/día", "ubicacion": "Talca"},
+            {"tipo": "servicio", "servicio": "Clasificación óptica", "capacidad": "2 líneas", "ubicacion": "Talca"},
+        ],
+    },
+
+    # =========================
+    # Frigorífico (servicios)
+    # =========================
+    "frigorificoserv1@demo.cl": {
+        "empresa": "FríoPort Servicios",
+        "rut": "80.333.333-3",
+        "rol": "Frigorífico",
+        "perfil_tipo": "servicios",
+        "pais": "CL",
+        "email": "frigorificoserv1@demo.cl",
+        "telefono": "+56 9 7400 1111",
+        "direccion": "Valparaíso",
+        "descripcion": "Prefrío, cámara y consolidado.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Preenfriado", "capacidad": "6 túneles", "ubicacion": "Valparaíso"},
+            {"tipo": "servicio", "servicio": "Cámara fría", "capacidad": "1500 pallets", "ubicacion": "Valparaíso"},
+        ],
+    },
+    "frigorificoserv2@demo.cl": {
+        "empresa": "Frío Andino Servicios",
+        "rut": "80.444.444-4",
+        "rol": "Frigorífico",
+        "perfil_tipo": "servicios",
+        "pais": "CL",
+        "email": "frigorificoserv2@demo.cl",
+        "telefono": "+56 9 7400 2222",
+        "direccion": "Santiago",
+        "descripcion": "Servicios integrales para exportación.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Paletizado", "capacidad": "800 pallets/día", "ubicacion": "Santiago"},
+            {"tipo": "servicio", "servicio": "Cross-docking", "capacidad": "Alta", "ubicacion": "Santiago"},
+        ],
+    },
+
+    # =========================
+    # Agencia de Aduanas (servicios)
+    # =========================
+    "aduana1@demo.cl": {
+        "empresa": "Agencia Andes",
+        "rut": "82.111.111-1",
+        "rol": "Agencia de Aduanas",
+        "perfil_tipo": "servicios",
+        "pais": "CL",
+        "email": "aduana1@demo.cl",
+        "telefono": "+56 2 2900 1111",
+        "direccion": "Valparaíso",
+        "descripcion": "Tramitación documental de exportación.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Despacho de exportación", "capacidad": "Alta", "ubicacion": "Valparaíso"},
+        ],
+    },
+    "aduana2@demo.cl": {
+        "empresa": "Aduanas Express",
+        "rut": "82.222.222-2",
+        "rol": "Agencia de Aduanas",
+        "perfil_tipo": "servicios",
+        "pais": "CL",
+        "email": "aduana2@demo.cl",
+        "telefono": "+56 2 2900 2222",
+        "direccion": "San Antonio",
+        "descripcion": "Ventanilla única y asesoria OEA.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Asesoría OEA", "capacidad": "Media", "ubicacion": "San Antonio"},
+        ],
+    },
+
+    # =========================
+    # Extraportuario (servicios)
+    # =========================
+    "extraport1@demo.cl": {
+        "empresa": "Servicios Extraport Valpo",
+        "rut": "83.111.111-1",
+        "rol": "Extraportuario",
+        "perfil_tipo": "servicios",
+        "pais": "CL",
+        "email": "extraport1@demo.cl",
+        "telefono": "+56 9 7500 1111",
+        "direccion": "Valparaíso",
+        "descripcion": "Consolidado y desconsolidado.",
+        "items": [
+            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "100/día", "ubicacion": "Valparaíso"},
+        ],
+    },
+    "extraport2@demo.cl": {
+        "empresa": "Extraport San Antonio",
+        "rut": "83.222.222-2",
+        "rol": "Extraportuario",
+        "perfil_tipo": "servicios",
+        "pais": "CL",
+        "email": "extraport2@demo.cl",
+        "telefono": "+56 9 7500 2222",
+        "direccion": "San Antonio",
+        "descripcion": "Servicios logísticos en puerto.",
+        "items": [
+          # =========================================================
+# DATOS SIMULADOS: USUARIOS Y PUBLICACIONES
 # =========================================================
-# RUTAS PRINCIPALES Y AUTENTICACIÓN
+
+USERS = {
+    "cliente1": {"usuario": "cliente1", "rol": "Cliente extranjero", "tipo": "compras", "empresa": "Importadora Asia Ltd.", "password": "1234"},
+    "export1": {"usuario": "export1", "rol": "Exportador", "tipo": "compraventa", "empresa": "Exportadora Andes SpA", "password": "1234"},
+    "export2": {"usuario": "export2", "rol": "Exportador", "tipo": "compraventa", "empresa": "Exportadora del Pacífico", "password": "1234"},
+    "packing1": {"usuario": "packing1", "rol": "Packing", "tipo": "compraventa", "empresa": "Packing Maule", "password": "1234"},
+    "packing2": {"usuario": "packing2", "rol": "Packing", "tipo": "servicios", "empresa": "Servicios Packing Sur", "password": "1234"},
+    "packing3": {"usuario": "packing3", "rol": "Packing", "tipo": "mixto", "empresa": "Packing Integral BioBio", "password": "1234"},
+    "frig1": {"usuario": "frig1", "rol": "Frigorífico", "tipo": "compraventa", "empresa": "Frigorífico Valpo", "password": "1234"},
+    "frig2": {"usuario": "frig2", "rol": "Frigorífico", "tipo": "servicios", "empresa": "Servicios Frío Sur", "password": "1234"},
+    "frig3": {"usuario": "frig3", "rol": "Frigorífico", "tipo": "mixto", "empresa": "Frigorífico Integral del Maule", "password": "1234"},
+    "prod1": {"usuario": "prod1", "rol": "Productor(planta)", "tipo": "ventas", "empresa": "Productores del Sur", "password": "1234"},
+    "prod2": {"usuario": "prod2", "rol": "Productor(planta)", "tipo": "ventas", "empresa": "Plantas Maule Verde", "password": "1234"},
+    "aduana1": {"usuario": "aduana1", "rol": "Agencia de aduana", "tipo": "servicios", "empresa": "Agencia Andes", "password": "1234"},
+    "extra1": {"usuario": "extra1", "rol": "Extraportuario", "tipo": "servicios", "empresa": "Servicios Extraportuario Valpo", "password": "1234"},
+    "trans1": {"usuario": "trans1", "rol": "Transporte", "tipo": "servicios", "empresa": "Transporte Global", "password": "1234"},
+}
+
+# Publicaciones simuladas (ofertas, demandas, servicios)
+PUBLICACIONES = [
+    {"usuario": "export1", "tipo": "oferta", "rol": "Exportador", "empresa": "Exportadora Andes SpA", "producto": "Trufas Negras Chilenas", "precio": "USD 800/kg"},
+    {"usuario": "export2", "tipo": "oferta", "rol": "Exportador", "empresa": "Exportadora del Pacífico", "producto": "Cerezas Premium", "precio": "USD 7/kg"},
+    {"usuario": "packing1", "tipo": "servicio", "rol": "Packing", "empresa": "Packing Maule", "producto": "Servicio de Embalaje de Fruta", "precio": "USD 0.50/kg"},
+    {"usuario": "frig1", "tipo": "servicio", "rol": "Frigorífico", "empresa": "Frigorífico Valpo", "producto": "Almacenamiento Refrigerado", "precio": "USD 0.20/kg"},
+    {"usuario": "aduana1", "tipo": "servicio", "rol": "Agencia de aduana", "empresa": "Agencia Andes", "producto": "Tramitación de Exportación", "precio": "USD 200/trámite"},
+    {"usuario": "cliente1", "tipo": "demanda", "rol": "Cliente extranjero", "empresa": "Importadora Asia Ltd.", "producto": "Demanda de Fruta Chilena", "precio": "Consultar"},
+]
+
+# =========================================================
+# FUNCIONES AUXILIARES
+# =========================================================
+
+def is_logged():
+    """Verifica si hay sesión activa"""
+    return "user" in session
+
+def get_lang():
+    """Obtiene el idioma activo"""
+    return session.get("lang", "es")
+
+def t(es, en, zh):
+    """Traducción rápida según idioma"""
+    lang = get_lang()
+    if lang == "en":
+        return en
+    elif lang == "zh":
+        return zh
+    return es
+# =========================================================
+# RUTAS DE AUTENTICACIÓN Y NAVEGACIÓN PRINCIPAL
 # =========================================================
 
 @app.route("/")
 def home():
+    """Página principal"""
     return render_template("home.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Inicio de sesión"""
     if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
 
-        user = USERS.get(email)
-        if not user or user["password"] != password:
-            flash("Correo o contraseña incorrectos", "error")
+        if username in USERS and USERS[username]["password"] == password:
+            session["user"] = username
+            flash(t("Inicio de sesión exitoso", "Login successful", "登入成功"))
+            return redirect(url_for("home"))
+        else:
+            flash(t("Usuario o contraseña incorrecta", "Incorrect username or password", "用戶名或密碼錯誤"))
             return redirect(url_for("login"))
-
-        session["user"] = email
-        session["rol"] = user["rol"]
-        flash("Inicio de sesión exitoso", "success")
-        return redirect(url_for("dashboard"))
 
     return render_template("login.html")
 
 
 @app.route("/logout")
 def logout():
-    session.clear()
-    flash("Sesión cerrada correctamente", "success")
+    """Cierra sesión"""
+    session.pop("user", None)
+    flash(t("Sesión cerrada correctamente", "Logged out successfully", "成功登出"))
     return redirect(url_for("home"))
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """
+    Registro de nuevos usuarios.
+    Se define el rol, tipo de usuario (compras, ventas, servicios, mixto)
+    y se agregan automáticamente a la base simulada USERS.
+    """
     if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
-        rol = request.form.get("rol")
-        perfil_tipo = request.form.get("perfil_tipo")
+        usuario = request.form.get("usuario", "").strip()
+        password = request.form.get("password", "").strip()
+        empresa = request.form.get("empresa", "").strip()
+        rol = request.form.get("rol", "")
+        tipo = request.form.get("tipo", "")
 
-        if email in USERS:
-            flash("Este correo ya está registrado", "error")
+        if not all([usuario, password, empresa, rol, tipo]):
+            flash(t("Todos los campos son obligatorios", "All fields are required", "所有欄位均為必填"))
             return redirect(url_for("register"))
 
-        USERS[email] = {"password": password, "rol": rol, "perfil_tipo": perfil_tipo, "pais": "CL"}
-        USER_PROFILES[email] = {
-            "empresa": request.form.get("empresa"),
-            "rut": request.form.get("rut"),
+        if usuario in USERS:
+            flash(t("El nombre de usuario ya existe", "Username already exists", "用戶名已存在"))
+            return redirect(url_for("register"))
+
+        USERS[usuario] = {
+            "usuario": usuario,
+            "password": password,
+            "empresa": empresa,
             "rol": rol,
-            "perfil_tipo": perfil_tipo,
-            "pais": "CL",
-            "email": email,
-            "telefono": request.form.get("telefono"),
-            "direccion": request.form.get("direccion"),
-            "descripcion": request.form.get("descripcion"),
-            "items": [],
+            "tipo": tipo,
         }
 
-        flash("Registro exitoso. Inicia sesión para continuar.", "success")
+        flash(t("Usuario registrado exitosamente", "User registered successfully", "用戶註冊成功"))
         return redirect(url_for("login"))
 
-    return render_template("register.html")
+    # Lista de roles disponibles
+    roles = [
+        "Cliente extranjero",
+        "Productor(planta)",
+        "Packing",
+        "Frigorífico",
+        "Exportador",
+        "Agencia de aduana",
+        "Extraportuario",
+        "Transporte",
+    ]
+
+    tipos = ["compras", "ventas", "servicios", "mixto", "compraventa"]
+
+    return render_template("register.html", roles=roles, tipos=tipos)
 
 
-@app.route("/dashboard")
-def dashboard():
-    if not is_logged():
-        return redirect(url_for("login"))
-
-    user_email = session.get("user")
-    profile = USER_PROFILES.get(user_email, {})
-    rol = profile.get("rol")
-
-    return render_template("dashboard.html", profile=profile, rol=rol)
 # =========================================================
-# FILTROS Y DETALLES (Ventas / Compras / Servicios)
+# RUTA DE PERFIL
+# =========================================================
+@app.route("/perfil")
+def perfil():
+    """Perfil del usuario actual"""
+    if not is_logged():
+        flash(t("Debes iniciar sesión para acceder al perfil", "You must log in to access the profile", "請先登入以訪問個人資料"))
+        return redirect(url_for("login"))
+
+    user = USERS.get(session["user"], {})
+    return render_template("perfil.html", user=user)
+# =========================================================
+# DETALLES DE PUBLICACIONES (VENTAS / COMPRAS / SERVICIOS)
 # =========================================================
 @app.route("/detalles/<tipo>", methods=["GET", "POST"])
 def detalles(tipo):
     """
-    Muestra los detalles disponibles según el tipo y el rol del usuario logeado.
-    Incluye buscador y checkboxes para agregar varios al carrito.
+    Muestra los detalles disponibles según el tipo y el rol del usuario logueado.
+    Incluye buscador y filtro dinámico según los flujos definidos.
     """
     tipo = tipo.lower()
     if tipo not in ("ventas", "compras", "servicios"):
         abort(404)
 
-    my_rol = None
-    roles_permitidos = None
-    if is_logged():
-        me = USERS.get(session["user"], {})
-        my_rol = me.get("rol", "")
-        roles_permitidos = set(targets_for(tipo, my_rol))
-
-    filtro_texto = (request.args.get("q", "") or "").lower().strip()
-    data = []
-
-    # Caso especial: Cliente extranjero en "compras" ve exportadores (oferta)
-    if tipo == "compras" and my_rol == "Cliente extranjero":
-        tag = "oferta"
-        forced_roles = {"Exportador"}
-        for uname, c in USER_PROFILES.items():
-            if c.get("rol") in forced_roles and any(it.get("tipo") == tag for it in c.get("items", [])):
-                if not filtro_texto or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
-                    item = c.copy()
-                    item["username"] = uname
-                    data.append(item)
-        return render_template("detalle_compras.html", data=wrap_list(data), tipo=tipo, query=filtro_texto)
-
-    # --- Servicios ---
-    if tipo == "servicios":
-        for uname, c in USER_PROFILES.items():
-            if any(it.get("tipo") == "servicio" for it in c.get("items", [])):
-                if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
-                    if not filtro_texto or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
-                        item = c.copy()
-                        item["username"] = uname
-                        data.append(item)
-        return render_template("detalle_servicio.html", data=wrap_list(data), tipo=tipo, query=filtro_texto)
-
-    # --- Compras y Ventas ---
-    if tipo == "compras":
-        tag = "oferta"      # comprador ve lo que se ofrece
-    elif tipo == "ventas":
-        tag = "demanda"     # vendedor ve lo que se solicita
-    else:
-        tag = "servicio"
-
-    # Restricciones por rol
-    if tipo == "compras" and my_rol in ("Productor", "Planta"):
-        flash(t("Tu rol no puede comprar fruta. Revisa Ventas o Servicios.",
-                "Your role cannot buy fruit. Check Sales or Services.",
-                "你的角色不能購買水果。請查看銷售或服務。"))
-
-    for uname, c in USER_PROFILES.items():
-        if any(it.get("tipo") == tag for it in c.get("items", [])):
-            if (roles_permitidos is None) or (c["rol"] in roles_permitidos):
-                if not filtro_texto or filtro_texto in c["empresa"].lower() or filtro_texto in (c.get("descripcion", "").lower()):
-                    item = c.copy()
-                    item["username"] = uname
-                    data.append(item)
-
-    tpl = "detalle_ventas.html" if tipo == "ventas" else "detalle_compras.html"
-    return render_template(tpl, data=wrap_list(data), tipo=tipo, query=filtro_texto)
-
-
-# =========================================================
-# MENSAJERÍA ENTRE EMPRESAS
-# =========================================================
-@app.route("/enviar_mensaje/<empresa>", methods=["GET", "POST"])
-def enviar_mensaje(empresa):
     if not is_logged():
+        flash(t("Debes iniciar sesión para ver los detalles", "You must log in to view details", "請先登入以查看詳情"))
         return redirect(url_for("login"))
 
-    if request.method == "POST":
-        mensaje = request.form.get("mensaje")
-        if not mensaje:
-            flash("Debes escribir un mensaje antes de enviarlo.", "error")
-            return redirect(request.url)
+    me = USERS.get(session["user"], {})
+    my_rol = me.get("rol", "")
+    filtro_texto = (request.args.get("q", "") or "").lower().strip()
 
-        flash("Mensaje enviado correctamente.", "success")
-        return redirect(url_for("dashboard"))
+    # ---------------------------------------------------------
+    # VISIBILIDAD SEGÚN ROL Y TIPO
+    # ---------------------------------------------------------
+    visibles = []
 
-    return render_template("mensaje_enviado.html", empresa=empresa)
+    for pub in PUBLICACIONES:
+        p_rol = pub["rol"]
+        p_tipo = pub["tipo"]
+        p_empresa = pub["empresa"].lower()
+
+        # Aplica el filtro de texto
+        if filtro_texto and filtro_texto not in p_empresa:
+            continue
+
+        # Reglas de visibilidad según el flujo que definiste:
+        if tipo == "ventas":  # vender (ver demandas)
+            if my_rol == "Productor(planta)" and p_rol in ["Packing", "Frigorífico", "Exportador"]:
+                visibles.append(pub)
+            elif my_rol == "Packing" and p_rol in ["Frigorífico", "Exportador"]:
+                visibles.append(pub)
+            elif my_rol == "Frigorífico" and p_rol in ["Packing", "Exportador"]:
+                visibles.append(pub)
+            elif my_rol == "Exportador" and p_rol in ["Exportador", "Cliente extranjero"]:
+                visibles.append(pub)
+
+        elif tipo == "compras":  # comprar (ver ofertas)
+            if my_rol == "Packing" and p_rol in ["Productor(planta)", "Frigorífico"]:
+                visibles.append(pub)
+            elif my_rol == "Frigorífico" and p_rol in ["Productor(planta)", "Packing"]:
+                visibles.append(pub)
+            elif my_rol == "Exportador" and p_rol in ["Productor(planta)", "Packing", "Frigorífico", "Exportador"]:
+                visibles.append(pub)
+            elif my_rol == "Cliente extranjero" and p_rol == "Exportador":
+                visibles.append(pub)
+
+        elif tipo == "servicios":
+            if my_rol == "Productor(planta)" and p_rol in ["Packing", "Frigorífico", "Transporte"]:
+                visibles.append(pub)
+            elif my_rol == "Packing" and p_rol in ["Frigorífico", "Transporte"]:
+                visibles.append(pub)
+            elif my_rol == "Frigorífico" and p_rol in ["Packing", "Transporte"]:
+                visibles.append(pub)
+            elif my_rol == "Exportador" and p_rol in ["Agencia de aduana", "Transporte", "Extraportuario", "Packing", "Frigorífico"]:
+                visibles.append(pub)
+            elif my_rol == "Agencia de aduana" and p_rol == "Exportador":
+                visibles.append(pub)
+            elif my_rol == "Extraportuario" and p_rol == "Exportador":
+                visibles.append(pub)
+            elif my_rol == "Transporte" and p_rol in ["Exportador", "Packing", "Frigorífico", "Productor(planta)"]:
+                visibles.append(pub)
+            elif my_rol == "Packing" and me.get("tipo") == "mixto" and p_rol in ["Exportador", "Packing", "Productor(planta)"]:
+                visibles.append(pub)
+            elif my_rol == "Frigorífico" and me.get("tipo") == "mixto" and p_rol in ["Productor(planta)", "Packing", "Exportador"]:
+                visibles.append(pub)
+
+    # ---------------------------------------------------------
+    # RENDERIZAR PLANTILLA
+    # ---------------------------------------------------------
+    if tipo == "ventas":
+        titulo = t("Detalle de Ventas", "Sales Details", "銷售詳情")
+        plantilla = "detalle_ventas.html"
+    elif tipo == "compras":
+        titulo = t("Detalle de Compras", "Purchase Details", "採購詳情")
+        plantilla = "detalle_compras.html"
+    else:
+        titulo = t("Detalle de Servicios", "Service Details", "服務詳情")
+        plantilla = "detalle_servicio.html"
+
+    return render_template(plantilla, titulo=titulo, publicaciones=visibles, tipo=tipo, query=filtro_texto)
 # =========================================================
-# CARRITO DE COMPRAS / SERVICIOS
+# SISTEMA DE CARRITO DE COMPRAS / SERVICIOS
 # =========================================================
 
 def get_cart():
-    """Obtiene el carrito del usuario actual desde la sesión."""
-    if "cart" not in session:
-        session["cart"] = []
-    return session["cart"]
+    """Obtiene el carrito actual desde la sesión"""
+    return session.get("cart", [])
 
 
 def save_cart(cart):
-    """Guarda el carrito en la sesión."""
+    """Guarda el carrito actualizado en la sesión"""
     session["cart"] = cart
-
-
-@app.route("/carrito")
-def carrito():
-    """Muestra los ítems agregados al carrito."""
-    if not is_logged():
-        flash("Debes iniciar sesión para ver el carrito.", "error")
-        return redirect(url_for("login"))
-
-    cart = get_cart()
-    return render_template("carrito.html", cart=cart)
 
 
 @app.route("/cart_add", methods=["POST"])
 def cart_add():
-    """Agrega un elemento al carrito (ventas, compras o servicios)."""
+    """Agrega un ítem al carrito"""
     if not is_logged():
-        flash("Debes iniciar sesión para agregar elementos al carrito.", "error")
+        flash(t("Debes iniciar sesión para agregar al carrito", "You must log in to add to cart", "請先登入以新增至購物車"))
         return redirect(url_for("login"))
 
-    item = {
-        "empresa": request.form.get("empresa"),
-        "descripcion": request.form.get("descripcion"),
-        "tipo": request.form.get("tipo"),
-        "rol": request.form.get("rol"),
-        "contacto": request.form.get("contacto"),
-    }
-
     cart = get_cart()
+    empresa = request.form.get("empresa")
+    rol = request.form.get("rol")
+    tipo = request.form.get("tipo")
+
+    if not all([empresa, rol, tipo]):
+        flash(t("Error al agregar al carrito", "Error adding to cart", "新增至購物車時發生錯誤"))
+        return redirect(request.referrer or url_for("home"))
+
+    item = {"empresa": empresa, "rol": rol, "tipo": tipo}
     cart.append(item)
     save_cart(cart)
-    flash("Elemento agregado al carrito.", "success")
+
+    flash(t("Agregado al carrito correctamente", "Added to cart successfully", "已成功加入購物車"))
     return redirect(request.referrer or url_for("carrito"))
 
 
-@app.route("/cart_remove/<int:index>", methods=["POST"])
-def cart_remove(index):
-    """Elimina un elemento del carrito según su posición."""
+@app.route("/carrito")
+def carrito():
+    """Muestra los ítems del carrito"""
     if not is_logged():
+        flash(t("Debes iniciar sesión para ver el carrito", "You must log in to view the cart", "請先登入以查看購物車"))
         return redirect(url_for("login"))
 
     cart = get_cart()
+    total_items = len(cart)
+    return render_template("carrito.html", cart=cart, total_items=total_items)
+
+
+@app.route("/cart_remove/<int:index>")
+def cart_remove(index):
+    """Elimina un ítem del carrito según su posición"""
+    cart = get_cart()
     if 0 <= index < len(cart):
-        removed = cart.pop(index)
+        eliminado = cart.pop(index)
         save_cart(cart)
-        flash(f"Se eliminó '{removed['empresa']}' del carrito.", "success")
+        flash(t(f"Se eliminó {eliminado['empresa']} del carrito", f"Removed {eliminado['empresa']} from cart", f"已將 {eliminado['empresa']} 移出購物車"))
     else:
-        flash("Ítem no encontrado en el carrito.", "error")
+        flash(t("Ítem no encontrado", "Item not found", "找不到項目"))
     return redirect(url_for("carrito"))
 
 
-@app.route("/cart_clear", methods=["POST"])
+@app.route("/cart_clear")
 def cart_clear():
-    """Vacía completamente el carrito."""
-    if not is_logged():
-        return redirect(url_for("login"))
-
-    session.pop("cart", None)
-    flash("Carrito vaciado correctamente.", "success")
+    """Vacía completamente el carrito"""
+    save_cart([])
+    flash(t("Carrito vaciado correctamente", "Cart cleared successfully", "購物車已清空"))
     return redirect(url_for("carrito"))
 # =========================================================
-# FUNCIONES AUXILIARES
+# DATOS FICTICIOS DE EMPRESAS Y PUBLICACIONES
 # =========================================================
 
-def is_logged():
-    """Verifica si el usuario está logeado."""
-    return "user" in session
+PUBLICACIONES = [
+    # --- Productores (planta) ---
+    {"empresa": "AgroVerde Ltda.", "rol": "Productor(planta)", "tipo": "ventas"},
+    {"empresa": "Campos del Sur SpA", "rol": "Productor(planta)", "tipo": "ventas"},
 
+    # --- Packing (compraventa / servicio / mixto) ---
+    {"empresa": "Packing Maule", "rol": "Packing", "tipo": "compraventa"},
+    {"empresa": "AgroPack Chile", "rol": "Packing", "tipo": "servicios"},
+    {"empresa": "Valle Frutal", "rol": "Packing", "tipo": "mixto"},
+    {"empresa": "EcoPack Export", "rol": "Packing", "tipo": "mixto"},
 
-def wrap_list(data):
-    """Asegura que los datos sean siempre una lista."""
-    if isinstance(data, list):
-        return data
-    elif isinstance(data, dict):
-        return [data]
-    else:
-        return []
+    # --- Frigoríficos (compraventa / mixto) ---
+    {"empresa": "FrigoSur", "rol": "Frigorífico", "tipo": "compraventa"},
+    {"empresa": "ColdAndes", "rol": "Frigorífico", "tipo": "mixto"},
+    {"empresa": "FrostChile", "rol": "Frigorífico", "tipo": "mixto"},
+    {"empresa": "FrioMaule", "rol": "Frigorífico", "tipo": "servicios"},
 
+    # --- Exportadores ---
+    {"empresa": "ExportaMaule", "rol": "Exportador", "tipo": "compraventa"},
+    {"empresa": "GlobalChile Exports", "rol": "Exportador", "tipo": "compraventa"},
 
-def t(es, en=None, zh=None):
-    """
-    Traductor simple por idioma.
-    - Español (default)
-    - Inglés
-    - Chino
-    """
-    idioma = session.get("lang", "es")
-    if idioma == "en" and en:
-        return en
-    elif idioma == "zh" and zh:
-        return zh
-    return es
+    # --- Servicios: agencia de aduana, transporte, extraportuario ---
+    {"empresa": "AduanaExpress", "rol": "Agencia de aduana", "tipo": "servicios"},
+    {"empresa": "Portuaria Sur", "rol": "Extraportuario", "tipo": "servicios"},
+    {"empresa": "LogisTrans", "rol": "Transporte", "tipo": "servicios"},
+    {"empresa": "RutaAndina", "rol": "Transporte", "tipo": "servicios"},
+
+    # --- Clientes extranjeros ---
+    {"empresa": "AsiaFresh Import Co.", "rol": "Cliente extranjero", "tipo": "compras"},
+    {"empresa": "Gourmet Asia Ltd.", "rol": "Cliente extranjero", "tipo": "compras"},
+]
 
 
 # =========================================================
-# RUTAS DE IDIOMA Y MENSAJES
+# ERRORES PERSONALIZADOS CON TRADUCCIÓN
 # =========================================================
-
-@app.route("/set_lang/<lang>")
-def set_lang(lang):
-    """Permite cambiar el idioma de la interfaz."""
-    if lang not in ("es", "en", "zh"):
-        lang = "es"
-    session["lang"] = lang
-    flash(f"Idioma cambiado a {lang.upper()}", "success")
-    return redirect(request.referrer or url_for("home"))
-
 
 @app.errorhandler(404)
-def not_found(error):
-    """Página personalizada para error 404."""
-    return render_template("404.html"), 404
+def not_found(e):
+    """Página no encontrada"""
+    return render_template(
+        "404.html",
+        mensaje=t("Página no encontrada", "Page not found", "找不到頁面"),
+        descripcion=t("La página que buscas no existe o fue movida.", "The page you are looking for does not exist or has been moved.", "您尋找的頁面不存在或已被移動。"),
+    ), 404
+
+
+@app.errorhandler(500)
+def server_error(e):
+    """Error interno del servidor"""
+    return render_template(
+        "500.html",
+        mensaje=t("Error interno del servidor", "Internal server error", "伺服器內部錯誤"),
+        descripcion=t("Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.", "An unexpected error occurred. Please try again later.", "發生意外錯誤，請稍後再試。"),
+    ), 500
 
 
 # =========================================================
-# EJECUCIÓN LOCAL
+# EJECUCIÓN FINAL DE LA APLICACIÓN
 # =========================================================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
-
+    app.run(debug=True)
