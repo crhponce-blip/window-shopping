@@ -1,24 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="content-container" style="max-width:900px;margin:30px auto">
-  <h2>{{ t("Centro de Ayuda","Help Center","幫助中心") }}</h2>
-  <p>{{ t("Aquí encontrarás información básica para usar la plataforma Window Shopping (WS):",
-           "Here you will find basic information to use the Window Shopping (WS) platform:",
-           "在這裡，您可以找到使用 WS 平台的基本資訊：") }}</p>
+<section class="ayuda-container">
+  <h2>{{ t("Centro de Ayuda", "Help Center", "幫助中心") }}</h2>
+  <p>{{ t("Aquí puedes encontrar información sobre cómo usar la plataforma, registrar usuarios o contactar soporte.",
+          "Here you can find information about using the platform, registering users or contacting support.",
+          "在這裡您可以找到使用平台、註冊用戶或聯絡支援的資訊。") }}</p>
 
-  <div class="card-grid" style="display:grid;gap:12px;margin-top:12px">
-    {% for t in temas %}
-      <div class="card" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);padding:20px;border-radius:10px;">
-        <h3>{{ t.titulo }}</h3>
-        <p>{{ t.detalle }}</p>
-      </div>
-    {% endfor %}
-  </div>
-
-  <div style="margin-top:20px;">
-    <p>{{ t("¿Aún necesitas ayuda?","Still need help?","還需要幫助嗎？") }} {{ t("Escríbenos a","Write to us at","請發送郵件至") }} <b>soporte@windowshopping.cl</b></p>
-  </div>
-
-  <a href="{{ url_for('dashboard') }}" class="btn" style="margin-top:14px">{{ t("Volver al inicio","Back to Dashboard","返回主頁") }}</a>
-</div>
+  <h3>{{ t("Preguntas frecuentes", "Frequently Asked Questions", "常見問題") }}</h3>
+  <ul>
+    <li>{{ t("¿Cómo registro una nueva empresa?", "How do I register a new company?", "如何註冊新公司？") }}</li>
+    <li>{{ t("¿Cómo puedo comprar o vender productos?", "How can I buy or sell products?", "我如何購買或銷售產品？") }}</li>
+    <li>{{ t("¿Cómo contacto al soporte técnico?", "How do I contact support?", "如何聯絡技術支援？") }}</li>
+  </ul>
+</section>
 {% endblock %}
