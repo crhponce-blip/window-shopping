@@ -403,7 +403,7 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "descripcion": "Servicios logísticos en puerto.",
         "items": [
             {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "50/día", "ubicación": "San Antonio"},
-        ],
+        ]
     },    
         
           # =========================================================
