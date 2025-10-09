@@ -140,7 +140,7 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
     # =========================
     # Productor / Planta (compraventa)
     # =========================
-    "productor1@demo.cl": 
+    "productor1@demo.cl": {  # <-- FIX (faltaba '{')
         "empresa": "Productores del Valle SpA",
         "rut": "76.111.111-1",
         "rol": "Productor",
@@ -155,7 +155,7 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
             {"tipo": "oferta", "producto": "Arándano", "variedad": "Duke", "cantidad": "80", "bulto": "pallets", "origen": "VI Región", "precio_caja": "$15"},
             {"tipo": "servicio", "servicio": "Mano de obra cosecha", "capacidad": "10 cuadrillas", "ubicacion": "V-VI Región"}
         ],
-    },
+    },  # <-- FIX (faltaba '},')
     "productor2@demo.cl": {
         "empresa": "Agro Cordillera Ltda.",
         "rut": "76.222.222-2",
@@ -402,9 +402,10 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "direccion": "San Antonio",
         "descripcion": "Servicios logísticos en puerto.",
         "items": [
-            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "50/día", "ubicación": "San Antonio"},
+            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "50/día", "ubicacion": "San Antonio"},  # <-- FIX (ubicación -> ubicacion para consistencia)
         ]
-    },    
+    },  # <-- FIX (faltaba coma/cierre correcto del bloque)
+}  # <-- FIX (cierre correcto de USER_PROFILES)
         
           # =========================================================
 # DATOS SIMULADOS: USUARIOS Y PUBLICACIONES
