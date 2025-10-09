@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="auth-container" style="display:flex;justify-content:center;margin-top:50px;">
-  <div class="auth-box" style="width:360px;background:rgba(255,255,255,.08);padding:24px;border-radius:12px;">
-    <h2 style="text-align:center">{{ t("Iniciar Sesión","Login","登入") }}</h2>
-    <form method="POST" style="display:grid;gap:10px;margin-top:12px;">
-      <label>Email</label>
-      <input type="text" name="username" placeholder="correo@empresa.cl" required>
-      <label>{{ t("Contraseña","Password","密碼") }}</label>
-      <input type="password" name="password" placeholder="••••••••" required>
-      {% if error %}<p class="error" style="color:#f87171">{{ error }}</p>{% endif %}
-      <button type="submit" class="btn" style="width:100%">{{ t("Ingresar","Enter","登入") }}</button>
+
+<section class="form-container">
+    <h2>{{ t("Iniciar sesión", "Login", "登入") }}</h2>
+
+    <form action="{{ url_for('login') }}" method="POST" class="form-box">
+        <label for="email">{{ t("Correo electrónico", "Email", "電子郵件") }}</label>
+        <input type="email" id="email" name="email" required placeholder="{{ t('Ingresa tu correo', 'Enter your email', '輸入您的電子郵件') }}">
+
+        <label for="password">{{ t("Contraseña", "Password", "密碼") }}</label>
+        <input type="password" id="password" name="password" required placeholder="{{ t('Ingresa tu contraseña', 'Enter your password', '輸入您的密碼') }}">
+
+        <button type="submit" class="btn btn-primary">{{ t("Entrar", "Sign in", "登入") }}</button>
     </form>
-    <div class="extra-links" style="margin-top:12px;text-align:center">
-      <a href="{{ url_for('password_reset_request') }}">{{ t("¿Olvidaste tu contraseña?","Forgot your password?","忘記密碼？") }}</a>
-    </div>
-    <p style="margin-top:14px;text-align:center;opacity:.8">
-      {{ t("¿No tienes cuenta?","Don't have an account?","還沒有帳號？") }}
-      <a href="{{ url_for('register_router') }}">{{ t("Regístrate aquí","Register here","點此註冊") }}</a>
+
+    <p class="form-footer">
+        {{ t("¿No tienes una cuenta?", "Don't have an account?", "還沒有帳號？") }}
+        <a href="{{ url_for('register') }}">{{ t("Regístrate aquí", "Register here", "點此註冊") }}</a>
     </p>
-  </div>
-</div>
+</section>
+
 {% endblock %}
