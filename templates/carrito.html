@@ -1,47 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="max-width:980px;margin:26px auto">
-  <h2>🛒 {{ t("Carrito","Cart","購物車") }}</h2>
-  {% if cart and cart|length > 0 %}
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>{{ t("Empresa","Company","公司") }}</th>
-          <th>{{ t("Rol","Role","角色") }}</th>
-          <th>{{ t("Tipo","Type","類型") }}</th>
-          <th>{{ t("Descripción","Description","描述") }}</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in cart %}
-        <tr>
-          <td>{{ loop.index }}</td>
-          <td>{{ item.empresa }}</td>
-          <td>{{ item.rol }}</td>
-          <td>{{ item.tipo }}</td>
-          <td>{{ item.descripcion }}</td>
-          <td>
-            <form method="post" action="{{ url_for('cart_remove', index=loop.index0) }}">
-              <button class="btn btn-danger" type="submit">❌ {{ t("Eliminar","Remove","刪除") }}</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      <form method="post" action="{{ url_for('checkout') }}">
-        <button class="btn btn-success" type="submit">✅ {{ t("Enviar Solicitud","Submit Request","送出請求") }}</button>
-      </form>
-      <form method="post" action="{{ url_for('cart_clear') }}">
-        <button class="btn btn-secondary" type="submit">🗑 {{ t("Vaciar Carrito","Clear Cart","清空購物車") }}</button>
-      </form>
-    </div>
-  {% else %}
-    <p>{{ t("No tienes productos o servicios en el carrito.","You have no products or services in the cart.","購物車沒有任何項目。") }}</p>
-  {% endif %}
-</div>
+<section class="carrito-container">
+    <h2>🛍️ {{ t("Tu Carrito", "Your Cart", "你的購物車") }}</h2>
+
+    {% if not carrito or carrito|length == 0 %}
+        <p class="no-results">{{ t("Tu carrito está vacío.", "Your cart is empty.", "你的購物車是空的。") }}</p>
+    {% else %}
+        <table class="carrito-table">
+            <thead>
+                <tr>
+                    <th>{{ t("Empresa", "Company", "公司") }}</th>
+                    <th>{{ t("Rol", "Role", "角色") }}</th>
+                    <th>{{ t("Descripción", "Description", "描述") }}</th>
+                    <th>{{ t("Tipo", "Type", "類型") }}</th>
+                    <th>{{ t("Acción", "Action", "操作") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in carrito %}
+                <tr>
+                    <td>{{ item.empresa }}</td>
+                    <td>{{ item.rol }}</td>
+                    <td>{{ item.descripcion }}</td>
+                    <td>{{ item.tipo }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('eliminar_carrito', index=loop.index0) }}">
+                            <button type="submit" class="btn btn-danger">🗑️ {{ t("Eliminar", "Remove", "刪除") }}</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="carrito-acciones">
+            <form method="post" action="{{ url_for('vaciar_carrito') }}">
+                <button type="submit" class="btn btn-warning">⚠️ {{ t("Vaciar Carrito", "Empty Cart", "清空購物車") }}</button>
+            </form>
+
+            <form method="post" action="{{ url_for('confirmar_carrito') }}">
+                <button type="submit" class="btn btn-success">✅ {{ t("Confirmar Pedido", "Confirm Order", "確認訂單") }}</button>
+            </form>
+        </div>
+    {% endif %}
+</section>
+
 {% endblock %}
