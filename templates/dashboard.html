@@ -1,15 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="max-width:980px;margin:30px auto">
-  <h2>{{ t("Panel de Control","Dashboard","控制台") }}</h2>
-  <p>{{ t("Bienvenido/a","Welcome","歡迎") }} <strong>{{ nombre }}</strong></p>
-  <p>{{ t("Rol","Role","角色") }}: <strong>{{ rol }}</strong></p>
-  {% if empresa %}<p><strong>{{ empresa }}</strong> — {{ descripcion }}</p>{% endif %}
 
-  <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px">
-    {% for a in acciones %}
-      <a class="btn" href="{{ url_for(a.ruta, tipo=a.param) if a.param else url_for(a.ruta) }}">{{ a.nombre }}</a>
-    {% endfor %}
-  </div>
-</div>
-{% endblock %}
+<section class="dashboard-container">
+    <h2>{{ t("Panel Principal", "Main Dashboard", "主面板") }}</h2>
+
+    <!-- PERFIL DEL USUARIO ACTUAL -->
+    <div class="user-info">
+        <p><strong>{{ t("Usuario:", "User:", "使用者：") }}</strong> {{ session['user']['nombre'] }}</p>
+        <p><strong>{{ t("Correo:", "Email:", "電子郵件：") }}</strong> {{ session['user']['email'] }}</p>
+        <p><strong>{{ t("Perfil:", "Profile:", "檔案：") }}</strong> {{ session['user']['perfil'] | capitalize }}</p>
+        <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ session['user']['rol'] }}</p>
+    </div>
+
+    <!-- BOTONES DE ACCESO -->
+    <div class="dashboard-actions">
+        <a href="{{ url_for('compras') }}" class="btn btn-primary">
+            🛒 {{ t("Ir a Compras", "Go to Purchases", "前往採購") }}
+        </a>
+
+        <a href="{{ url_for('ventas') }}" class="btn btn-secondary">
+            💰 {{ t("Ir a Ventas", "Go to Sales", "前往銷售") }}
+        </a>
+
+        <a href="{{ url_for('servicios') }}" class="btn btn-tertiary">
+            🧰 {{ t("Ir a Servicios", "Go to Services", "前往服務") }}
+        </a>
+    </div>
+
+    <hr>
+
+    <!-- INFORMACIÓN DE AYUDA -->
+    <div class="dashboard-info">
+        <h3>{{ t("¿Qué puedes hacer aquí?", "What can you do here?", "你可以在這裡做什麼？") }}</h3>
+        <ul>
+            <li>{{ t("Explorar publicaciones según tu rol y perfil.", "Browse listings based on your role and profile.", "根據您的角色和資料瀏覽列表。") }}</li>
+            <li>{{ t("Publicar tus productos, demandas o servicios.", "Post your products, demands or services.", "發布您的產品、需求或服務。") }}</li>
+            <li>{{ t("Conectar con empresas verificadas.", "Connect with verified companies.", "與已驗證的公司聯繫。") }}</li>
+        </ul>
+    </div>
+</section>
+
+{% endblock %
