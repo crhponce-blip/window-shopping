@@ -768,6 +768,208 @@ def server_error(e):
         descripcion=t("Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.", "An unexpected error occurred. Please try again later.", "發生意外錯誤，請稍後再試。"),
     ), 500
 
+# =========================================================
+# ENDPOINTS FALTANTES: AYUDA, REGISTER_ROUTER, CLIENTES, RESET PASS, DASHBOARD, FAVICON
+# (Pegar íntegro antes de la ejecución final)
+# =========================================================
+
+# Import extra (seguro aunque ya exista; Python lo permite)
+from flask import send_from_directory
+
+# ---------- FAVICON ----------
+@app.route("/favicon.ico")
+def favicon():
+    """
+    Sirve el favicon para evitar 404 y errores encadenados.
+    Coloca tu archivo en: static/favicon.ico
+    """
+    try:
+        return send_from_directory(os.path.join(STATIC_DIR), "favicon.ico")
+    except Exception:
+        # Si no existe, respondemos 204 (sin contenido) para no romper nada.
+        return ("", 204)
+
+# ---------- AYUDA ----------
+@app.route("/ayuda")
+def ayuda():
+    """
+    Página de ayuda (usada por el navbar en base.html).
+    """
+    return render_template("ayuda.html")
+
+# ---------- REGISTER ROUTER ----------
+@app.route("/register_router")
+def register_router():
+    """
+    Pantalla para elegir tipo de registro (usa el template register_router.html).
+    """
+    return render_template("register_router.html")
+
+# ---------- CLIENTES (LISTA) ----------
+def _normaliza_items(items):
+    """
+    Convierte los items de USER_PROFILES a un formato estándar:
+    [{'nombre': '...', 'tipo': 'oferta/servicio/demanda'}]
+    """
+    out = []
+    for it in items or []:
+        nombre = it.get("producto") or it.get("servicio") or it.get("variedad") or "Item"
+        tipo = it.get("tipo") or "item"
+        out.append({"nombre": nombre, "tipo": tipo})
+    return out
+
+def _armar_cliente_desde_profile(username, profile):
+    return {
+        "username": username,
+        "empresa": profile.get("empresa"),
+        "rol": profile.get("rol"),
+        "tipo": profile.get("perfil_tipo") or profile.get("tipo") or "",
+        "descripcion": profile.get("descripcion") or "",
+        "items": _normaliza_items(profile.get("items")),
+    }
+
+def _armar_cliente_desde_users(username, data):
+    # Fallback si no está en USER_PROFILES
+    return {
+        "username": username,
+        "empresa": data.get("empresa", username),
+        "rol": data.get("rol", ""),
+        "tipo": data.get("perfil_tipo") or data.get("tipo") or "",
+        "descripcion": data.get("descripcion", ""),
+        "items": [],
+    }
+
+@app.route("/clientes")
+def clientes():
+    """
+    Lista de empresas/usuarios para el template clientes.html
+    - Prioriza USER_PROFILES por tener más datos (items, descripción).
+    - Completa con USERS si algo no está en USER_PROFILES.
+    """
+    lista = []
+    # 1) Desde USER_PROFILES (si existe en tu archivo)
+    try:
+        for u, profile in USER_PROFILES.items():
+            lista.append(_armar_cliente_desde_profile(u, profile))
+    except Exception:
+        pass
+
+    # 2) Completar con USERS faltantes
+    try:
+        ya = {c["username"] for c in lista}
+        for u, data in USERS.items():
+            if u not in ya:
+                lista.append(_armar_cliente_desde_users(u, data))
+    except Exception:
+        pass
+
+    # Orden simple por empresa
+    lista.sort(key=lambda c: (c.get("empresa") or "").lower())
+    return render_template("clientes.html", clientes=lista)
+
+# ---------- CLIENTE DETALLE ----------
+@app.route("/clientes/<username>")
+def cliente_detalle(username):
+    """
+    Detalle de un cliente (usado por CLIENTE_DETALLE).
+    """
+    c = None
+    # Buscar en USER_PROFILES
+    try:
+        if username in USER_PROFILES:
+            c = _armar_cliente_desde_profile(username, USER_PROFILES[username])
+    except Exception:
+        pass
+
+    # Fallback a USERS
+    if not c:
+        try:
+            if username in USERS:
+                c = _armar_cliente_desde_users(username, USERS[username])
+        except Exception:
+            pass
+
+    if not c:
+        abort(404)
+
+    return render_template("cliente_detalle.html", c=c)
+
+# ---------- ENVIAR MENSAJE A CLIENTE ----------
+@app.route("/clientes/<username>/mensaje", methods=["POST"])
+def enviar_mensaje(username):
+    """
+    Maneja el formulario de mensaje en CLIENTE_DETALLE.
+    Solo simula el envío (flash) para esta demo.
+    """
+    if not is_logged():
+        flash(t("Debes iniciar sesión para enviar mensajes",
+                "You must log in to send messages",
+                "請先登入以發送訊息"))
+        return redirect(url_for("login"))
+
+    mensaje = (request.form.get("mensaje") or "").strip()
+    if not mensaje:
+        flash(t("El mensaje no puede estar vacío",
+                "Message cannot be empty",
+                "訊息不可為空"))
+        return redirect(url_for("cliente_detalle", username=username))
+
+    flash(t("Mensaje enviado correctamente",
+            "Message sent successfully",
+            "訊息已成功發送"))
+    return redirect(url_for("cliente_detalle", username=username))
+
+# ---------- RESET DE CONTRASEÑA ----------
+@app.route("/password_reset_request", methods=["GET", "POST"])
+def password_reset_request():
+    """
+    Solicitud de reseteo de contraseña (renderiza password_reset_request.html).
+    En POST solo simula que enviamos instrucciones y pasa al form de nuevo password.
+    """
+    if request.method == "POST":
+        usuario = (request.form.get("usuario") or "").strip()
+        # Aquí podrías validar si usuario existe y generar token.
+        flash(t("Si el usuario existe, enviaremos instrucciones a su correo.",
+                "If the user exists, we'll email recovery instructions.",
+                "若帳號存在，我們將寄出重設指示。"))
+        return redirect(url_for("password_reset_form"))
+
+    return render_template("password_reset_request.html")
+
+@app.route("/password_reset_form", methods=["GET", "POST"])
+def password_reset_form():
+    """
+    Formulario para establecer nueva contraseña (renderiza password_reset_form.html).
+    En POST solo simula actualización y redirige a login.
+    """
+    if request.method == "POST":
+        nueva_password = request.form.get("nueva_contraseña") or request.form.get("nueva_contrasena")
+        if not (nueva_password or "").strip():
+            flash(t("La nueva contraseña es obligatoria",
+                    "New password is required",
+                    "必須填寫新密碼"))
+            return redirect(url_for("password_reset_form"))
+
+        flash(t("Contraseña actualizada",
+                "Password updated",
+                "密碼已更新"))
+        return redirect(url_for("login"))
+
+    return render_template("password_reset_form.html")
+
+# ---------- DASHBOARD (referido por PERFIL) ----------
+@app.route("/dashboard")
+def dashboard():
+    """
+    Enlace seguro desde PERFIL. Si no tienes template de dashboard,
+    redirigimos al home para evitar TemplateNotFound.
+    """
+    return redirect(url_for("home"))
+
+# ---------- (Opcional) Register con preselección por ?tipo= ----------
+# Si quieres, puedes leer request.args.get("tipo") dentro de tu register() existente
+# para preseleccionar roles/tipos en el template register.html.
+# No lo sobreescribo aquí para respetar tu función actual.
 
 # =========================================================
 # EJECUCIÓN FINAL DE LA APLICACIÓN
