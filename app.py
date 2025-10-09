@@ -402,6 +402,9 @@ USER_PROFILES: Dict[str, Dict[str, Any]] = {
         "direccion": "San Antonio",
         "descripcion": "Servicios logísticos en puerto.",
         "items": [
+            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "50/día", "ubicacion": "San Antonio"},
+        ],
+    },
           # =========================================================
 # DATOS SIMULADOS: USUARIOS Y PUBLICACIONES
 # =========================================================
