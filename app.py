@@ -70,18 +70,6 @@ def inject_globals():
         is_logged=is_logged
     )
 
-
-
-
-@app.route("/set_lang/<lang>")
-def set_lang(lang):
-    """Cambia el idioma de la sesión (endpoint único)."""
-    session["lang"] = lang if lang in ("es", "en", "zh") else "es"
-    return redirect(request.referrer or url_for("home"))
-
-
-
-
 # ---------------------------------------------------------
 # SEMILLAS: USUARIOS / PERFILES / PUBLICACIONES
 # (Consolidado y consistente; evita duplicados)
