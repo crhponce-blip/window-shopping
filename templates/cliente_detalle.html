@@ -9,7 +9,7 @@
   <h3 class="mt-3">{{ t("Productos o servicios", "Products or Services", "產品或服務") }}</h3>
   {% if c.items %}
     <ul class="item-list">
-      {% for i in c.items %}
+      {% for i in c["items"] %}
       <li>{{ i.nombre }} — {{ t("Tipo", "Type", "類型") }}: {{ i.tipo }}</li>
       {% endfor %}
     </ul>
