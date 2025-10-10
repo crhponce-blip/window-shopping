@@ -1,16 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
 
-<section class="perfil-container fade-in">
-  <h2>{{ t("Tu Perfil", "Your Profile", "您的個人資料") }}</h2>
+<section class="perfil-container glass-card fade-in">
+  <h2 class="title-gradient">{{ t("Tu Perfil", "Your Profile", "您的個人資料") }}</h2>
 
-  <p><strong>{{ t("Nombre:", "Name:", "名稱：") }}</strong> {{ user.nombre }}</p>
+  <p><strong>{{ t("Empresa:", "Company:", "公司：") }}</strong> {{ user.empresa }}</p>
   <p><strong>{{ t("Correo:", "Email:", "電子郵件：") }}</strong> {{ user.email }}</p>
   <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ user.rol }}</p>
   <p><strong>{{ t("Tipo de Cuenta:", "Account Type:", "帳戶類型：") }}</strong> {{ user.tipo }}</p>
 
-  <div class="mt-3">
-    <a href="{{ url_for('logout') }}" class="btn ghost">🚪 {{ t("Cerrar sesión", "Log out", "登出") }}</a>
+  {% if user.descripcion %}
+    <p><strong>{{ t("Descripción:", "Description:", "描述：") }}</strong> {{ user.descripcion }}</p>
+  {% endif %}
+
+  <div class="mt-3" style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="{{ url_for('editar_perfil') }}" class="btn btn-primary">⚙️ {{ t("Editar Perfil","Edit Profile","編輯個人資料") }}</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-secondary">🚪 {{ t("Cerrar Sesión","Log out","登出") }}</a>
   </div>
 </section>
 
