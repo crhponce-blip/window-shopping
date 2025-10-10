@@ -1,21 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="page-msg text-center fade-in">
-  <img src="{{ url_for('static', filename='images/ws_logo.png') }}" alt="WS Logo" style="height:90px; opacity:0.9; margin-bottom:10px;">
-  <h1>404</h1>
-  <h2>{{ t("Página no encontrada", "Page not found", "頁面不存在") }}</h2>
-  <p class="lead">
-    {{ t("La URL que intentaste abrir no existe o cambió de ubicación.",
-          "The URL you tried to open doesn’t exist or has moved.",
-          "您嘗試開啟的網址不存在或已移動。") }}
-  </p>
-  <div class="mt-4">
-    <a class="btn" href="{{ url_for('home') }}">{{ t("Volver al inicio","Back home","回首頁") }}</a>
-    {% if 'user' in session %}
-      <a class="btn" href="{{ url_for('dashboard') }}">{{ t("Ir al panel","Go to dashboard","前往主頁") }}</a>
-    {% else %}
-      <a class="btn" href="{{ url_for('login') }}">{{ t("Iniciar sesión","Login","登入") }}</a>
-    {% endif %}
-  </div>
+
+<section class="page-msg fade-in text-center">
+  <h2>❌ {{ t("Página no encontrada", "Page not found", "找不到頁面") }}</h2>
+  <p class="lead mt-2">{{ t("La página que buscas no existe o ha sido movida.", "The page you are looking for does not exist or has been moved.", "您要尋找的頁面不存在或已被移動。") }}</p>
+
+  <a href="{{ url_for('home') }}" class="btn mt-3">{{ t("Volver al inicio", "Back to home", "返回主頁") }}</a>
 </section>
+
 {% endblock %}
