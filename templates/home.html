@@ -2,34 +2,34 @@
 {% block content %}
 
 <section class="hero fade-in">
-  <div class="panel text-center">
-    <h1>{{ t("Bienvenido a Window Shopping", "Welcome to Window Shopping", "歡迎來到 Window Shopping") }}</h1>
+  <div class="panel text-center glass-card" style="padding:28px;">
+    <h1 class="title-gradient">{{ t("Bienvenido a Window Shopping", "Welcome to Window Shopping", "歡迎來到 Window Shopping") }}</h1>
     <p class="mt-2">{{ t(
       "La plataforma que conecta productores chilenos con compradores internacionales.",
       "The platform connecting Chilean producers with international buyers.",
       "連接智利生產商與國際買家的平台。"
     ) }}</p>
-    <a href="{{ url_for('register_router') }}" class="btn mt-3">
+    <a href="{{ url_for('register_router') }}" class="btn btn-primary mt-3">
       🛒 {{ t("Comienza ahora", "Start now", "立即開始") }}
     </a>
   </div>
 </section>
 
-<section class="home-section">
-  <h2>{{ t("Explora nuestros servicios", "Explore our services", "探索我們的服務") }}</h2>
+<section class="home-section fade-in" style="margin-top:28px;">
+  <h2 class="center">{{ t("Explora nuestros servicios", "Explore our services", "探索我們的服務") }}</h2>
 
   <div class="grid-3 mt-3">
-    <div class="card">
+    <div class="card glass-card">
       <h3>{{ t("Compra y Venta", "Buy & Sell", "買賣") }}</h3>
       <p>{{ t("Encuentra productores, packing, exportadores y clientes internacionales.", "Find producers, packers, exporters and international clients.", "尋找生產商、包裝廠、出口商和國際客戶。") }}</p>
     </div>
 
-    <div class="card">
+    <div class="card glass-card">
       <h3>{{ t("Servicios Logísticos", "Logistic Services", "物流服務") }}</h3>
       <p>{{ t("Accede a transporte, frigoríficos y agentes de aduana certificados.", "Access transport, cold storage, and certified customs agents.", "提供運輸、冷藏庫及報關行服務。") }}</p>
     </div>
 
-    <div class="card">
+    <div class="card glass-card">
       <h3>{{ t("Sostenibilidad", "Sustainability", "永續發展") }}</h3>
       <p>{{ t("Promovemos comercio responsable con trazabilidad y economía circular.", "We promote responsible trade with traceability and circular economy.", "推動負責任的貿易、可追溯性與循環經濟。") }}</p>
     </div>
