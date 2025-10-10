@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="clientes-section glass-card fade-in">
-  <h2>{{ t("Empresas registradas", "Registered Companies", "已註冊的公司") }}</h2>
+  <h2 class="title-gradient">{{ t("Empresas Registradas","Registered Companies","已註冊的公司") }}</h2>
 
   {% if clientes %}
     <ul class="clientes-list">
@@ -9,17 +9,17 @@
       <li class="cliente-card">
         <div class="cliente-info">
           <h3>{{ c.empresa }}</h3>
-          <p><strong>{{ t("Rol", "Role", "角色") }}:</strong> {{ c.rol }}</p>
-          <p><strong>{{ t("Descripción", "Description", "描述") }}:</strong> {{ c.descripcion }}</p>
+          <p><strong>{{ t("Rol","Role","角色") }}:</strong> {{ c.rol }}</p>
+          <p><strong>{{ t("Descripción","Description","描述") }}:</strong> {{ c.descripcion }}</p>
         </div>
-        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn">
-          🔍 {{ t("Ver detalles", "View details", "查看詳情") }}
+        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">
+          🔍 {{ t("Ver detalles","View details","查看詳情") }}
         </a>
       </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>{{ t("No hay empresas registradas actualmente.", "No companies registered yet.", "目前沒有註冊公司。") }}</p>
+    <p class="no-results">{{ t("No hay empresas registradas actualmente.","No companies registered yet.","目前沒有註冊公司。") }}</p>
   {% endif %}
 </section>
 {% endblock %}
