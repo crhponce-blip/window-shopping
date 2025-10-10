@@ -1,27 +1,23 @@
-# =========================
-# app.py — Parte 1/3
-# Base estable: Config, i18n, sesión, semillas, auth, stubs seguros
-# =========================
+APP.PY NUEVO
+
 import os
 import uuid
 from datetime import timedelta
 from typing import List, Dict, Any, Optional
+import sqlite3
 
-
-from werkzeug.utils import secure_filename
 from flask import (
     Flask, render_template, request, redirect, url_for,
     session, abort, flash, send_from_directory
 )
-
+from werkzeug.utils import secure_filename
 
 # ---------------------------------------------------------
-# CONFIGURACIÓN BÁSICA
+# 🔧 CONFIGURACIÓN BÁSICA
 # ---------------------------------------------------------
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 app.permanent_session_lifetime = timedelta(days=14)
-
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -29,21 +25,41 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 UPLOAD_FOLDER = os.path.join(STATIC_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg"}
 
-
-
-
 def allowed_file(filename: str) -> bool:
+    """Valida extensión de archivo subida."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
 
 
 # ---------------------------------------------------------
-# BASE DE DATOS (SQLite) — Usuarios y Autenticación real
+# 🧩 TIPOS Y ROLES (Reglas de creación de usuario)
 # ---------------------------------------------------------
-import sqlite3
+TIPOS_VALIDOS = {"compras", "servicios", "mixto", "compraventa"}
 
+ROLES_POR_TIPO: Dict[str, List[str]] = {
+    # Cliente extranjero = SOLO compras (no servicios)
+    "compras": ["Cliente extranjero"],
+
+    # Servicios únicos (no fruta)
+    "servicios": [
+        "Agencia de aduana", "Transporte", "Extraportuario",
+        "Packing", "Frigorífico"
+    ],
+
+    # Nacional compraventa (fruta)
+    "compraventa": [
+        "Productor(planta)", "Packing", "Frigorífico", "Exportador"
+    ],
+
+    # Mixto (fruta + servicios)
+    "mixto": ["Packing", "Frigorífico"],
+}
+
+
+# ---------------------------------------------------------
+# 🗄️ BASE DE DATOS (SQLite) — Usuarios y autenticación
+# ---------------------------------------------------------
 DB_PATH = os.path.join(BASE_DIR, "users.db")
 
 def init_db():
@@ -64,6 +80,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def create_admin_if_missing():
     """Crea un usuario admin por defecto si no existe."""
     conn = sqlite3.connect(DB_PATH)
@@ -78,7 +95,8 @@ def create_admin_if_missing():
         print("✅ Usuario admin creado: admin@ws.com / 1234")
     conn.close()
 
-def get_user(email):
+
+def get_user(email: str):
     """Obtiene un usuario por email."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -87,6 +105,7 @@ def get_user(email):
     user = c.fetchone()
     conn.close()
     return user
+
 
 def add_user(email, password, empresa, rol, tipo, pais):
     """Agrega un nuevo usuario a la base de datos."""
@@ -104,20 +123,14 @@ def add_user(email, password, empresa, rol, tipo, pais):
     finally:
         conn.close()
 
-# Inicialización automática de la base de datos al iniciar app
+
+# Inicialización automática
 init_db()
 create_admin_if_missing()
 
-# ---------------------------------------------------------
-# HOME — página principal base
-# ---------------------------------------------------------
-@app.route("/")
-def home():
-    """Página principal de Window Shopping."""
-    return render_template("home.html", titulo=t("Inicio", "Home", "主頁"))
 
 # ---------------------------------------------------------
-# LOGIN (con base de datos SQLite)
+# 🔒 LOGIN (con base de datos SQLite)
 # ---------------------------------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -128,21 +141,46 @@ def login():
 
         user = get_user(email)
         if user and user["password"] == password:
-            session["user"] = dict(user)
+            session["user"] = {
+                "id": user["id"],
+                "email": user["email"],
+                "empresa": user["empresa"],
+                "rol": user["rol"],
+                "tipo": user["tipo"],
+                "pais": user["pais"],
+            }
             print(f"✅ Sesión iniciada por: {email}")
             return redirect(url_for("dashboard"))
         else:
             print("❌ Credenciales incorrectas")
+            flash("Credenciales incorrectas")
             return render_template("login.html", error="Credenciales incorrectas")
     return render_template("login.html")
 
+
 # ---------------------------------------------------------
-# REGISTRO (con base de datos SQLite)
+# 🧾 VALIDADORES Y NORMALIZADORES
+# ---------------------------------------------------------
+def _normaliza_tipo(tipo: str) -> str:
+    """Normaliza el tipo de cuenta."""
+    tipo = (tipo or "").strip().lower()
+    if tipo in {"compra-venta", "compra_venta", "cv"}:
+        return "compraventa"
+    return tipo if tipo in TIPOS_VALIDOS else ""
+
+
+def _rol_valido_para_tipo(rol: str, tipo: str) -> bool:
+    """Valida si el rol pertenece al tipo de cuenta."""
+    return rol in ROLES_POR_TIPO.get(tipo, [])
+
+
+# ---------------------------------------------------------
+# 🧩 REGISTRO (con validaciones completas)
 # ---------------------------------------------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Registro de nuevos usuarios — guarda datos reales en SQLite."""
-    roles = [
+    """Registro de nuevos usuarios (validación por tipo/rol)."""
+    roles_catalogo = [
         "Cliente extranjero",
         "Productor(planta)",
         "Packing",
@@ -152,453 +190,165 @@ def register():
         "Extraportuario",
         "Transporte",
     ]
-    tipos = ["compras", "ventas", "servicios", "mixto", "compraventa"]
+    tipos_catalogo = ["compras", "servicios", "mixto", "compraventa"]
 
     if request.method == "POST":
-        email = (request.form.get("usuario") or "").strip().lower()
+        email = (request.form.get("username") or "").strip().lower()
         password = (request.form.get("password") or "").strip()
         empresa = (request.form.get("empresa") or "").strip()
         rol = (request.form.get("rol") or "").strip()
-        tipo = (request.form.get("tipo") or "").strip()
-        pais = (request.form.get("pais") or "CL").strip()
+        tipo = _normaliza_tipo(request.form.get("tipo") or "")
+        pais = (request.form.get("pais") or "CL").strip().upper()
 
+        # Validaciones básicas
         if not all([email, password, empresa, rol, tipo]):
-            flash(t("Todos los campos son obligatorios", "All fields are required", "所有欄位均為必填"))
+            flash("Todos los campos son obligatorios")
             return redirect(url_for("register"))
 
-        # Verifica si ya existe
+        if not _rol_valido_para_tipo(rol, tipo):
+            flash("El rol seleccionado no corresponde al tipo de cuenta.")
+            return redirect(url_for("register"))
+
+        if rol == "Cliente extranjero" and tipo != "compras":
+            flash("Cliente extranjero solo puede ser tipo 'compras'.")
+            return redirect(url_for("register"))
+
+        if rol == "Exportador" and tipo not in {"compraventa"}:
+            flash("Exportador debe ser tipo 'compraventa'.")
+            return redirect(url_for("register"))
+
+        if len(pais) != 2:
+            flash("El código de país debe tener 2 letras (ej: CL, US).")
+            return redirect(url_for("register"))
+
         existing = get_user(email)
         if existing:
-            flash(t("El usuario ya existe", "User already exists", "用戶已存在"))
+            flash("El usuario ya existe")
             return redirect(url_for("register"))
 
         add_user(email, password, empresa, rol, tipo, pais)
-        flash(t("Usuario registrado exitosamente", "User registered successfully", "用戶註冊成功"))
+        flash("Usuario registrado exitosamente")
         return redirect(url_for("login"))
 
-    return render_template("register.html", roles=roles, tipos=tipos)
-
-# ---------------------------------------------------------
-# I18N / MULTI-IDIOMA (ES / EN / ZH)
-# ---------------------------------------------------------
-def is_logged() -> bool:
-    return "user" in session
-
-
-
-
-def t(es: str, en: str, zh: Optional[str] = None) -> str:
-    """Devuelve texto según idioma de sesión."""
-    lang = session.get("lang", "es")
-    if lang == "en":
-        return en
-    if lang == "zh" and zh:
-        return zh
-    return es
-
-
-
-
-@app.context_processor
-def inject_globals():
-    return dict(
-        t=t,
-        LANGS=[("es", "ES"), ("en", "EN"), ("zh", "中文")],
-        is_logged=is_logged
+    # GET
+    return render_template(
+        "register.html",
+        roles=roles_catalogo,
+        tipos=tipos_catalogo,
+        roles_por_tipo=ROLES_POR_TIPO
     )
-
 # ---------------------------------------------------------
-# SEMILLAS: USUARIOS / PERFILES / PUBLICACIONES
-# (Consolidado y consistente; evita duplicados)
+# 🌱 SEMILLAS — Usuarios demo para pruebas
 # ---------------------------------------------------------
-
-
-# Semillas de acceso rápido (login por email o username)
 USERS: Dict[str, Dict[str, Any]] = {
-    # ---- Compraventa nacionales ----
-    "productor1@demo.cl": {"password": "1234", "rol": "Productor(planta)", "tipo": "compraventa", "empresa": "Productores del Valle SpA", "pais": "CL"},
-    "productor2@demo.cl": {"password": "1234", "rol": "Productor(planta)", "tipo": "compraventa", "empresa": "Agro Cordillera Ltda.", "pais": "CL"},
-
-
-    "packingcv1@demo.cl": {"password": "1234", "rol": "Packing", "tipo": "compraventa", "empresa": "Packing Maule SpA", "pais": "CL"},
-    "packingcv2@demo.cl": {"password": "1234", "rol": "Packing", "tipo": "compraventa", "empresa": "Packing Limarí Ltda.", "pais": "CL"},
-
-
-    "frigorificocv1@demo.cl": {"password": "1234", "rol": "Frigorífico", "tipo": "compraventa", "empresa": "Frío Centro SpA", "pais": "CL"},
-    "frigorificocv2@demo.cl": {"password": "1234", "rol": "Frigorífico", "tipo": "compraventa", "empresa": "Frío Pacífico Ltda.", "pais": "CL"},
-
-
-    "export1@demo.cl": {"password": "1234", "rol": "Exportador", "tipo": "compraventa", "empresa": "Exportadora Andes SpA", "pais": "CL"},
-    "export2@demo.cl": {"password": "1234", "rol": "Exportador", "tipo": "compraventa", "empresa": "Exportadora del Pacífico Ltda.", "pais": "CL"},
-
-
-    # ---- Servicios nacionales ----
-    "packingserv1@demo.cl": {"password": "1234", "rol": "Packing", "tipo": "servicios", "empresa": "PackSmart Servicios", "pais": "CL"},
-    "packingserv2@demo.cl": {"password": "1234", "rol": "Packing", "tipo": "servicios", "empresa": "PackPro Services", "pais": "CL"},
-
-
-    "frigorificoserv1@demo.cl": {"password": "1234", "rol": "Frigorífico", "tipo": "servicios", "empresa": "FríoPort Servicios", "pais": "CL"},
-    "frigorificoserv2@demo.cl": {"password": "1234", "rol": "Frigorífico", "tipo": "servicios", "empresa": "Frío Andino Servicios", "pais": "CL"},
-
-
-    "aduana1@demo.cl": {"password": "1234", "rol": "Agencia de aduana", "tipo": "servicios", "empresa": "Agencia Andes", "pais": "CL"},
-    "aduana2@demo.cl": {"password": "1234", "rol": "Agencia de aduana", "tipo": "servicios", "empresa": "Aduanas Express", "pais": "CL"},
-
-
-    "extraport1@demo.cl": {"password": "1234", "rol": "Extraportuario", "tipo": "servicios", "empresa": "Servicios Extraport Valpo", "pais": "CL"},
-    "extraport2@demo.cl": {"password": "1234", "rol": "Extraportuario", "tipo": "servicios", "empresa": "Extraport San Antonio", "pais": "CL"},
-
-
-    "transporte1@demo.cl": {"password": "1234", "rol": "Transporte", "tipo": "servicios", "empresa": "Transporte Global", "pais": "CL"},
-    "transporte2@demo.cl": {"password": "1234", "rol": "Transporte", "tipo": "servicios", "empresa": "Ruta Andina", "pais": "CL"},
-
-
-    # ---- Mixtos (Packing y Frigorífico) ----
-    "packingmix1@demo.cl": {"password": "1234", "rol": "Packing", "tipo": "mixto", "empresa": "Packing Integral BioBio", "pais": "CL"},
-    "frigorificomix1@demo.cl": {"password": "1234", "rol": "Frigorífico", "tipo": "mixto", "empresa": "Frigorífico Integral del Maule", "pais": "CL"},
-
-
-    # ---- Clientes extranjeros (compras/demanda) ----
-    "clienteusa1@ext.com": {"password": "1234", "rol": "Cliente extranjero", "tipo": "compras", "empresa": "Importadora Asia Ltd.", "pais": "US"},
-    "clienteusa2@ext.com": {"password": "1234", "rol": "Cliente extranjero", "tipo": "compras", "empresa": "Gourmet Asia Ltd.", "pais": "US"},
-
-
-    # ---- Aliases (usernames simples para pruebas) ----
-    "export1": {"password": "1234", "rol": "Exportador", "tipo": "compraventa", "empresa": "Exportadora Andes SpA", "pais": "CL"},
-    "export2": {"password": "1234", "rol": "Exportador", "tipo": "compraventa", "empresa": "Exportadora del Pacífico Ltda.", "pais": "CL"},
-    "packing1": {"password": "1234", "rol": "Packing", "tipo": "compraventa", "empresa": "Packing Maule", "pais": "CL"},
-    "frig1": {"password": "1234", "rol": "Frigorífico", "tipo": "compraventa", "empresa": "Frigorífico Valpo", "pais": "CL"},
-    "aduana1": {"password": "1234", "rol": "Agencia de aduana", "tipo": "servicios", "empresa": "Agencia Andes", "pais": "CL"},
-    "cliente1": {"password": "1234", "rol": "Cliente extranjero", "tipo": "compras", "empresa": "Importadora Asia Ltd.", "pais": "US"},
-}
-
-
-# Perfiles extendidos detallados (descripciones + items)
-USER_PROFILES: Dict[str, Dict[str, Any]] = {
+    # ---- Compraventa (fruta) ----
     "productor1@demo.cl": {
-        "empresa": "Productores del Valle SpA",
-        "rut": "76.111.111-1",
-        "rol": "Productor(planta)",
-        "tipo": "compraventa",
-        "pais": "CL",
-        "email": "productor1@demo.cl",
-        "telefono": "+56 9 7000 1111",
-        "direccion": "San Felipe, V Región",
-        "descripcion": "Uva de mesa, arándano y ciruela. Exportación directa y vía packing.",
-        "items": [
-            {"tipo": "oferta", "producto": "Uva Red Globe", "variedad": "Red Globe", "cantidad": "120", "bulto": "pallets", "origen": "V Región", "precio_caja": "$12"},
-            {"tipo": "oferta", "producto": "Arándano", "variedad": "Duke", "cantidad": "80", "bulto": "pallets", "origen": "VI Región", "precio_caja": "$15"},
-            {"tipo": "servicio", "servicio": "Mano de obra cosecha", "capacidad": "10 cuadrillas", "ubicacion": "V-VI Región"},
-        ],
+        "password": "1234", "rol": "Productor(planta)", "tipo": "compraventa",
+        "empresa": "Productores del Valle SpA", "pais": "CL"
     },
-    "productor2@demo.cl": {
-        "empresa": "Agro Cordillera Ltda.",
-        "rut": "76.222.222-2",
-        "rol": "Productor(planta)",
-        "tipo": "compraventa",
-        "pais": "CL",
-        "email": "productor2@demo.cl",
-        "telefono": "+56 9 7000 2222",
-        "direccion": "Rengo, VI Región",
-        "descripcion": "Cereza y ciruela D’Agen para fresco e industria.",
-        "items": [
-            {"tipo": "oferta", "producto": "Cereza", "variedad": "Santina", "cantidad": "150", "bulto": "pallets", "origen": "VI Región", "precio_caja": "$25"},
-            {"tipo": "oferta", "producto": "Ciruela D’Agen", "variedad": "D’Agen", "cantidad": "100", "bulto": "pallets", "origen": "VI Región", "precio_kilo": "$1.2"},
-        ],
-    },
-
-
-    # Packing CV
     "packingcv1@demo.cl": {
-        "empresa": "Packing Maule SpA",
-        "rut": "77.333.333-3",
-        "rol": "Packing",
-        "tipo": "compraventa",
-        "pais": "CL",
-        "email": "packingcv1@demo.cl",
-        "telefono": "+56 9 7100 3333",
-        "direccion": "Curicó, VII Región",
-        "descripcion": "Packing con línea de calibrado, también comercializamos fruta.",
-        "items": [
-            {"tipo": "oferta", "producto": "Ciruela Angeleno", "variedad": "Angeleno", "cantidad": "60", "bulto": "pallets", "origen": "VII Región", "precio_caja": "$11"},
-            {"tipo": "servicio", "servicio": "Embalaje exportación", "capacidad": "20.000 cajas/día", "ubicacion": "Curicó"},
-        ],
+        "password": "1234", "rol": "Packing", "tipo": "compraventa",
+        "empresa": "Packing Maule SpA", "pais": "CL"
     },
-    "packingcv2@demo.cl": {
-        "empresa": "Packing Limarí Ltda.",
-        "rut": "77.444.444-4",
-        "rol": "Packing",
-        "tipo": "compraventa",
-        "pais": "CL",
-        "email": "packingcv2@demo.cl",
-        "telefono": "+56 9 7100 4444",
-        "direccion": "Ovalle, IV Región",
-        "descripcion": "Packing multiproducto con frío propio.",
-        "items": [
-            {"tipo": "oferta", "producto": "Uva Thompson", "variedad": "Thompson", "cantidad": "50", "bulto": "pallets", "origen": "IV Región", "precio_caja": "$13"},
-            {"tipo": "servicio", "servicio": "QA y etiquetado", "capacidad": "15.000 cajas/día", "ubicacion": "Ovalle"},
-        ],
-    },
-
-
-    # Frigorífico CV
     "frigorificocv1@demo.cl": {
-        "empresa": "Frío Centro SpA",
-        "rut": "80.111.111-1",
-        "rol": "Frigorífico",
-        "tipo": "compraventa",
-        "pais": "CL",
-        "email": "frigorificocv1@demo.cl",
-        "telefono": "+56 9 7200 1111",
-        "direccion": "Valparaíso",
-        "descripcion": "Cámara fría y trading puntual de fruta.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Preenfriado", "capacidad": "5 túneles", "ubicacion": "Valparaíso"},
-            {"tipo": "oferta", "producto": "Manzana Fuji", "variedad": "Fuji", "cantidad": "40", "bulto": "pallets", "origen": "RM", "precio_caja": "$9"},
-        ],
+        "password": "1234", "rol": "Frigorífico", "tipo": "compraventa",
+        "empresa": "Frío Centro SpA", "pais": "CL"
     },
-    "frigorificocv2@demo.cl": {
-        "empresa": "Frío Pacífico Ltda.",
-        "rut": "80.222.222-2",
-        "rol": "Frigorífico",
-        "tipo": "compraventa",
-        "pais": "CL",
-        "email": "frigorificocv2@demo.cl",
-        "telefono": "+56 9 7200 2222",
-        "direccion": "San Antonio",
-        "descripcion": "Frigorífico multipropósito con zona extraport.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Cámara fría", "capacidad": "1200 pallets", "ubicacion": "San Antonio"},
-            {"tipo": "oferta", "producto": "Kiwi Hayward", "variedad": "Hayward", "cantidad": "70", "bulto": "pallets", "origen": "V Región", "precio_caja": "$10"},
-        ],
-    },
-
-
-    # Exportadores
     "export1@demo.cl": {
-        "empresa": "Exportadora Andes SpA",
-        "rut": "78.111.111-1",
-        "rol": "Exportador",
-        "tipo": "compraventa",
-        "pais": "CL",
-        "email": "export1@demo.cl",
-        "telefono": "+56 2 2345 1111",
-        "direccion": "Las Condes, RM",
-        "descripcion": "Exportación a Asia y USA. Compramos cereza, uva y ciruela.",
-        "items": [
-            {"tipo": "demanda", "producto": "Cereza Santina", "variedad": "Santina", "cantidad": "120", "bulto": "pallets", "origen": "CL"},
-            {"tipo": "demanda", "producto": "Uva Thompson", "variedad": "Thompson", "cantidad": "80", "bulto": "pallets", "origen": "CL"},
-        ],
-    },
-    "export2@demo.cl": {
-        "empresa": "Exportadora del Pacífico Ltda.",
-        "rut": "78.222.222-2",
-        "rol": "Exportador",
-        "tipo": "compraventa",
-        "pais": "CL",
-        "email": "export2@demo.cl",
-        "telefono": "+56 2 2345 2222",
-        "direccion": "Providencia, RM",
-        "descripcion": "FOB/CIF multi-mercado. Buscamos arándano y manzana.",
-        "items": [
-            {"tipo": "demanda", "producto": "Arándano Duke", "variedad": "Duke", "cantidad": "100", "bulto": "pallets", "origen": "CL"},
-            {"tipo": "demanda", "producto": "Manzana Gala", "variedad": "Gala", "cantidad": "60", "bulto": "pallets", "origen": "CL"},
-        ],
+        "password": "1234", "rol": "Exportador", "tipo": "compraventa",
+        "empresa": "Exportadora Andes SpA", "pais": "CL"
     },
 
-
-    # Servicios: Packing
+    # ---- Servicios ----
     "packingserv1@demo.cl": {
-        "empresa": "PackSmart Servicios",
-        "rut": "79.111.111-1",
-        "rol": "Packing",
-        "tipo": "servicios",
-        "pais": "CL",
-        "email": "packingserv1@demo.cl",
-        "telefono": "+56 9 7300 1111",
-        "direccion": "Rancagua",
-        "descripcion": "Servicios de embalaje y QA.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Embalaje exportación", "capacidad": "25.000 cajas/día", "ubicacion": "Rancagua"},
-            {"tipo": "servicio", "servicio": "QA + etiquetado", "capacidad": "15.000 cajas/día", "ubicacion": "Rancagua"},
-        ],
+        "password": "1234", "rol": "Packing", "tipo": "servicios",
+        "empresa": "PackSmart Servicios", "pais": "CL"
     },
-    "packingserv2@demo.cl": {
-        "empresa": "PackPro Services",
-        "rut": "79.222.222-2",
-        "rol": "Packing",
-        "tipo": "servicios",
-        "pais": "CL",
-        "email": "packingserv2@demo.cl",
-        "telefono": "+56 9 7300 2222",
-        "direccion": "Talca",
-        "descripcion": "Servicios para fruta de carozo y pomáceas.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Reembalaje", "capacidad": "10.000 cajas/día", "ubicacion": "Talca"},
-            {"tipo": "servicio", "servicio": "Clasificación óptica", "capacidad": "2 líneas", "ubicacion": "Talca"},
-        ],
-    },
-
-
-    # Servicios: Frigorífico
     "frigorificoserv1@demo.cl": {
-        "empresa": "FríoPort Servicios",
-        "rut": "80.333.333-3",
-        "rol": "Frigorífico",
-        "tipo": "servicios",
-        "pais": "CL",
-        "email": "frigorificoserv1@demo.cl",
-        "telefono": "+56 9 7400 1111",
-        "direccion": "Valparaíso",
-        "descripcion": "Prefrío, cámara y consolidado.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Preenfriado", "capacidad": "6 túneles", "ubicacion": "Valparaíso"},
-            {"tipo": "servicio", "servicio": "Cámara fría", "capacidad": "1500 pallets", "ubicacion": "Valparaíso"},
-        ],
+        "password": "1234", "rol": "Frigorífico", "tipo": "servicios",
+        "empresa": "FríoPort Servicios", "pais": "CL"
     },
-    "frigorificoserv2@demo.cl": {
-        "empresa": "Frío Andino Servicios",
-        "rut": "80.444.444-4",
-        "rol": "Frigorífico",
-        "tipo": "servicios",
-        "pais": "CL",
-        "email": "frigorificoserv2@demo.cl",
-        "telefono": "+56 9 7400 2222",
-        "direccion": "Santiago",
-        "descripcion": "Servicios integrales para exportación.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Paletizado", "capacidad": "800 pallets/día", "ubicacion": "Santiago"},
-            {"tipo": "servicio", "servicio": "Cross-docking", "capacidad": "Alta", "ubicacion": "Santiago"},
-        ],
-    },
-
-
-    # Servicios: Aduana / Extraportuario
     "aduana1@demo.cl": {
-        "empresa": "Agencia Andes",
-        "rut": "82.111.111-1",
-        "rol": "Agencia de aduana",
-        "tipo": "servicios",
-        "pais": "CL",
-        "email": "aduana1@demo.cl",
-        "telefono": "+56 2 2900 1111",
-        "direccion": "Valparaíso",
-        "descripcion": "Tramitación documental de exportación.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Despacho de exportación", "capacidad": "Alta", "ubicacion": "Valparaíso"},
-        ],
+        "password": "1234", "rol": "Agencia de aduana", "tipo": "servicios",
+        "empresa": "Agencia Andes", "pais": "CL"
     },
-    "aduana2@demo.cl": {
-        "empresa": "Aduanas Express",
-        "rut": "82.222.222-2",
-        "rol": "Agencia de aduana",
-        "tipo": "servicios",
-        "pais": "CL",
-        "email": "aduana2@demo.cl",
-        "telefono": "+56 2 2900 2222",
-        "direccion": "San Antonio",
-        "descripcion": "Ventanilla única y asesoría OEA.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Asesoría OEA", "capacidad": "Media", "ubicacion": "San Antonio"},
-        ],
-    },
-    "extraport1@demo.cl": {
-        "empresa": "Servicios Extraport Valpo",
-        "rut": "83.111.111-1",
-        "rol": "Extraportuario",
-        "tipo": "servicios",
-        "pais": "CL",
-        "email": "extraport1@demo.cl",
-        "telefono": "+56 9 7500 1111",
-        "direccion": "Valparaíso",
-        "descripcion": "Consolidado y desconsolidado.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "100/día", "ubicacion": "Valparaíso"},
-        ],
-    },
-    "extraport2@demo.cl": {
-        "empresa": "Extraport San Antonio",
-        "rut": "83.222.222-2",
-        "rol": "Extraportuario",
-        "tipo": "servicios",
-        "pais": "CL",
-        "email": "extraport2@demo.cl",
-        "telefono": "+56 9 7500 2222",
-        "direccion": "San Antonio",
-        "descripcion": "Servicios logísticos en puerto.",
-        "items": [
-            {"tipo": "servicio", "servicio": "Consolidación de contenedores", "capacidad": "50/día", "ubicacion": "San Antonio"},
-        ],
+    "transporte1@demo.cl": {
+        "password": "1234", "rol": "Transporte", "tipo": "servicios",
+        "empresa": "Transporte Global", "pais": "CL"
     },
 
-
-    # Clientes extranjeros
+    # ---- Cliente extranjero (solo compras) ----
     "clienteusa1@ext.com": {
-        "empresa": "Importadora Asia Ltd.",
-        "rol": "Cliente extranjero",
-        "tipo": "compras",
-        "pais": "US",
-        "email": "clienteusa1@ext.com",
-        "telefono": "+1 415 555 0101",
-        "direccion": "San Francisco, CA",
-        "descripcion": "Compras de fruta chilena; foco cereza, uva y ciruela.",
-        "items": [
-            {"tipo": "demanda", "producto": "Cereza Santina", "variedad": "Santina", "cantidad": "80", "bulto": "pallets", "origen": "CL"},
-        ],
-    },
-    "clienteusa2@ext.com": {
-        "empresa": "Gourmet Asia Ltd.",
-        "rol": "Cliente extranjero",
-        "tipo": "compras",
-        "pais": "US",
-        "email": "clienteusa2@ext.com",
-        "telefono": "+1 212 555 0199",
-        "direccion": "New York, NY",
-        "descripcion": "Compras de arándano y manzana premium.",
-        "items": [
-            {"tipo": "demanda", "producto": "Arándano Duke", "variedad": "Duke", "cantidad": "50", "bulto": "pallets", "origen": "CL"},
-        ],
+        "password": "1234", "rol": "Cliente extranjero", "tipo": "compras",
+        "empresa": "Importadora Asia Ltd.", "pais": "US"
     },
 }
 
 
-# Dataset liviano de "publicaciones" genéricas (se usa en Parte 2)
+# ---------------------------------------------------------
+# 🧩 “ELIMINAR DE MI VISTA” (persistente en sesión)
+# ---------------------------------------------------------
+def get_hidden_items() -> List[str]:
+    """Obtiene IDs de publicaciones ocultas por el usuario."""
+    return session.setdefault("hidden_items", [])
+
+
+def hide_item(item_id: str):
+    """Oculta un ítem (lo añade a la lista de ocultos)."""
+    hidden = get_hidden_items()
+    if item_id not in hidden:
+        hidden.append(item_id)
+        session["hidden_items"] = hidden
+
+
+def unhide_all():
+    """Restaura todos los ítems ocultos."""
+    session["hidden_items"] = []
+
+
+# ---------------------------------------------------------
+# 🧾 PUBLICACIONES DEMO (ofertas, servicios, demandas)
+# ---------------------------------------------------------
 PUBLICACIONES: List[Dict[str, Any]] = [
-    {"usuario": "export1", "tipo": "oferta", "rol": "Exportador", "empresa": "Exportadora Andes SpA", "producto": "Trufas Negras Chilenas", "precio": "USD 800/kg"},
-    {"usuario": "export2", "tipo": "oferta", "rol": "Exportador", "empresa": "Exportadora del Pacífico Ltda.", "producto": "Cerezas Premium", "precio": "USD 7/kg"},
-    {"usuario": "packing1", "tipo": "servicio", "rol": "Packing", "empresa": "Packing Maule", "producto": "Servicio de Embalaje", "precio": "USD 0.50/kg"},
-    {"usuario": "frig1", "tipo": "servicio", "rol": "Frigorífico", "empresa": "Frigorífico Valpo", "producto": "Almacenamiento Refrigerado", "precio": "USD 0.20/kg"},
-    {"usuario": "aduana1", "tipo": "servicio", "rol": "Agencia de aduana", "empresa": "Agencia Andes", "producto": "Tramitación de Exportación", "precio": "USD 200/trámite"},
-    {"usuario": "cliente1", "tipo": "demanda", "rol": "Cliente extranjero", "empresa": "Importadora Asia Ltd.", "producto": "Demanda de Fruta Chilena", "precio": "Consultar"},
+    # --- Fruta / Ofertas ---
+    {"id": "pub1", "usuario": "export1@demo.cl", "tipo": "oferta", "rol": "Exportador",
+     "empresa": "Exportadora Andes SpA", "producto": "Cerezas Premium", "precio": "USD 7/kg"},
+    # --- Servicios ---
+    {"id": "pub2", "usuario": "packingcv1@demo.cl", "tipo": "servicio", "rol": "Packing",
+     "empresa": "Packing Maule SpA", "producto": "Servicio de Embalaje", "precio": "USD 0.50/kg"},
+    {"id": "pub3", "usuario": "frigorificocv1@demo.cl", "tipo": "servicio", "rol": "Frigorífico",
+     "empresa": "Frío Centro SpA", "producto": "Almacenamiento Refrigerado", "precio": "USD 0.20/kg"},
+    {"id": "pub4", "usuario": "aduana1@demo.cl", "tipo": "servicio", "rol": "Agencia de aduana",
+     "empresa": "Agencia Andes", "producto": "Tramitación de Exportación", "precio": "USD 200/trámite"},
+    # --- Demandas ---
+    {"id": "pub5", "usuario": "clienteusa1@ext.com", "tipo": "demanda", "rol": "Cliente extranjero",
+     "empresa": "Importadora Asia Ltd.", "producto": "Demanda de Fruta Chilena", "precio": "Consultar"},
 ]
 
 
-
-
 # ---------------------------------------------------------
-# CARRITO (helpers de sesión) — usado en Parte 2
+# 🛒 CARRITO (helpers de sesión)
 # ---------------------------------------------------------
 def get_cart() -> List[Dict[str, Any]]:
+    """Obtiene el carrito actual desde la sesión."""
     return session.setdefault("cart", [])
 
 
-
-
 def save_cart(cart: List[Dict[str, Any]]) -> None:
+    """Guarda el carrito actualizado en la sesión."""
     session["cart"] = cart
 
 
-
-
 def add_to_cart(item: Dict[str, Any]) -> None:
+    """Agrega un ítem al carrito si no está ya presente."""
     cart = get_cart()
-    cart.append(item)
-    save_cart(cart)
-
-
+    if item not in cart:
+        cart.append(item)
+        save_cart(cart)
 
 
 def remove_from_cart(index: int) -> bool:
+    """Elimina un ítem del carrito por índice."""
     cart = get_cart()
     if 0 <= index < len(cart):
         cart.pop(index)
@@ -607,35 +357,180 @@ def remove_from_cart(index: int) -> bool:
     return False
 
 
-
-
 def clear_cart() -> None:
+    """Vacía el carrito."""
     save_cart([])
 
 
-@app.route("/logout")
-def logout():
-    """Cierra sesión."""
-    session.pop("user", None)
-    flash(t("Sesión cerrada correctamente", "Logged out successfully", "成功登出"))
-    return redirect(url_for("home"))
+# ---------------------------------------------------------
+# 🧠 FILTRADO DE PUBLICACIONES SEGÚN ROL Y PERMISOS
+# ---------------------------------------------------------
+def filtrar_publicaciones_por_usuario(usuario: Dict[str, Any], permisos: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Devuelve solo las publicaciones visibles según el rol/tipo del usuario.
+    Se filtra por permisos definidos en la Parte 3.
+    """
+    rol = usuario.get("rol", "")
+    hidden = set(get_hidden_items())
+    visibles = []
+
+    for pub in PUBLICACIONES:
+        if pub["id"] in hidden:
+            continue
+
+        tipo_pub = pub.get("tipo")
+
+        # --- Ofertas ---
+        if tipo_pub == "oferta":
+            visibles_roles = permisos["fruta_oferta_visible_por_rol"].get(rol, [])
+            if pub["rol"] in visibles_roles:
+                visibles.append(pub)
+
+        # --- Demandas ---
+        elif tipo_pub == "demanda":
+            visibles_roles = permisos["fruta_demanda_visible_por_rol"].get(rol, [])
+            if pub["rol"] in visibles_roles:
+                visibles.append(pub)
+
+        # --- Servicios ---
+        elif tipo_pub == "servicio":
+            compradores = permisos["servicios_compra_de"].get(rol, [])
+            if pub["rol"] in compradores or pub["rol"] == rol:
+                visibles.append(pub)
+
+    return visibles
+# ---------------------------------------------------------
+# 🧩 MATRIZ DE PERMISOS (ofertas, demandas, servicios)
+# ---------------------------------------------------------
+PERMISOS: Dict[str, Dict[str, List[str]]] = {
+    # === FRUTA: quién puede ver OFERTAS publicadas por cada rol ===
+    "fruta_oferta_visible_por_rol": {
+        # Productor vende a Packing, Frigorífico, Exportador
+        "Packing": ["Productor(planta)"],
+        "Frigorífico": ["Productor(planta)", "Packing"],
+        "Exportador": ["Productor(planta)", "Packing", "Frigorífico", "Exportador"],
+        "Cliente extranjero": ["Exportador"],  # Solo ve exportadores
+        "Productor(planta)": ["Packing", "Frigorífico", "Exportador"],
+
+        # Servicios no ven fruta
+        "Agencia de aduana": [],
+        "Transporte": [],
+        "Extraportuario": [],
+    },
+
+    # === FRUTA: quién puede ver DEMANDAS (quién compra fruta) ===
+    "fruta_demanda_visible_por_rol": {
+        "Productor(planta)": ["Exportador", "Packing", "Frigorífico", "Productor(planta)"],
+        "Packing": ["Exportador", "Frigorífico", "Packing"],
+        "Frigorífico": ["Exportador", "Packing", "Frigorífico"],
+        "Exportador": ["Exportador"],
+        "Cliente extranjero": ["Exportador"],
+
+        # Servicios no participan en fruta
+        "Agencia de aduana": [],
+        "Transporte": [],
+        "Extraportuario": [],
+    },
+
+    # === SERVICIOS: a quién pueden VENDER servicios cada rol ===
+    "servicios_venta_a": {
+        "Agencia de aduana": ["Exportador"],
+        "Transporte": ["Exportador", "Packing", "Frigorífico", "Productor(planta)"],
+        "Extraportuario": ["Exportador"],
+        "Packing": ["Productor(planta)", "Frigorífico", "Exportador"],
+        "Frigorífico": ["Packing", "Productor(planta)", "Exportador"],
+        "Exportador": [],
+        "Productor(planta)": [],
+        "Cliente extranjero": [],
+    },
+
+    # === SERVICIOS: desde quién pueden COMPRAR servicios cada rol comprador ===
+    "servicios_compra_de": {
+        "Productor(planta)": ["Transporte", "Packing", "Frigorífico"],
+        "Packing": ["Transporte", "Frigorífico"],
+        "Frigorífico": ["Transporte", "Packing"],
+        "Exportador": ["Agencia de aduana", "Transporte", "Extraportuario", "Packing", "Frigorífico"],
+        "Cliente extranjero": [],
+
+        # Proveedores de servicio normalmente no compran servicios
+        "Agencia de aduana": [],
+        "Transporte": [],
+        "Extraportuario": [],
+    },
+}
+
 
 # ---------------------------------------------------------
-# MAIN
+# 🧱 ROLES POR TIPO DE CUENTA (helpers para registro)
 # ---------------------------------------------------------
-if __name__ == "__main__":
-    # debug=True solo local. En Render se usa gunicorn app:app
-    app.run(debug=True)
-# =========================
-# app.py — Parte 2/3
-# Lógica de negocio, roles, vistas dinámicas y formularios
-# =========================
+ROLES_SERVICIO_PUROS = ["Agencia de aduana", "Transporte", "Extraportuario"]
+ROLES_FRUTA = ["Productor(planta)", "Packing", "Frigorífico", "Exportador"]
+ROLES_TODOS = ROLES_FRUTA + ROLES_SERVICIO_PUROS + ["Cliente extranjero"]
+
+def roles_permitidos_por_tipo(tipo: str) -> List[str]:
+    """
+    Devuelve los roles válidos para el tipo de cuenta seleccionado.
+    - 'compras'     -> Cliente extranjero
+    - 'servicios'   -> Perfiles de servicio puros (+ Packing/Frigorífico)
+    - 'compraventa' -> Productor, Packing, Frigorífico, Exportador
+    - 'mixto'       -> Packing, Frigorífico (ambos tipos)
+    """
+    tipo = (tipo or "").strip().lower()
+    if tipo == "compras":
+        return ["Cliente extranjero"]
+    if tipo == "servicios":
+        return ROLES_SERVICIO_PUROS + ["Packing", "Frigorífico"]
+    if tipo == "compraventa":
+        return ROLES_FRUTA
+    if tipo == "mixto":
+        return ["Packing", "Frigorífico"]
+    return ROLES_TODOS
 
 
 # ---------------------------------------------------------
-# HELPERS DE CLIENTES
+# 👁️‍🗨️ VISIBILIDAD DE PUBLICACIONES POR ROL
+# ---------------------------------------------------------
+def publica_es_visible_para_rol(pub: Dict[str, Any], rol_usuario: str) -> bool:
+    """Evalúa si una publicación es visible para un rol dado."""
+    if not pub or not rol_usuario:
+        return False
+
+    tipo = pub.get("tipo")
+    rol_pub = pub.get("rol")
+
+    if tipo == "oferta":
+        roles_v = PERMISOS["fruta_oferta_visible_por_rol"].get(rol_usuario, [])
+        return rol_pub in roles_v
+
+    if tipo == "demanda":
+        roles_v = PERMISOS["fruta_demanda_visible_por_rol"].get(rol_usuario, [])
+        return rol_pub in roles_v
+
+    if tipo == "servicio":
+        compra_de = PERMISOS["servicios_compra_de"].get(rol_usuario, [])
+        return rol_pub in compra_de
+
+    return False
+
+
+def publicaciones_visibles(usuario: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Filtra PUBLICACIONES según el rol/tipo del usuario + ítems ocultos."""
+    hidden = set(session.get("hidden_items", []))
+    rol = usuario.get("rol", "")
+    visibles = []
+    for p in PUBLICACIONES:
+        if p.get("id") in hidden:
+            continue
+        if publica_es_visible_para_rol(p, rol):
+            visibles.append(p)
+    return visibles
+
+
+# ---------------------------------------------------------
+# 👥 HELPERS DE CLIENTES (para vistas de lista/detalle)
 # ---------------------------------------------------------
 def _normaliza_items(items):
+    """Normaliza productos o servicios dentro de perfiles."""
     out = []
     for it in items or []:
         nombre = it.get("producto") or it.get("servicio") or it.get("variedad") or "Item"
@@ -644,9 +539,8 @@ def _normaliza_items(items):
     return out
 
 
-
-
-def _armar_cliente_desde_profile(username, profile):
+def _armar_cliente_desde_profile(username: str, profile: Dict[str, Any]):
+    """Convierte un perfil extendido en un formato estándar para mostrar."""
     return {
         "username": username,
         "empresa": profile.get("empresa"),
@@ -657,9 +551,8 @@ def _armar_cliente_desde_profile(username, profile):
     }
 
 
-
-
-def _armar_cliente_desde_users(username, data):
+def _armar_cliente_desde_users(username: str, data: Dict[str, Any]):
+    """Convierte datos de USERS (semilla o BD) a formato de cliente."""
     return {
         "username": username,
         "empresa": data.get("empresa", username),
@@ -668,253 +561,281 @@ def _armar_cliente_desde_users(username, data):
         "descripcion": data.get("descripcion", ""),
         "items": [],
     }
+from flask import render_template, redirect, url_for, request, flash, abort, session
 
-
+# ---------------------------------------------------------
+# 🔐 LOGIN REQUERIDO (middleware simple)
+# ---------------------------------------------------------
+def login_requerido():
+    """Valida que el usuario haya iniciado sesión."""
+    if "user" not in session:
+        flash("Debes iniciar sesión para acceder a esta sección.")
+        return False
+    return True
 
 
 # ---------------------------------------------------------
-# CLIENTES / DETALLES / MENSAJES
+# 🏠 DASHBOARD PRINCIPAL
+# ---------------------------------------------------------
+@app.route("/dashboard")
+def dashboard():
+    """Panel principal del usuario."""
+    if not login_requerido():
+        return redirect(url_for("login"))
+
+    user = session.get("user", {})
+    publicaciones = publicaciones_visibles(user)
+
+    return render_template(
+        "dashboard.html",
+        user=user,
+        publicaciones=publicaciones,
+        rol=user.get("rol", ""),
+        tipo=user.get("tipo", ""),
+        empresa=user.get("empresa", ""),
+        pais=user.get("pais", ""),
+        titulo="Panel de Usuario"
+    )
+
+
+# ---------------------------------------------------------
+# 🛍️ COMPRAS — Ofertas y servicios visibles según rol
+# ---------------------------------------------------------
+@app.route("/compras")
+def compras():
+    if not login_requerido():
+        return redirect(url_for("login"))
+
+    user = session["user"]
+    publicaciones = [
+        p for p in PUBLICACIONES
+        if p["tipo"] in ("oferta", "servicio") and publica_es_visible_para_rol(p, user["rol"])
+    ]
+    return render_template("compras.html", publicaciones=publicaciones)
+
+
+# ---------------------------------------------------------
+# 💰 VENTAS — Demandas visibles según rol
+# ---------------------------------------------------------
+@app.route("/ventas")
+def ventas():
+    if not login_requerido():
+        return redirect(url_for("login"))
+
+    user = session["user"]
+    publicaciones = [
+        p for p in PUBLICACIONES
+        if p["tipo"] == "demanda" and publica_es_visible_para_rol(p, user["rol"])
+    ]
+    return render_template("ventas.html", publicaciones=publicaciones)
+
+
+# ---------------------------------------------------------
+# 🧰 SERVICIOS — Filtrados según rol comprador
+# ---------------------------------------------------------
+@app.route("/servicios")
+def servicios():
+    if not login_requerido():
+        return redirect(url_for("login"))
+
+    user = session["user"]
+    publicaciones = [
+        p for p in PUBLICACIONES
+        if p["tipo"] == "servicio" and publica_es_visible_para_rol(p, user["rol"])
+    ]
+    return render_template("servicios.html", publicaciones=publicaciones)
+
+
+# ---------------------------------------------------------
+# 👥 CLIENTES — Listado general y detalle
 # ---------------------------------------------------------
 @app.route("/clientes")
 def clientes():
-    if not is_logged():
-        flash(t("Debes iniciar sesión", "You must log in", "請先登入"))
+    if not login_requerido():
         return redirect(url_for("login"))
 
-
     lista = []
-    for u, profile in USER_PROFILES.items():
-        lista.append(_armar_cliente_desde_profile(u, profile))
-    ya = {c["username"] for c in lista}
-    for u, data in USERS.items():
-        if u not in ya:
-            lista.append(_armar_cliente_desde_users(u, data))
+    for username, data in USERS.items():
+        lista.append(_armar_cliente_desde_users(username, data))
     lista.sort(key=lambda c: (c.get("empresa") or "").lower())
-
 
     return render_template("clientes.html", clientes=lista)
 
 
-
-
 @app.route("/clientes/<username>")
 def cliente_detalle(username):
-    if username in USER_PROFILES:
-        c = _armar_cliente_desde_profile(username, USER_PROFILES[username])
-    elif username in USERS:
-        c = _armar_cliente_desde_users(username, USERS[username])
-    else:
+    """Detalle de un cliente específico."""
+    if username not in USERS:
         abort(404)
-    return render_template("cliente_detalle.html", c=c)
-
-
-
-
-@app.route("/clientes/<username>/mensaje", methods=["POST"])
-def enviar_mensaje(username):
-    if not is_logged():
-        flash(t("Debes iniciar sesión para enviar mensajes",
-                "You must log in to send messages", "請先登入以發送訊息"))
-        return redirect(url_for("login"))
-
-
-    mensaje = (request.form.get("mensaje") or "").strip()
-    if not mensaje:
-        flash(t("El mensaje no puede estar vacío", "Message cannot be empty", "訊息不可為空"))
-        return redirect(url_for("cliente_detalle", username=username))
-
-
-    flash(t("Mensaje enviado correctamente",
-            "Message sent successfully", "訊息已成功發送"))
-    return redirect(url_for("cliente_detalle", username=username))
-
-
+    cliente = _armar_cliente_desde_users(username, USERS[username])
+    return render_template("cliente_detalle.html", c=cliente)
 
 
 # ---------------------------------------------------------
-# CARRITO / COMPRAS / VENTAS / SERVICIOS
+# 🛒 CARRITO — Visualización, agregar, eliminar, vaciar
 # ---------------------------------------------------------
 @app.route("/carrito")
 def carrito():
-    if not is_logged():
+    if not login_requerido():
         return redirect(url_for("login"))
     return render_template("carrito.html", cart=get_cart())
 
 
-
-
-@app.route("/carrito/agregar/<int:pub_id>")
+@app.route("/carrito/agregar/<pub_id>")
 def carrito_agregar(pub_id):
-    if not is_logged():
-        flash(t("Debes iniciar sesión", "You must log in", "請先登入"))
+    if not login_requerido():
         return redirect(url_for("login"))
 
-
-    if 0 <= pub_id < len(PUBLICACIONES):
-        add_to_cart(PUBLICACIONES[pub_id])
-        flash(t("Agregado al carrito", "Added to cart", "已加入購物車"))
+    pub = next((p for p in PUBLICACIONES if p["id"] == pub_id), None)
+    if pub:
+        add_to_cart(pub)
+        flash("Agregado al carrito.")
+    else:
+        flash("Publicación no encontrada.")
     return redirect(url_for("carrito"))
-
-
 
 
 @app.route("/carrito/eliminar/<int:index>")
 def carrito_eliminar(index):
     if remove_from_cart(index):
-        flash(t("Eliminado del carrito", "Removed from cart", "已刪除"))
+        flash("Eliminado del carrito.")
     else:
-        flash(t("Ítem no encontrado", "Item not found", "找不到項目"))
+        flash("Ítem no encontrado.")
     return redirect(url_for("carrito"))
 
 
-
-
-@app.route("/compras")
-def compras():
-    return render_template("compras.html", publicaciones=[p for p in PUBLICACIONES if p["tipo"] in ("oferta", "servicio")])
-
-
-
-
-@app.route("/ventas")
-def ventas():
-    return render_template("ventas.html", publicaciones=[p for p in PUBLICACIONES if p["tipo"] == "demanda"])
-
-
-
-
-@app.route("/servicios")
-def servicios():
-    return render_template("servicios.html", publicaciones=[p for p in PUBLICACIONES if p["tipo"] == "servicio"])
-
-
+@app.route("/carrito/vaciar")
+def carrito_vaciar():
+    clear_cart()
+    flash("Carrito vaciado.")
+    return redirect(url_for("carrito"))
 
 
 # ---------------------------------------------------------
-# PERFIL / DASHBOARD
+# 🧹 “ELIMINAR DE MI VISTA” / RESTAURAR
+# ---------------------------------------------------------
+@app.route("/ocultar/<pub_id>", methods=["POST"])
+def ocultar_publicacion(pub_id):
+    """Permite ocultar una publicación (no eliminarla del sistema)."""
+    if not login_requerido():
+        return redirect(url_for("login"))
+
+    hide_item(pub_id)
+    flash("Publicación ocultada.")
+    return redirect(request.referrer or url_for("dashboard"))
+
+
+@app.route("/restablecer_ocultos", methods=["POST"])
+def restablecer_ocultos():
+    """Restaura todas las publicaciones ocultas."""
+    if not login_requerido():
+        return redirect(url_for("login"))
+
+    unhide_all()
+    flash("Publicaciones restauradas.")
+    return redirect(url_for("dashboard"))
+
+
+# ---------------------------------------------------------
+# 🙍 PERFIL DE USUARIO
 # ---------------------------------------------------------
 @app.route("/perfil")
 def perfil():
-    if not is_logged():
-        flash(t("Debes iniciar sesión", "You must log in", "請先登入"))
+    """Perfil del usuario actual."""
+    if not login_requerido():
         return redirect(url_for("login"))
 
-
-    username = session["user"]
-    user = USERS.get(username, {})
+    user = session["user"]
     return render_template("perfil.html", user=user)
+# ------------------------------
+# 🌐 MULTILENGUAJE (ES / EN / 中文)
+# ------------------------------
+from flask import request
+
+# Diccionario base; si falta una clave, el traductor hace fallback al texto en ES.
+TRANSLATIONS = {
+    # Navegación y acciones
+    "Inicio": {"en": "Home", "zh": "主頁"},
+    "Compras": {"en": "Purchases", "zh": "購買"},
+    "Ventas": {"en": "Sales", "zh": "銷售"},
+    "Servicios": {"en": "Services", "zh": "服務"},
+    "Carrito": {"en": "Cart", "zh": "購物車"},
+    "Perfil": {"en": "Profile", "zh": "個人資料"},
+    "Ayuda": {"en": "Help", "zh": "幫助"},
+    "Cerrar sesión": {"en": "Log out", "zh": "登出"},
+    "Iniciar sesión": {"en": "Log in", "zh": "登入"},
+    "Registrarse": {"en": "Register", "zh": "註冊"},
+
+    # Home
+    "Bienvenido a Window Shopping": {
+        "en": "Welcome to Window Shopping", "zh": "歡迎來到 Window Shopping"
+    },
+    "Conectamos productores chilenos con compradores internacionales": {
+        "en": "Connecting Chilean producers with international buyers",
+        "zh": "連接智利生產商與國際買家"
+    },
+    "Ver demandas": {"en": "View demands", "zh": "查看需求"},
+    "Explorar ofertas": {"en": "Explore offers", "zh": "查看報價"},
+    "Explorar servicios": {"en": "Explore services", "zh": "探索服務"},
+
+    # Mensajes comunes
+    "Debes iniciar sesión para acceder a esta sección.": {
+        "en": "You must log in to access this section.", "zh": "請先登入以存取此區域。"
+    },
+    "Agregado al carrito": {"en": "Added to cart", "zh": "已加入購物車"},
+    "Eliminado del carrito": {"en": "Removed from cart", "zh": "已從購物車移除"},
+    "Carrito vaciado": {"en": "Cart cleared", "zh": "購物車已清空"},
+    "Publicación no encontrada": {"en": "Item not found", "zh": "找不到項目"},
+    "Publicación ocultada": {"en": "Item hidden", "zh": "項目已隱藏"},
+    "Publicaciones restauradas": {"en": "Hidden items restored", "zh": "已恢復隱藏項目"},
+    "Panel de Usuario": {"en": "User Dashboard", "zh": "用戶主頁"},
+
+    # Errores
+    "Página no encontrada": {"en": "Page not found", "zh": "找不到頁面"},
+    "Error interno del servidor": {"en": "Internal server error", "zh": "伺服器內部錯誤"},
+}
+
+@app.context_processor
+def inject_translator():
+    def t(es: str, en: str = None, zh: str = None) -> str:
+        """
+        Traductor dinámico:
+        - Usa session['lang'] (por defecto 'es')
+        - Busca en TRANSLATIONS; si no existe, usa los alternativos 'en'/'zh' pasados a la función
+        - Si aún así no hay, retorna el texto en español.
+        """
+        lang = session.get("lang", "es")
+        if lang == "en":
+            # 1) diccionario central -> 2) parámetro 'en' -> 3) fallback ES
+            return (TRANSLATIONS.get(es, {}).get("en")) or (en if en else es)
+        if lang == "zh":
+            return (TRANSLATIONS.get(es, {}).get("zh")) or (zh if zh else es)
+        return es
+    return dict(t=t)
+
+@app.route("/set_lang", methods=["POST"])
+def set_lang():
+    """Selector de idioma: guarda el idioma en sesión y regresa a la página previa."""
+    lang = request.form.get("lang", "es")
+    session["lang"] = lang
+    print(f"🌍 Idioma establecido: {lang}")
+    return redirect(request.referrer or url_for("home"))
 
 
-@app.route("/dashboard")
-def dashboard():
-    if not is_logged():
-        flash(t("Debes iniciar sesión", "You must log in", "請先登入"))
-        return redirect(url_for("login"))
-
-    user = session.get("user", {})
-
-    # Filtrado visual según tipo de usuario
-    tipo = user.get("tipo", "")
-    rol = user.get("rol", "")
-    empresa = user.get("empresa", "")
-    email = user.get("email", "")
-
-    # Redirección contextual (por tipo de cuenta)
-    if tipo == "compras":
-        vista = "compras"
-    elif tipo == "servicios":
-        vista = "servicios"
-    elif tipo in ("compraventa", "mixto"):
-        vista = "ventas"
-    else:
-        vista = "compras"
-
-    return render_template(
-        "dashboard.html",
-        user=user,
-        tipo=tipo,
-        rol=rol,
-        empresa=empresa,
-        email=email,
-        vista=vista
-    )
-
-# ---------------------------------------------------------
-# REGISTER ROUTER
-# ---------------------------------------------------------
-@app.route("/register_router")
-def register_router():
-    return render_template("register_router.html")
-
-
-
-
-# ---------------------------------------------------------
-# PASSWORD RESET (2 PASOS)
-# ---------------------------------------------------------
-@app.route("/password_reset_request", methods=["GET", "POST"])
-def password_reset_request():
-    if request.method == "POST":
-        usuario = (request.form.get("usuario") or "").strip()
-        flash(t("Si el usuario existe, enviaremos instrucciones a su correo.",
-                "If the user exists, we'll email recovery instructions.",
-                "若帳號存在，我們將寄出重設指示。"))
-        return redirect(url_for("password_reset_form"))
-    return render_template("password_reset_request.html")
-
-
-
-
-@app.route("/password_reset_form", methods=["GET", "POST"])
-def password_reset_form():
-    if request.method == "POST":
-        nueva_password = request.form.get("nueva_contraseña") or request.form.get("nueva_contrasena")
-        if not (nueva_password or "").strip():
-            flash(t("La nueva contraseña es obligatoria",
-                    "New password is required", "必須填寫新密碼"))
-            return redirect(url_for("password_reset_form"))
-        flash(t("Contraseña actualizada", "Password updated", "密碼已更新"))
-        return redirect(url_for("login"))
-    return render_template("password_reset_form.html")
-# =========================
-# app.py — Parte 3/3 (final)
-# Rutas de ayuda, errores, registro_exitoso y manejo global
-# =========================
-
-
-# ---------------------------------------------------------
-# AYUDA — versión completa (reemplaza stub de la Parte 1)
-# ---------------------------------------------------------
-@app.route("/ayuda")
-def ayuda():
-    """Centro de ayuda traducido con información básica."""
-    return render_template("ayuda.html")
-
-
-
-
-# ---------------------------------------------------------
-# REGISTRO EXITOSO
-# ---------------------------------------------------------
-@app.route("/registro_exitoso")
-def registro_exitoso():
-    """Confirma creación de cuenta."""
-    return render_template("registro_exitoso.html")
-
-
-# -----------------------------------------------------
-# ⚠️ MANEJO DE ERRORES (Integrado con multilenguaje)
-# -----------------------------------------------------
-from flask import render_template
-
+# ------------------------------
+# 🧯 MANEJO DE ERRORES
+# ------------------------------
 @app.errorhandler(404)
 def not_found_error(error):
     """Página no encontrada (404)."""
     try:
-        return render_template("404.html"), 404
+        return render_template(
+            "404.html",
+            mensaje=t("Página no encontrada", "Page not found", "找不到頁面")
+        ), 404
     except Exception as e:
+        # Fallback minimalista si falla el template
         print(f"Error al renderizar 404: {e}")
-        # fallback minimalista si hay fallo de template
         return "<h1>404</h1><p>Página no encontrada</p>", 404
 
 
@@ -922,169 +843,19 @@ def not_found_error(error):
 def server_error(error):
     """Error interno del servidor (500)."""
     try:
-        return render_template("500.html"), 500
+        return render_template(
+            "500.html",
+            mensaje=t("Error interno del servidor", "Internal server error", "伺服器內部錯誤")
+        ), 500
     except Exception as e:
         print(f"Error al renderizar 500: {e}")
-        # fallback minimalista
         return "<h1>500</h1><p>Error interno del servidor</p>", 500
 
-# ---------------------------------------------------------
-# VALIDACIÓN FINAL — FAVICON ÚNICO
-# ---------------------------------------------------------
-@app.route("/favicon.ico")
-def favicon():
-    """Sirve el favicon sin duplicar endpoint."""
-    icon_path = os.path.join(STATIC_DIR, "favicon.ico")
-    if os.path.exists(icon_path):
-        return send_from_directory(STATIC_DIR, "favicon.ico")
-    return ("", 204)
 
-# -----------------------------------------------------
-# 🌐 SOPORTE MULTILENGUAJE (Español / English / 中文)
-# -----------------------------------------------------
-from flask import request, session, redirect, url_for
-
-# 📘 Diccionario central de traducciones
-TRANSLATIONS = {
-    # --- Navegación ---
-    "Inicio": {"en": "Home", "zh": "主頁"},
-    "Empresas": {"en": "Companies", "zh": "公司"},
-    "Servicios": {"en": "Services", "zh": "服務"},
-    "Carrito": {"en": "Cart", "zh": "購物車"},
-    "Perfil": {"en": "Profile", "zh": "個人資料"},
-    "Ayuda": {"en": "Help", "zh": "幫助"},
-    "Salir": {"en": "Logout", "zh": "登出"},
-    "Iniciar Sesión": {"en": "Login", "zh": "登入"},
-    "Registrarse": {"en": "Register", "zh": "註冊"},
-    "Comercio Internacional": {"en": "International Trade", "zh": "國際貿易"},
-    "Versión": {"en": "Version", "zh": "版本"},
-    "Desarrollado en Flask": {"en": "Built with Flask", "zh": "使用 Flask 構建"},
-    "Conectando productores y compradores del mundo": {
-        "en": "Connecting global producers and buyers",
-        "zh": "連接全球生產商與買家"
-    },
-
-    # --- HOME ---
-    "Bienvenido a Window Shopping": {"en": "Welcome to Window Shopping", "zh": "歡迎來到 Window Shopping"},
-    "La plataforma que conecta productores chilenos con compradores internacionales.": {
-        "en": "The platform connecting Chilean producers with international buyers.",
-        "zh": "連接智利生產商與國際買家的平台。"
-    },
-    "Comienza ahora": {"en": "Start now", "zh": "立即開始"},
-    "Explora nuestros servicios": {"en": "Explore our services", "zh": "探索我們的服務"},
-    "Compra y Venta": {"en": "Buy & Sell", "zh": "買賣"},
-    "Encuentra productores, packing, exportadores y clientes internacionales.": {
-        "en": "Find producers, packers, exporters and international clients.",
-        "zh": "尋找生產商、包裝廠、出口商和國際客戶。"
-    },
-    "Servicios Logísticos": {"en": "Logistic Services", "zh": "物流服務"},
-    "Accede a transporte, frigoríficos y agentes de aduana certificados.": {
-        "en": "Access transport, cold storage, and certified customs agents.",
-        "zh": "提供運輸、冷藏庫及報關行服務。"
-    },
-    "Sostenibilidad": {"en": "Sustainability", "zh": "永續發展"},
-    "Promovemos comercio responsable con trazabilidad y economía circular.": {
-        "en": "We promote responsible trade with traceability and circular economy.",
-        "zh": "推動負責任的貿易、可追溯性與循環經濟。"
-    },
-
-    # --- LOGIN / REGISTER ---
-    "Iniciar sesión": {"en": "Login", "zh": "登入"},
-    "Correo electrónico": {"en": "Email", "zh": "電子郵件"},
-    "Contraseña": {"en": "Password", "zh": "密碼"},
-    "Entrar": {"en": "Sign in", "zh": "登入"},
-    "¿No tienes una cuenta?": {"en": "Don't have an account?", "zh": "還沒有帳號？"},
-    "Regístrate aquí": {"en": "Register here", "zh": "點此註冊"},
-    "¿Ya tienes una cuenta?": {"en": "Already have an account?", "zh": "已經有帳號了？"},
-    "Inicia sesión aquí": {"en": "Log in here", "zh": "點此登入"},
-    "Registro de empresa o usuario": {"en": "Company or User Registration", "zh": "公司或用戶註冊"},
-    "Nombre de la empresa o usuario": {"en": "Company or User Name", "zh": "公司或用戶名稱"},
-    "Selecciona tu tipo de perfil": {"en": "Select your profile type", "zh": "選擇您的個人資料類型"},
-    "Selecciona tu rol": {"en": "Select your role", "zh": "選擇您的角色"},
-    "Crear cuenta": {"en": "Create Account", "zh": "建立帳號"},
-    "Cliente extranjero (solo compras)": {"en": "Foreign client (only purchases)", "zh": "外國客戶（僅購買）"},
-    "Nacional - Compra/Venta": {"en": "National - Buy/Sell", "zh": "國內 - 買賣"},
-    "Nacional - Servicios": {"en": "National - Services", "zh": "國內 - 服務"},
-    "Nacional - Mixto (Fruta y Servicios)": {"en": "National - Mixed (Fruit & Services)", "zh": "國內 - 混合（水果與服務）"},
-    "Productor": {"en": "Producer", "zh": "生產商"},
-    "Packing": {"en": "Packing", "zh": "包裝廠"},
-    "Frigorífico": {"en": "Cold Storage", "zh": "冷藏庫"},
-    "Exportador": {"en": "Exporter", "zh": "出口商"},
-    "Agencia de aduana": {"en": "Customs Agency", "zh": "報關行"},
-    "Extraportuario": {"en": "Extra-port Service", "zh": "港外服務"},
-    "Transporte": {"en": "Transport", "zh": "運輸"},
-    "Cliente extranjero": {"en": "Foreign Client", "zh": "外國客戶"},
-
-    # --- REGISTRO EXITOSO ---
-    "¡Registro Exitoso!": {"en": "Registration Successful!", "zh": "註冊成功！"},
-    "Tu cuenta ha sido creada correctamente.": {
-        "en": "Your account has been successfully created.",
-        "zh": "您的帳戶已成功建立。"
-    },
-    "Ir al inicio de sesión": {"en": "Go to login", "zh": "前往登入"},
-
-    # --- PERFIL ---
-    "Tu Perfil": {"en": "Your Profile", "zh": "您的個人資料"},
-    "Cerrar sesión": {"en": "Log out", "zh": "登出"},
-    "Rol:": {"en": "Role:", "zh": "角色："},
-    "Tipo de Cuenta:": {"en": "Account Type:", "zh": "帳戶類型："},
-
-    # --- PASSWORD RESET ---
-    "Recuperar Contraseña": {"en": "Recover Password", "zh": "重設密碼"},
-    "Enviar enlace de recuperación": {"en": "Send recovery link", "zh": "發送重設連結"},
-    "Nueva Contraseña": {"en": "New Password", "zh": "新密碼"},
-    "Guardar contraseña": {"en": "Save password", "zh": "儲存密碼"},
-    "Volver al inicio de sesión": {"en": "Back to login", "zh": "返回登入頁面"},
-
-    # --- AYUDA ---
-    "Centro de Ayuda": {"en": "Help Center", "zh": "幫助中心"},
-    "Preguntas frecuentes": {"en": "Frequently Asked Questions", "zh": "常見問題"},
-    "¿Cómo registro mi empresa?": {"en": "How do I register my company?", "zh": "如何註冊我的公司？"},
-    "¿Puedo ofrecer servicios y productos a la vez?": {"en": "Can I offer both services and products?", "zh": "我可以同時提供服務和產品嗎？"},
-    "¿Cómo contacto a un comprador extranjero?": {"en": "How do I contact a foreign buyer?", "zh": "如何聯繫外國買家？"},
-    "¿Qué significa el perfil mixto?": {"en": "What does the mixed profile mean?", "zh": "什麼是混合型帳戶？"},
-    "Si necesitas más ayuda, contáctanos a:": {"en": "If you need more help, contact us at:", "zh": "如需更多幫助，請聯繫我們："},
-
-    # --- ERRORES ---
-    "Página no encontrada": {"en": "Page not found", "zh": "找不到頁面"},
-    "Error interno del servidor": {"en": "Internal server error", "zh": "伺服器內部錯誤"},
-    "Volver al inicio": {"en": "Back to home", "zh": "返回主頁"},
-}
-
-# Función auxiliar t() disponible en templates
-@app.context_processor
-def inject_translator():
-    def t(es, en=None, zh=None):
-        """
-        Traductor dinámico: usa el idioma activo (session['lang'])
-        y busca coincidencias en TRANSLATIONS. Si no hay, devuelve el texto en español.
-        """
-        lang = session.get("lang", "es")
-        if lang == "es":
-            return es
-        # Busca en el diccionario central
-        if es in TRANSLATIONS and lang in TRANSLATIONS[es]:
-            return TRANSLATIONS[es][lang]
-        # Si no existe, usa el alternativo
-        if lang == "en" and en:
-            return en
-        if lang == "zh" and zh:
-            return zh
-        return es  # fallback
-    return dict(t=t)
-
-
-# Ruta para cambiar idioma desde el selector del header
-@app.route('/set_lang', methods=['POST'])
-def set_lang():
-    """Recibe el idioma desde el formulario base.html y lo guarda en sesión."""
-    lang = request.form.get('lang', 'es')
-    session['lang'] = lang
-    print(f"🌍 Idioma establecido: {lang}")
-    return redirect(request.referrer or url_for('home'))
-
-# ---------------------------------------------------------
-# ARRANQUE FINAL
-# ---------------------------------------------------------
+# ------------------------------
+# 🚀 ARRANQUE LOCAL
+# (En Render se usa: gunicorn app:app)
+# ------------------------------
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    print("🚀 Iniciando Window Shopping...")
+    app.run(debug=True, host="0.0.0.0", port=5000)
