@@ -5,29 +5,60 @@
   <h2 class="title-gradient">{{ t("Panel Principal", "Main Dashboard", "主面板") }}</h2>
 
   <!-- Información del usuario -->
-  <div class="user-info glass-card">
-    <p><strong>{{ t("Empresa:", "Company:", "公司：") }}</strong> {{ empresa }}</p>
-    <p><strong>{{ t("Correo:", "Email:", "電子郵件：") }}</strong> {{ email }}</p>
-    <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ rol }}</p>
-    <p><strong>{{ t("Tipo de Cuenta:", "Account Type:", "帳戶類型：") }}</strong> {{ tipo }}</p>
+  <div class="user-info glass-card" style="margin-top:12px;">
+    <p><strong>{{ t("Empresa:", "Company:", "公司：") }}</strong> {{ empresa or user.empresa }}</p>
+    <p><strong>{{ t("Correo:", "Email:", "電子郵件：") }}</strong> {{ email or user.email }}</p>
+    <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ rol or user.rol }}</p>
+    <p><strong>{{ t("Tipo de Cuenta:", "Account Type:", "帳戶類型：") }}</strong> {{ tipo or user.tipo }}</p>
   </div>
 
   <!-- Acciones según tipo -->
-  <div class="dashboard-actions">
-    {% if tipo == "compras" %}
-      <a href="{{ url_for('compras') }}" class="btn large primary">🛒 {{ t("Explorar Ofertas", "Browse Offers", "瀏覽商品") }}</a>
-    {% elif tipo == "servicios" %}
-      <a href="{{ url_for('servicios') }}" class="btn large secondary">🧰 {{ t("Ver Servicios", "View Services", "查看服務") }}</a>
-    {% elif tipo in ("compraventa", "mixto") %}
-      <a href="{{ url_for('ventas') }}" class="btn large primary">💰 {{ t("Ver Demandas", "View Demands", "查看需求") }}</a>
-      <a href="{{ url_for('compras') }}" class="btn large secondary">🛒 {{ t("Explorar Ofertas", "Browse Offers", "瀏覽商品") }}</a>
+  <div class="dashboard-actions" style="display:flex; gap:12px; flex-wrap:wrap; margin:16px 0;">
+    {% set tcuenta = (tipo or user.tipo) %}
+    {% if tcuenta == "compras" %}
+      <a href="{{ url_for('compras') }}" class="btn btn-primary">🛒 {{ t("Explorar Ofertas", "Browse Offers", "瀏覽商品") }}</a>
+    {% elif tcuenta == "servicios" %}
+      <a href="{{ url_for('servicios') }}" class="btn btn-secondary">🧰 {{ t("Ver Servicios", "View Services", "查看服務") }}</a>
+    {% elif tcuenta in ("compraventa", "mixto") %}
+      <a href="{{ url_for('ventas') }}" class="btn btn-primary">💰 {{ t("Ver Demandas", "View Demands", "查看需求") }}</a>
+      <a href="{{ url_for('compras') }}" class="btn btn-secondary">🛒 {{ t("Explorar Ofertas", "Browse Offers", "瀏覽商品") }}</a>
+      <a href="{{ url_for('servicios') }}" class="btn btn-secondary">🧰 {{ t("Explorar Servicios", "Browse Services", "探索服務") }}</a>
     {% endif %}
   </div>
 
-  <hr>
+  {% if publicaciones %}
+    <div class="glass-card">
+      <h3 style="margin-bottom:10px;">{{ t("Sugerencias para ti", "Suggestions for you", "為你推薦") }}</h3>
+      <ul class="detalle-list">
+        {% for p in publicaciones %}
+          <li class="detalle-card">
+            <h4>{{ p.empresa }}</h4>
+            <p><strong>{{ t("Tipo", "Type", "類型") }}:</strong> {{ p.tipo }}</p>
+            <p><strong>{{ t("Rol", "Role", "角色") }}:</strong> {{ p.rol }}</p>
+            {% if p.producto %}<p><strong>{{ t("Producto", "Product", "產品") }}:</strong> {{ p.producto }}</p>{% endif %}
+            {% if p.precio %}<p><strong>{{ t("Precio", "Price", "價格") }}:</strong> {{ p.precio }}</p>{% endif %}
 
-  <!-- Información -->
-  <div class="dashboard-info">
+            <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+              <a href="{{ url_for('carrito_agregar', pub_id=p.id) }}" class="btn btn-secondary">🛍️ {{ t("Agregar al carrito", "Add to Cart", "加入購物車") }}</a>
+              <form method="post" action="{{ url_for('ocultar_publicacion', pub_id=p.id) }}">
+                <button type="submit" class="btn btn-secondary">🙈 {{ t("Eliminar de mi vista", "Hide from my view", "從我的視圖隱藏") }}</button>
+              </form>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <form method="post" action="{{ url_for('restablecer_ocultos') }}" style="margin-top:12px;">
+        <button type="submit" class="btn btn-warning">♻️ {{ t("Restablecer ocultos", "Restore hidden", "恢復隱藏項目") }}</button>
+      </form>
+    </div>
+  {% else %}
+    <div class="glass-card">
+      <p class="no-results">{{ t("Aún no hay publicaciones para tu perfil.", "There are no listings for your profile yet.", "目前沒有適合你個人資料的貼文。") }}</p>
+    </div>
+  {% endif %}
+
+  <div class="dashboard-info" style="margin-top:18px;">
     <h3>{{ t("¿Qué puedes hacer aquí?", "What can you do here?", "你可以在這裡做什麼？") }}</h3>
     <ul>
       <li>{{ t("Explorar publicaciones según tu rol y tipo de cuenta.", "Browse listings by role and account type.", "根據您的角色和帳戶類型瀏覽。") }}</li>
