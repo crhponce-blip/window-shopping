@@ -109,6 +109,14 @@ init_db()
 create_admin_if_missing()
 
 # ---------------------------------------------------------
+# HOME — página principal base
+# ---------------------------------------------------------
+@app.route("/")
+def home():
+    """Página principal de Window Shopping."""
+    return render_template("home.html", titulo=t("Inicio", "Home", "主頁"))
+
+# ---------------------------------------------------------
 # LOGIN (con base de datos SQLite)
 # ---------------------------------------------------------
 @app.route("/login", methods=["GET", "POST"])
