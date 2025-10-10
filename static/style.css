@@ -304,3 +304,155 @@ input:focus, select:focus, textarea:focus {
     align-items: stretch;
   }
 }
+
+/* ==========================================================
+   🌐 ESTILO MODERNO — WINDOW SHOPPING v3.0
+   Glassmorphism + Neón WS + Futurismo Limpio
+   ========================================================== */
+
+/* --- ANIMACIONES BÁSICAS --- */
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+  opacity: 0;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); opacity: 1; }
+}
+
+/* --- TARJETAS DE VIDRIO (GLASS CARD) --- */
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease-in-out;
+}
+.glass-card:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+  transform: translateY(-3px);
+}
+
+/* --- SECCIONES DE AUTENTICACIÓN (LOGIN / REGISTER) --- */
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #041227, #06254d);
+}
+.auth-box {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 35px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* --- TITULOS Y GRADIENTES --- */
+.title-gradient {
+  text-align: center;
+  font-size: 1.9em;
+  background: linear-gradient(90deg, #00c3ff, #3a7bd5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+/* --- CAMPOS DE FORMULARIO --- */
+.form-styled .form-group {
+  margin-bottom: 20px;
+}
+.form-styled label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-bottom: 6px;
+  color: #d1eaff;
+}
+.form-styled input,
+.form-styled select,
+.form-styled textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 0.95em;
+  color: #0b172d;
+  background-color: rgba(255, 255, 255, 0.9);
+  transition: box-shadow 0.2s ease-in-out;
+}
+.form-styled input:focus,
+.form-styled select:focus,
+.form-styled textarea:focus {
+  box-shadow: 0 0 6px #00c3ff;
+}
+
+/* --- BOTONES --- */
+.btn-gradient {
+  background: linear-gradient(135deg, #00c3ff, #0078ff);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #009ee0, #0061d1);
+  box-shadow: 0 0 10px rgba(0, 195, 255, 0.6);
+}
+.full-width {
+  width: 100%;
+}
+
+/* --- ENLACES --- */
+.link-contrast {
+  color: #00c3ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+.link-contrast:hover {
+  text-decoration: underline;
+}
+
+/* --- TEXTOS Y MÁRGENES --- */
+.text-center {
+  text-align: center;
+}
+.mt-3 {
+  margin-top: 1rem;
+}
+
+/* --- MEJORAS VISUALES ADICIONALES --- */
+.navbar a:hover,
+.footer-inner a:hover {
+  color: #00c3ff;
+  transition: color 0.2s ease-in-out;
+}
+input::placeholder {
+  color: #555;
+}
+select {
+  cursor: pointer;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+  .auth-box {
+    padding: 30px 25px;
+  }
+  .title-gradient {
+    font-size: 1.6em;
+  }
+}
