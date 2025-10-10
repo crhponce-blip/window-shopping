@@ -805,16 +805,39 @@ def perfil():
     return render_template("perfil.html", user=user)
 
 
-
-
 @app.route("/dashboard")
 def dashboard():
     if not is_logged():
+        flash(t("Debes iniciar sesión", "You must log in", "請先登入"))
         return redirect(url_for("login"))
-    return render_template("dashboard.html")
 
+    user = session.get("user", {})
 
+    # Filtrado visual según tipo de usuario
+    tipo = user.get("tipo", "")
+    rol = user.get("rol", "")
+    empresa = user.get("empresa", "")
+    email = user.get("email", "")
 
+    # Redirección contextual (por tipo de cuenta)
+    if tipo == "compras":
+        vista = "compras"
+    elif tipo == "servicios":
+        vista = "servicios"
+    elif tipo in ("compraventa", "mixto"):
+        vista = "ventas"
+    else:
+        vista = "compras"
+
+    return render_template(
+        "dashboard.html",
+        user=user,
+        tipo=tipo,
+        rol=rol,
+        empresa=empresa,
+        email=email,
+        vista=vista
+    )
 
 # ---------------------------------------------------------
 # REGISTER ROUTER
