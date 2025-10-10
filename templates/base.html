@@ -1,68 +1,64 @@
 <!DOCTYPE html>
 <html lang="{{ session.get('lang', 'es') }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WS - {{ t("Comercio Internacional", "International Trade", "國際貿易") }}</title>
-
-    <!-- Icono -->
-    <link rel="icon" href="{{ url_for('static', filename='images/ws_logo.png') }}">
-
-    <!-- Estilos -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WS - {{ t("Comercio Internacional", "International Trade", "國際貿易") }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/ws_logo.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <!-- 🌍 NAVBAR -->
-    <nav>
-        <div class="nav-left">
-            <a href="{{ url_for('home') }}" class="logo">🌐 <strong>WS</strong></a>
-        </div>
+<header class="site-header">
+  <div class="container navbar">
+    <div class="brand">
+      <a href="{{ url_for('home') }}" class="logo"></a>
+      <span>WS</span>
+    </div>
 
-        <div class="nav-center">
-            {% if session.get('user') %}
-                <a href="{{ url_for('dashboard') }}">{{ t("Inicio", "Home", "主頁") }}</a>
-                <a href="{{ url_for('clientes') }}">{{ t("Empresas", "Companies", "公司") }}</a>
-                <a href="{{ url_for('servicios') }}">{{ t("Servicios", "Services", "服務") }}</a>
-                <a href="{{ url_for('carrito') }}">{{ t("Carrito", "Cart", "購物車") }}</a>
-                <a href="{{ url_for('perfil') }}">{{ t("Perfil", "Profile", "個人資料") }}</a>
-                <a href="{{ url_for('ayuda') }}">{{ t("Ayuda", "Help", "幫助") }}</a>
-            {% else %}
-                <a href="{{ url_for('home') }}">{{ t("Inicio", "Home", "主頁") }}</a>
-                <a href="{{ url_for('ayuda') }}">{{ t("Ayuda", "Help", "幫助") }}</a>
-            {% endif %}
-        </div>
+    <div class="nav-links">
+      {% if session.get('user') %}
+        <a href="{{ url_for('dashboard') }}">{{ t("Inicio", "Home", "主頁") }}</a>
+        <a href="{{ url_for('clientes') }}">{{ t("Empresas", "Companies", "公司") }}</a>
+        <a href="{{ url_for('servicios') }}">{{ t("Servicios", "Services", "服務") }}</a>
+        <a href="{{ url_for('carrito') }}">{{ t("Carrito", "Cart", "購物車") }}</a>
+        <a href="{{ url_for('perfil') }}">{{ t("Perfil", "Profile", "個人資料") }}</a>
+        <a href="{{ url_for('ayuda') }}">{{ t("Ayuda", "Help", "幫助") }}</a>
+      {% else %}
+        <a href="{{ url_for('home') }}">{{ t("Inicio", "Home", "主頁") }}</a>
+        <a href="{{ url_for('ayuda') }}">{{ t("Ayuda", "Help", "幫助") }}</a>
+      {% endif %}
+    </div>
 
-        <div class="nav-right">
-            <!-- Selector de idioma -->
-            <form method="post" action="{{ url_for('set_language') }}" class="lang-selector">
-                <select name="lang" onchange="this.form.submit()">
-                    <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>🇪🇸 ES</option>
-                    <option value="en" {% if session.get('lang') == 'en' %}selected{% endif %}>🇬🇧 EN</option>
-                    <option value="zh" {% if session.get('lang') == 'zh' %}selected{% endif %}>🇨🇳 中文</option>
-                </select>
-            </form>
+    <div class="lang-switch">
+      <form method="post" action="{{ url_for('set_lang') }}">
+        <select name="lang" onchange="this.form.submit()">
+          <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>🇪🇸 ES</option>
+          <option value="en" {% if session.get('lang') == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+          <option value="zh" {% if session.get('lang') == 'zh' %}selected{% endif %}>🇨🇳 中文</option>
+        </select>
+      </form>
 
-            <!-- Login / Logout -->
-            {% if session.get('user') %}
-                <a href="{{ url_for('logout') }}" class="btn-secondary">🚪 {{ t("Salir", "Logout", "登出") }}</a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="btn-primary">🔐 {{ t("Iniciar Sesión", "Login", "登入") }}</a>
-                <a href="{{ url_for('register_router') }}" class="btn-secondary">📝 {{ t("Registrarse", "Register", "註冊") }}</a>
-            {% endif %}
-        </div>
-    </nav>
+      {% if session.get('user') %}
+        <a href="{{ url_for('logout') }}" class="btn ghost">🚪 {{ t("Salir", "Logout", "登出") }}</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="btn">🔐 {{ t("Iniciar Sesión", "Login", "登入") }}</a>
+        <a href="{{ url_for('register_router') }}" class="btn secondary">📝 {{ t("Registrarse", "Register", "註冊") }}</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
 
-    <!-- 🔹 CONTENIDO -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+<main class="container py-4">
+  {% block content %}{% endblock %}
+</main>
 
-    <!-- ⚙️ FOOTER -->
-    <footer>
-        <p>© 2025 <strong>Window Shopping</strong> — {{ t("Conectando productores y compradores del mundo", "Connecting global producers and buyers", "連接全球生產商與買家") }}</p>
-        <p>{{ t("Versión", "Version", "版本") }} 3.0 — {{ t("Desarrollado en Flask", "Built with Flask", "使用 Flask 構建") }}</p>
-    </footer>
+<footer class="site-footer">
+  <div class="container footer-inner text-center">
+    <p>© 2025 <strong>Window Shopping</strong> — {{ t("Conectando productores y compradores del mundo", "Connecting global producers and buyers", "連接全球生產商與買家") }}</p>
+    <p>{{ t("Versión", "Version", "版本") }} 3.0 — {{ t("Desarrollado en Flask", "Built with Flask", "使用 Flask 構建") }}</p>
+  </div>
+</footer>
 
 </body>
 </html>
