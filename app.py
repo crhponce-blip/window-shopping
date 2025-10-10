@@ -614,20 +614,6 @@ def register():
 
     return render_template("register.html", roles=roles, tipos=tipos)
 
-# ÚNICA definición de favicon (evita AssertionError por duplicación)
-@app.route("/favicon.ico")
-def favicon():
-    """
-    Sirve el favicon desde /static si existe; evita duplicar endpoint.
-    """
-    icon_path = os.path.join(STATIC_DIR, "favicon.ico")
-    if os.path.exists(icon_path):
-        return send_from_directory(STATIC_DIR, "favicon.ico")
-    # Respuesta vacía si no hay archivo, para no romper
-    return ("", 204)
-
-
-
 
 # ---------------------------------------------------------
 # MAIN
