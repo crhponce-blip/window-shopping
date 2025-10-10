@@ -107,6 +107,7 @@ def add_user(email, password, empresa, rol, tipo, pais):
 # Inicialización automática de la base de datos al iniciar app
 init_db()
 create_admin_if_missing()
+
 # ---------------------------------------------------------
 # LOGIN (con base de datos SQLite)
 # ---------------------------------------------------------
@@ -118,18 +119,13 @@ def login():
         password = (request.form.get("password") or "").strip()
 
         user = get_user(email)
-
         if user and user["password"] == password:
-            session["user"] = user["email"]
-            session["rol"] = user["rol"]
-            session["empresa"] = user["empresa"]
-            session.permanent = True
-            flash(t("Inicio de sesión exitoso", "Login successful", "登入成功"))
+            session["user"] = dict(user)
+            print(f"✅ Sesión iniciada por: {email}")
             return redirect(url_for("dashboard"))
-
-        flash(t("Usuario o contraseña incorrecta", "Incorrect username or password", "用戶名或密碼錯誤"))
-        return redirect(url_for("login"))
-
+        else:
+            print("❌ Credenciales incorrectas")
+            return render_template("login.html", error="Credenciales incorrectas")
     return render_template("login.html")
 
 # ---------------------------------------------------------
@@ -607,53 +603,6 @@ def remove_from_cart(index: int) -> bool:
 
 def clear_cart() -> None:
     save_cart([])
-
-
-
-
-# ---------------------------------------------------------
-# AUTH Y RUTAS BASE
-# ---------------------------------------------------------
-@app.route("/")
-def home():
-    """Página principal (plantilla requiere base.html y enlace a /ayuda)."""
-    return render_template("home.html")
-
-
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    """Inicio de sesión (permite email o username alias del seed)."""
-    if request.method == "POST":
-        username = (request.form.get("username") or "").strip()
-        password = (request.form.get("password") or "").strip()
-
-
-        if username in USERS and USERS[username]["password"] == password:
-            session["user"] = username
-            session.permanent = True
-            flash(t("Inicio de sesión exitoso", "Login successful", "登入成功"))
-            return redirect(url_for("home"))
-
-
-        # Buscar por email si se ingresó un alias o viceversa
-        # (Intento flexible de match)
-        for u, data in USERS.items():
-            if (u.lower() == username.lower() or data.get("empresa", "").lower() == username.lower()) and data.get("password") == password:
-                session["user"] = u
-                session.permanent = True
-                flash(t("Inicio de sesión exitoso", "Login successful", "登入成功"))
-                return redirect(url_for("home"))
-
-
-        flash(t("Usuario o contraseña incorrecta", "Incorrect username or password", "用戶名或密碼錯誤"))
-        return redirect(url_for("login"))
-
-
-    return render_template("login.html")
-
-
 
 
 @app.route("/logout")
