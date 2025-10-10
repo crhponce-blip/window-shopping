@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="perfil-container glass-card fade-in">
-  <h2>{{ t("Mi Perfil", "My Profile", "我的資料") }}</h2>
 
-  <p><strong>{{ t("Usuario", "Username", "使用者名稱") }}:</strong> {{ user.username }}</p>
-  <p><strong>{{ t("Empresa", "Company", "公司") }}:</strong> {{ user.empresa }}</p>
-  <p><strong>{{ t("Rol", "Role", "角色") }}:</strong> {{ user.rol }}</p>
-  <p><strong>{{ t("Tipo de cuenta", "Account Type", "帳戶類型") }}:</strong> {{ user.tipo }}</p>
-  <p><strong>{{ t("Descripción", "Description", "描述") }}:</strong> {{ user.descripcion }}</p>
+<section class="perfil-container fade-in">
+  <h2>{{ t("Tu Perfil", "Your Profile", "您的個人資料") }}</h2>
 
-  <div class="perfil-actions mt-3">
-    <a href="{{ url_for('dashboard') }}" class="btn secondary">{{ t("Volver al panel", "Back to dashboard", "返回主頁") }}</a>
+  <p><strong>{{ t("Nombre:", "Name:", "名稱：") }}</strong> {{ user.nombre }}</p>
+  <p><strong>{{ t("Correo:", "Email:", "電子郵件：") }}</strong> {{ user.email }}</p>
+  <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ user.rol }}</p>
+  <p><strong>{{ t("Tipo de Cuenta:", "Account Type:", "帳戶類型：") }}</strong> {{ user.tipo }}</p>
+
+  <div class="mt-3">
+    <a href="{{ url_for('logout') }}" class="btn ghost">🚪 {{ t("Cerrar sesión", "Log out", "登出") }}</a>
   </div>
 </section>
+
 {% endblock %}
