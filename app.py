@@ -933,28 +933,111 @@ def favicon():
 # -----------------------------------------------------
 from flask import request, session, redirect, url_for
 
-# Diccionario central de traducciones básicas
+# 📘 Diccionario central de traducciones
 TRANSLATIONS = {
-    "Iniciar sesión": {"en": "Login", "zh": "登入"},
-    "Correo electrónico": {"en": "Email", "zh": "電子郵件"},
-    "Contraseña": {"en": "Password", "zh": "密碼"},
-    "Registro": {"en": "Register", "zh": "註冊"},
-    "Ayuda": {"en": "Help", "zh": "幫助"},
+    # --- Navegación ---
     "Inicio": {"en": "Home", "zh": "主頁"},
-    "Perfil": {"en": "Profile", "zh": "個人資料"},
-    "Carrito": {"en": "Cart", "zh": "購物車"},
     "Empresas": {"en": "Companies", "zh": "公司"},
     "Servicios": {"en": "Services", "zh": "服務"},
+    "Carrito": {"en": "Cart", "zh": "購物車"},
+    "Perfil": {"en": "Profile", "zh": "個人資料"},
+    "Ayuda": {"en": "Help", "zh": "幫助"},
     "Salir": {"en": "Logout", "zh": "登出"},
     "Iniciar Sesión": {"en": "Login", "zh": "登入"},
     "Registrarse": {"en": "Register", "zh": "註冊"},
     "Comercio Internacional": {"en": "International Trade", "zh": "國際貿易"},
+    "Versión": {"en": "Version", "zh": "版本"},
+    "Desarrollado en Flask": {"en": "Built with Flask", "zh": "使用 Flask 構建"},
     "Conectando productores y compradores del mundo": {
         "en": "Connecting global producers and buyers",
         "zh": "連接全球生產商與買家"
     },
-    "Versión": {"en": "Version", "zh": "版本"},
-    "Desarrollado en Flask": {"en": "Built with Flask", "zh": "使用 Flask 構建"},
+
+    # --- HOME ---
+    "Bienvenido a Window Shopping": {"en": "Welcome to Window Shopping", "zh": "歡迎來到 Window Shopping"},
+    "La plataforma que conecta productores chilenos con compradores internacionales.": {
+        "en": "The platform connecting Chilean producers with international buyers.",
+        "zh": "連接智利生產商與國際買家的平台。"
+    },
+    "Comienza ahora": {"en": "Start now", "zh": "立即開始"},
+    "Explora nuestros servicios": {"en": "Explore our services", "zh": "探索我們的服務"},
+    "Compra y Venta": {"en": "Buy & Sell", "zh": "買賣"},
+    "Encuentra productores, packing, exportadores y clientes internacionales.": {
+        "en": "Find producers, packers, exporters and international clients.",
+        "zh": "尋找生產商、包裝廠、出口商和國際客戶。"
+    },
+    "Servicios Logísticos": {"en": "Logistic Services", "zh": "物流服務"},
+    "Accede a transporte, frigoríficos y agentes de aduana certificados.": {
+        "en": "Access transport, cold storage, and certified customs agents.",
+        "zh": "提供運輸、冷藏庫及報關行服務。"
+    },
+    "Sostenibilidad": {"en": "Sustainability", "zh": "永續發展"},
+    "Promovemos comercio responsable con trazabilidad y economía circular.": {
+        "en": "We promote responsible trade with traceability and circular economy.",
+        "zh": "推動負責任的貿易、可追溯性與循環經濟。"
+    },
+
+    # --- LOGIN / REGISTER ---
+    "Iniciar sesión": {"en": "Login", "zh": "登入"},
+    "Correo electrónico": {"en": "Email", "zh": "電子郵件"},
+    "Contraseña": {"en": "Password", "zh": "密碼"},
+    "Entrar": {"en": "Sign in", "zh": "登入"},
+    "¿No tienes una cuenta?": {"en": "Don't have an account?", "zh": "還沒有帳號？"},
+    "Regístrate aquí": {"en": "Register here", "zh": "點此註冊"},
+    "¿Ya tienes una cuenta?": {"en": "Already have an account?", "zh": "已經有帳號了？"},
+    "Inicia sesión aquí": {"en": "Log in here", "zh": "點此登入"},
+    "Registro de empresa o usuario": {"en": "Company or User Registration", "zh": "公司或用戶註冊"},
+    "Nombre de la empresa o usuario": {"en": "Company or User Name", "zh": "公司或用戶名稱"},
+    "Selecciona tu tipo de perfil": {"en": "Select your profile type", "zh": "選擇您的個人資料類型"},
+    "Selecciona tu rol": {"en": "Select your role", "zh": "選擇您的角色"},
+    "Crear cuenta": {"en": "Create Account", "zh": "建立帳號"},
+    "Cliente extranjero (solo compras)": {"en": "Foreign client (only purchases)", "zh": "外國客戶（僅購買）"},
+    "Nacional - Compra/Venta": {"en": "National - Buy/Sell", "zh": "國內 - 買賣"},
+    "Nacional - Servicios": {"en": "National - Services", "zh": "國內 - 服務"},
+    "Nacional - Mixto (Fruta y Servicios)": {"en": "National - Mixed (Fruit & Services)", "zh": "國內 - 混合（水果與服務）"},
+    "Productor": {"en": "Producer", "zh": "生產商"},
+    "Packing": {"en": "Packing", "zh": "包裝廠"},
+    "Frigorífico": {"en": "Cold Storage", "zh": "冷藏庫"},
+    "Exportador": {"en": "Exporter", "zh": "出口商"},
+    "Agencia de aduana": {"en": "Customs Agency", "zh": "報關行"},
+    "Extraportuario": {"en": "Extra-port Service", "zh": "港外服務"},
+    "Transporte": {"en": "Transport", "zh": "運輸"},
+    "Cliente extranjero": {"en": "Foreign Client", "zh": "外國客戶"},
+
+    # --- REGISTRO EXITOSO ---
+    "¡Registro Exitoso!": {"en": "Registration Successful!", "zh": "註冊成功！"},
+    "Tu cuenta ha sido creada correctamente.": {
+        "en": "Your account has been successfully created.",
+        "zh": "您的帳戶已成功建立。"
+    },
+    "Ir al inicio de sesión": {"en": "Go to login", "zh": "前往登入"},
+
+    # --- PERFIL ---
+    "Tu Perfil": {"en": "Your Profile", "zh": "您的個人資料"},
+    "Cerrar sesión": {"en": "Log out", "zh": "登出"},
+    "Rol:": {"en": "Role:", "zh": "角色："},
+    "Tipo de Cuenta:": {"en": "Account Type:", "zh": "帳戶類型："},
+
+    # --- PASSWORD RESET ---
+    "Recuperar Contraseña": {"en": "Recover Password", "zh": "重設密碼"},
+    "Enviar enlace de recuperación": {"en": "Send recovery link", "zh": "發送重設連結"},
+    "Nueva Contraseña": {"en": "New Password", "zh": "新密碼"},
+    "Guardar contraseña": {"en": "Save password", "zh": "儲存密碼"},
+    "Volver al inicio de sesión": {"en": "Back to login", "zh": "返回登入頁面"},
+
+    # --- AYUDA ---
+    "Centro de Ayuda": {"en": "Help Center", "zh": "幫助中心"},
+    "Preguntas frecuentes": {"en": "Frequently Asked Questions", "zh": "常見問題"},
+    "¿Cómo registro mi empresa?": {"en": "How do I register my company?", "zh": "如何註冊我的公司？"},
+    "¿Puedo ofrecer servicios y productos a la vez?": {"en": "Can I offer both services and products?", "zh": "我可以同時提供服務和產品嗎？"},
+    "¿Cómo contacto a un comprador extranjero?": {"en": "How do I contact a foreign buyer?", "zh": "如何聯繫外國買家？"},
+    "¿Qué significa el perfil mixto?": {"en": "What does the mixed profile mean?", "zh": "什麼是混合型帳戶？"},
+    "Si necesitas más ayuda, contáctanos a:": {"en": "If you need more help, contact us at:", "zh": "如需更多幫助，請聯繫我們："},
+
+    # --- ERRORES ---
+    "Página no encontrada": {"en": "Page not found", "zh": "找不到頁面"},
+    "Error interno del servidor": {"en": "Internal server error", "zh": "伺服器內部錯誤"},
+    "Volver al inicio": {"en": "Back to home", "zh": "返回主頁"},
 }
 
 # Función auxiliar t() disponible en templates
@@ -968,10 +1051,10 @@ def inject_translator():
         lang = session.get("lang", "es")
         if lang == "es":
             return es
-        # Primero intenta usar el diccionario
+        # Busca en el diccionario central
         if es in TRANSLATIONS and lang in TRANSLATIONS[es]:
             return TRANSLATIONS[es][lang]
-        # Si no está en el diccionario, usa el texto alternativo si existe
+        # Si no existe, usa el alternativo
         if lang == "en" and en:
             return en
         if lang == "zh" and zh:
@@ -980,7 +1063,7 @@ def inject_translator():
     return dict(t=t)
 
 
-# Ruta para cambiar idioma desde el selector
+# Ruta para cambiar idioma desde el selector del header
 @app.route('/set_lang', methods=['POST'])
 def set_lang():
     """Recibe el idioma desde el formulario base.html y lo guarda en sesión."""
