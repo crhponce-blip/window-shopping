@@ -929,16 +929,64 @@ def favicon():
     return ("", 204)
 
 # -----------------------------------------------------
-# 🌐 Soporte multilenguaje (es, en, zh)
+# 🌐 SOPORTE MULTILENGUAJE (Español / English / 中文)
 # -----------------------------------------------------
 from flask import request, session, redirect, url_for
 
+# Diccionario central de traducciones básicas
+TRANSLATIONS = {
+    "Iniciar sesión": {"en": "Login", "zh": "登入"},
+    "Correo electrónico": {"en": "Email", "zh": "電子郵件"},
+    "Contraseña": {"en": "Password", "zh": "密碼"},
+    "Registro": {"en": "Register", "zh": "註冊"},
+    "Ayuda": {"en": "Help", "zh": "幫助"},
+    "Inicio": {"en": "Home", "zh": "主頁"},
+    "Perfil": {"en": "Profile", "zh": "個人資料"},
+    "Carrito": {"en": "Cart", "zh": "購物車"},
+    "Empresas": {"en": "Companies", "zh": "公司"},
+    "Servicios": {"en": "Services", "zh": "服務"},
+    "Salir": {"en": "Logout", "zh": "登出"},
+    "Iniciar Sesión": {"en": "Login", "zh": "登入"},
+    "Registrarse": {"en": "Register", "zh": "註冊"},
+    "Comercio Internacional": {"en": "International Trade", "zh": "國際貿易"},
+    "Conectando productores y compradores del mundo": {
+        "en": "Connecting global producers and buyers",
+        "zh": "連接全球生產商與買家"
+    },
+    "Versión": {"en": "Version", "zh": "版本"},
+    "Desarrollado en Flask": {"en": "Built with Flask", "zh": "使用 Flask 構建"},
+}
+
+# Función auxiliar t() disponible en templates
+@app.context_processor
+def inject_translator():
+    def t(es, en=None, zh=None):
+        """
+        Traductor dinámico: usa el idioma activo (session['lang'])
+        y busca coincidencias en TRANSLATIONS. Si no hay, devuelve el texto en español.
+        """
+        lang = session.get("lang", "es")
+        if lang == "es":
+            return es
+        # Primero intenta usar el diccionario
+        if es in TRANSLATIONS and lang in TRANSLATIONS[es]:
+            return TRANSLATIONS[es][lang]
+        # Si no está en el diccionario, usa el texto alternativo si existe
+        if lang == "en" and en:
+            return en
+        if lang == "zh" and zh:
+            return zh
+        return es  # fallback
+    return dict(t=t)
+
+
+# Ruta para cambiar idioma desde el selector
 @app.route('/set_lang', methods=['POST'])
 def set_lang():
     """Recibe el idioma desde el formulario base.html y lo guarda en sesión."""
-    lang = request.form.get('lang', 'es')  # valor por defecto: español
+    lang = request.form.get('lang', 'es')
     session['lang'] = lang
-    print(f"Idioma establecido: {lang}")
+    print(f"🌍 Idioma establecido: {lang}")
     return redirect(request.referrer or url_for('home'))
 
 # ---------------------------------------------------------
