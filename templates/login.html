@@ -1,23 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
 
-<section class="auth-card fade-in">
-  <h2 class="text-center">{{ t("Iniciar sesión", "Login", "登入") }}</h2>
+<section class="auth-wrapper glass-card fade-in">
+  <div class="auth-box">
+    <h2 class="title-gradient">{{ t("Iniciar sesión", "Login", "登入") }}</h2>
 
-  <form action="{{ url_for('login') }}" method="POST" class="form mt-3">
-    <label for="email">{{ t("Correo electrónico", "Email", "電子郵件") }}</label>
-    <input type="email" id="email" name="email" required placeholder="{{ t('Ingresa tu correo', 'Enter your email', '輸入您的電子郵件') }}">
+    <form action="{{ url_for('login') }}" method="POST" class="form-styled">
+      <div class="form-group">
+        <label for="username">{{ t("Correo electrónico", "Email", "電子郵件") }}</label>
+        <input type="text" id="username" name="username" required placeholder="{{ t('Ingresa tu correo o usuario', 'Enter your email or username', '輸入您的電子郵件或使用者名稱') }}">
+      </div>
 
-    <label for="password">{{ t("Contraseña", "Password", "密碼") }}</label>
-    <input type="password" id="password" name="password" required placeholder="{{ t('Ingresa tu contraseña', 'Enter your password', '輸入您的密碼') }}">
+      <div class="form-group">
+        <label for="password">{{ t("Contraseña", "Password", "密碼") }}</label>
+        <input type="password" id="password" name="password" required placeholder="{{ t('Ingresa tu contraseña', 'Enter your password', '輸入您的密碼') }}">
+      </div>
 
-    <button type="submit" class="btn">{{ t("Entrar", "Sign in", "登入") }}</button>
-  </form>
+      <button type="submit" class="btn-gradient full-width">{{ t("Entrar", "Sign in", "登入") }}</button>
+    </form>
 
-  <p class="text-center mt-3">
-    {{ t("¿No tienes una cuenta?", "Don't have an account?", "還沒有帳號？") }}
-    <a href="{{ url_for('register_router') }}" class="link">{{ t("Regístrate aquí", "Register here", "點此註冊") }}</a>
-  </p>
+    <p class="text-center mt-3">
+      {{ t("¿No tienes una cuenta?", "Don't have an account?", "還沒有帳號？") }}
+      <a href="{{ url_for('register') }}" class="link-contrast">{{ t("Regístrate aquí", "Register here", "點此註冊") }}</a>
+    </p>
+  </div>
 </section>
 
 {% endblock %}
