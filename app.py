@@ -1,5 +1,3 @@
-APP.PY NUEVO
-
 import os
 import uuid
 from datetime import timedelta
