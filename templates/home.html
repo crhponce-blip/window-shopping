@@ -1,45 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
-
-<section class="home-container">
-
-    <div class="home-hero">
-        <h2>{{ t("Bienvenido a Window Shopping", "Welcome to Window Shopping", "歡迎來到 Window Shopping") }}</h2>
-        <p>
-            {{ t(
-                "Conecta productores, exportadores y compradores internacionales en una sola plataforma. Compra, vende o contrata servicios fácilmente.",
-                "Connecting producers, exporters and international buyers on one platform. Buy, sell or hire services easily.",
-                "在同一平台上連接生產商、出口商和國際買家。輕鬆購買、銷售或租用服務。"
-            ) }}
-        </p>
-    </div>
+<section class="hero fade-in">
+  <div class="panel text-center">
+    <h2>{{ t("Bienvenido a Window Shopping", "Welcome to Window Shopping", "歡迎來到 Window Shopping") }}</h2>
+    <p>
+      {{ t(
+        "Conecta productores, exportadores y compradores internacionales en una sola plataforma. Compra, vende o contrata servicios fácilmente.",
+        "Connecting producers, exporters and international buyers on one platform. Buy, sell or hire services easily.",
+        "在同一平台上連接生產商、出口商和國際買家。輕鬆購買、銷售或租用服務。"
+      ) }}
+    </p>
 
     {% if not is_logged() %}
-    <div class="home-actions">
-        <a href="{{ url_for('login') }}" class="btn btn-primary">
-            {{ t("Iniciar sesión", "Login", "登入") }}
-        </a>
-        <a href="{{ url_for('register') }}" class="btn btn-secondary">
-            {{ t("Registrarse", "Register", "註冊") }}
-        </a>
-    </div>
+      <div class="mt-4">
+        <a href="{{ url_for('login') }}" class="btn">{{ t("Iniciar sesión", "Login", "登入") }}</a>
+        <a href="{{ url_for('register_router') }}" class="btn secondary">{{ t("Registrarse", "Register", "註冊") }}</a>
+      </div>
     {% else %}
-    <div class="home-actions">
-        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
-            {{ t("Ir al panel principal", "Go to Dashboard", "前往主頁面") }}
-        </a>
-    </div>
+      <div class="mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn">{{ t("Ir al panel principal", "Go to Dashboard", "前往主頁面") }}</a>
+      </div>
     {% endif %}
+  </div>
 
-    <div class="home-info">
-        <h3>{{ t("¿Qué puedes hacer aquí?", "What can you do here?", "你可以在這裡做什麼？") }}</h3>
-        <ul>
-            <li>{{ t("Publicar tus productos o servicios.", "Post your products or services.", "發布您的產品或服務。") }}</li>
-            <li>{{ t("Conectar con otras empresas del rubro.", "Connect with other businesses in the sector.", "與行業內的其他公司聯繫。") }}</li>
-            <li>{{ t("Explorar oportunidades de exportación.", "Explore export opportunities.", "探索出口機會。") }}</li>
-        </ul>
-    </div>
-
+  <div class="home-section mt-4">
+    <h3>{{ t("¿Qué puedes hacer aquí?", "What can you do here?", "你可以在這裡做什麼？") }}</h3>
+    <ul>
+      <li>{{ t("Publicar tus productos o servicios.", "Post your products or services.", "發布您的產品或服務。") }}</li>
+      <li>{{ t("Conectar con otras empresas del rubro.", "Connect with other businesses in the sector.", "與行業內的其他公司聯繫。") }}</li>
+      <li>{{ t("Explorar oportunidades de exportación.", "Explore export opportunities.", "探索出口機會。") }}</li>
+    </ul>
+  </div>
 </section>
-
 {% endblock %}
