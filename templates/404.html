@@ -1,25 +1,21 @@
 {% extends "base.html" %}
-{% block title %}404 · {{ t("No encontrado","Not found","找不到頁面") }}{% endblock %}
 {% block content %}
-<main class="error-container" style="text-align:center; padding:60px 20px;">
-  <img src="{{ url_for('static', filename='logo_ws.png') }}" alt="WS Logo" style="height:90px; opacity:0.9; margin-bottom:10px;">
-  <h1 style="margin:0;">404</h1>
-  <h2 style="margin-top:6px;">{{ t("Página no encontrada", "Page not found", "頁面不存在") }}</h2>
-  <p style="opacity:.85; max-width:640px; margin:10px auto 24px;">
+<section class="page-msg text-center fade-in">
+  <img src="{{ url_for('static', filename='images/ws_logo.png') }}" alt="WS Logo" style="height:90px; opacity:0.9; margin-bottom:10px;">
+  <h1>404</h1>
+  <h2>{{ t("Página no encontrada", "Page not found", "頁面不存在") }}</h2>
+  <p class="lead">
     {{ t("La URL que intentaste abrir no existe o cambió de ubicación.",
           "The URL you tried to open doesn’t exist or has moved.",
           "您嘗試開啟的網址不存在或已移動。") }}
   </p>
-
-  <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+  <div class="mt-4">
     <a class="btn" href="{{ url_for('home') }}">{{ t("Volver al inicio","Back home","回首頁") }}</a>
     {% if 'user' in session %}
       <a class="btn" href="{{ url_for('dashboard') }}">{{ t("Ir al panel","Go to dashboard","前往主頁") }}</a>
-      <a class="btn" href="{{ url_for('carrito') }}">{{ t("Ver carrito","View cart","查看購物車") }}</a>
     {% else %}
       <a class="btn" href="{{ url_for('login') }}">{{ t("Iniciar sesión","Login","登入") }}</a>
-      <a class="btn" href="{{ url_for('register_router') }}">{{ t("Registrarse","Register","註冊") }}</a>
     {% endif %}
   </div>
-</main>
+</section>
 {% endblock %}
