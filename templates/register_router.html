@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+
 <section class="register-router glass-card center fade-in">
   <h2>{{ t("Tipo de registro", "Choose registration type", "選擇註冊類型") }}</h2>
   <p>{{ t("Selecciona el tipo de cuenta que deseas crear:", "Select the type of account you want to create:", "選擇您要建立的帳戶類型：") }}</p>
 
-  <div class="router-buttons mt-3">
+  <div class="router-buttons mt-2">
     <a href="{{ url_for('register', tipo='nacional') }}" class="btn">{{ t("Nacional", "National", "本地帳戶") }}</a>
     <a href="{{ url_for('register', tipo='extranjero') }}" class="btn">{{ t("Cliente Extranjero", "Foreign Client", "外國客戶") }}</a>
     <a href="{{ url_for('register', tipo='servicio') }}" class="btn">{{ t("Servicios", "Services", "服務提供者") }}</a>
     <a href="{{ url_for('register', tipo='mixto') }}" class="btn">{{ t("Mixto", "Mixed", "混合類型") }}</a>
   </div>
 </section>
+
 {% endblock %}
