@@ -874,48 +874,31 @@ def registro_exitoso():
     return render_template("registro_exitoso.html")
 
 
+# -----------------------------------------------------
+# ⚠️ MANEJO DE ERRORES (Integrado con multilenguaje)
+# -----------------------------------------------------
+from flask import render_template
 
-
-# ---------------------------------------------------------
-# MANEJO DE ERRORES
-# ---------------------------------------------------------
 @app.errorhandler(404)
-def not_found_error(e):
-    """Página 404 personalizada."""
-    return (
-        render_template(
-            "404.html",
-            mensaje=t("Página no encontrada", "Page not found", "找不到頁面"),
-            descripcion=t(
-                "La página que buscas no existe o ha sido movida.",
-                "The page you are looking for does not exist or has been moved.",
-                "您尋找的頁面不存在或已被移動。",
-            ),
-        ),
-        404,
-    )
-
-
+def not_found_error(error):
+    """Página no encontrada (404)."""
+    try:
+        return render_template("404.html"), 404
+    except Exception as e:
+        print(f"Error al renderizar 404: {e}")
+        # fallback minimalista si hay fallo de template
+        return "<h1>404</h1><p>Página no encontrada</p>", 404
 
 
 @app.errorhandler(500)
-def server_error(e):
-    """Página 500 personalizada."""
-    return (
-        render_template(
-            "500.html",
-            mensaje=t("Error interno del servidor", "Internal server error", "伺服器內部錯誤"),
-            descripcion=t(
-                "Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.",
-                "An unexpected error occurred. Please try again later.",
-                "發生意外錯誤，請稍後再試。",
-            ),
-        ),
-        500,
-    )
-
-
-
+def server_error(error):
+    """Error interno del servidor (500)."""
+    try:
+        return render_template("500.html"), 500
+    except Exception as e:
+        print(f"Error al renderizar 500: {e}")
+        # fallback minimalista
+        return "<h1>500</h1><p>Error interno del servidor</p>", 500
 
 # ---------------------------------------------------------
 # VALIDACIÓN FINAL — FAVICON ÚNICO
