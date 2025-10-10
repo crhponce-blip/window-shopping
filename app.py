@@ -614,23 +614,6 @@ def register():
 
     return render_template("register.html", roles=roles, tipos=tipos)
 
-
-
-
-# ---------------------------------------------------------
-# STUBS SEGUROS (para que no falle mientras pegas Parte 2)
-# ---------------------------------------------------------
-@app.route("/ayuda")
-def ayuda():
-    """
-    Stub temporal para evitar BuildError en base.html mientras pegas Parte 2.
-    En Parte 2/3 se reemplaza por la versión completa con plantilla.
-    """
-    return render_template("ayuda.html")
-
-
-
-
 # ÚNICA definición de favicon (evita AssertionError por duplicación)
 @app.route("/favicon.ico")
 def favicon():
