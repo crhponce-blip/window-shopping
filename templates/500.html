@@ -1,21 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="page-msg text-center fade-in">
-  <img src="{{ url_for('static', filename='images/ws_logo.png') }}" alt="WS Logo" style="height:90px; opacity:0.9; margin-bottom:10px;">
-  <h1>500</h1>
-  <h2>{{ t("Ocurrió un error en el servidor", "A server error occurred", "伺服器發生錯誤") }}</h2>
-  <p class="lead">
-    {{ t("Estamos trabajando para solucionarlo. Intenta nuevamente en unos segundos.",
-          "We’re working to fix it. Please try again in a few seconds.",
-          "我們正在修復中，請稍後再試。") }}
-  </p>
-  <div class="mt-4">
-    <a class="btn" href="{{ url_for('home') }}">{{ t("Volver al inicio","Back home","回首頁") }}</a>
-    {% if 'user' in session %}
-      <a class="btn" href="{{ url_for('dashboard') }}">{{ t("Ir al panel","Go to dashboard","前往主頁") }}</a>
-    {% else %}
-      <a class="btn" href="{{ url_for('login') }}">{{ t("Iniciar sesión","Login","登入") }}</a>
-    {% endif %}
-  </div>
+
+<section class="page-msg fade-in text-center">
+  <h2>⚙️ {{ t("Error interno del servidor", "Internal server error", "伺服器內部錯誤") }}</h2>
+  <p class="lead mt-2">{{ t("Ocurrió un problema inesperado. Nuestro equipo está trabajando para resolverlo.", "An unexpected problem occurred. Our team is working to fix it.", "發生意外錯誤，我們的團隊正在解決中。") }}</p>
+
+  <a href="{{ url_for('home') }}" class="btn mt-3">{{ t("Volver al inicio", "Back to home", "返回主頁") }}</a>
 </section>
+
 {% endblock %}
