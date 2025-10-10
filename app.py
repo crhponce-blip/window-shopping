@@ -39,7 +39,140 @@ def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
 
 
+# ---------------------------------------------------------
+# BASE DE DATOS (SQLite) — Usuarios y Autenticación real
+# ---------------------------------------------------------
+import sqlite3
 
+DB_PATH = os.path.join(BASE_DIR, "users.db")
+
+def init_db():
+    """Crea la base de datos y tabla users si no existen."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            empresa TEXT,
+            rol TEXT,
+            tipo TEXT,
+            pais TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def create_admin_if_missing():
+    """Crea un usuario admin por defecto si no existe."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE email = ?", ("admin@ws.com",))
+    if not c.fetchone():
+        c.execute("""
+            INSERT INTO users (email, password, empresa, rol, tipo, pais)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, ("admin@ws.com", "1234", "Window Shopping Admin", "Exportador", "compraventa", "CL"))
+        conn.commit()
+        print("✅ Usuario admin creado: admin@ws.com / 1234")
+    conn.close()
+
+def get_user(email):
+    """Obtiene un usuario por email."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = c.fetchone()
+    conn.close()
+    return user
+
+def add_user(email, password, empresa, rol, tipo, pais):
+    """Agrega un nuevo usuario a la base de datos."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute("""
+            INSERT INTO users (email, password, empresa, rol, tipo, pais)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (email, password, empresa, rol, tipo, pais))
+        conn.commit()
+        print(f"🆕 Usuario creado: {email}")
+    except sqlite3.IntegrityError:
+        print(f"⚠️ El usuario {email} ya existe.")
+    finally:
+        conn.close()
+
+# Inicialización automática de la base de datos al iniciar app
+init_db()
+create_admin_if_missing()
+# ---------------------------------------------------------
+# LOGIN (con base de datos SQLite)
+# ---------------------------------------------------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Inicio de sesión conectado a la base de datos SQLite."""
+    if request.method == "POST":
+        email = (request.form.get("username") or "").strip().lower()
+        password = (request.form.get("password") or "").strip()
+
+        user = get_user(email)
+
+        if user and user["password"] == password:
+            session["user"] = user["email"]
+            session["rol"] = user["rol"]
+            session["empresa"] = user["empresa"]
+            session.permanent = True
+            flash(t("Inicio de sesión exitoso", "Login successful", "登入成功"))
+            return redirect(url_for("dashboard"))
+
+        flash(t("Usuario o contraseña incorrecta", "Incorrect username or password", "用戶名或密碼錯誤"))
+        return redirect(url_for("login"))
+
+    return render_template("login.html")
+
+# ---------------------------------------------------------
+# REGISTRO (con base de datos SQLite)
+# ---------------------------------------------------------
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Registro de nuevos usuarios — guarda datos reales en SQLite."""
+    roles = [
+        "Cliente extranjero",
+        "Productor(planta)",
+        "Packing",
+        "Frigorífico",
+        "Exportador",
+        "Agencia de aduana",
+        "Extraportuario",
+        "Transporte",
+    ]
+    tipos = ["compras", "ventas", "servicios", "mixto", "compraventa"]
+
+    if request.method == "POST":
+        email = (request.form.get("usuario") or "").strip().lower()
+        password = (request.form.get("password") or "").strip()
+        empresa = (request.form.get("empresa") or "").strip()
+        rol = (request.form.get("rol") or "").strip()
+        tipo = (request.form.get("tipo") or "").strip()
+        pais = (request.form.get("pais") or "CL").strip()
+
+        if not all([email, password, empresa, rol, tipo]):
+            flash(t("Todos los campos son obligatorios", "All fields are required", "所有欄位均為必填"))
+            return redirect(url_for("register"))
+
+        # Verifica si ya existe
+        existing = get_user(email)
+        if existing:
+            flash(t("El usuario ya existe", "User already exists", "用戶已存在"))
+            return redirect(url_for("register"))
+
+        add_user(email, password, empresa, rol, tipo, pais)
+        flash(t("Usuario registrado exitosamente", "User registered successfully", "用戶註冊成功"))
+        return redirect(url_for("login"))
+
+    return render_template("register.html", roles=roles, tipos=tipos)
 
 # ---------------------------------------------------------
 # I18N / MULTI-IDIOMA (ES / EN / ZH)
