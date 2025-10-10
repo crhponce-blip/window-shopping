@@ -1,21 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="form-container fade-in glass-card center">
-  <h2>{{ t("Iniciar sesión", "Login", "登入") }}</h2>
 
-  <form action="{{ url_for('login') }}" method="POST" class="form-box">
+<section class="auth-card fade-in">
+  <h2 class="text-center">{{ t("Iniciar sesión", "Login", "登入") }}</h2>
+
+  <form action="{{ url_for('login') }}" method="POST" class="form mt-3">
     <label for="email">{{ t("Correo electrónico", "Email", "電子郵件") }}</label>
     <input type="email" id="email" name="email" required placeholder="{{ t('Ingresa tu correo', 'Enter your email', '輸入您的電子郵件') }}">
 
     <label for="password">{{ t("Contraseña", "Password", "密碼") }}</label>
     <input type="password" id="password" name="password" required placeholder="{{ t('Ingresa tu contraseña', 'Enter your password', '輸入您的密碼') }}">
 
-    <button type="submit" class="btn mt-3">{{ t("Entrar", "Sign in", "登入") }}</button>
+    <button type="submit" class="btn">{{ t("Entrar", "Sign in", "登入") }}</button>
   </form>
 
-  <p class="form-footer mt-2">
+  <p class="text-center mt-3">
     {{ t("¿No tienes una cuenta?", "Don't have an account?", "還沒有帳號？") }}
-    <a href="{{ url_for('register_router') }}">{{ t("Regístrate aquí", "Register here", "點此註冊") }}</a>
+    <a href="{{ url_for('register_router') }}" class="link">{{ t("Regístrate aquí", "Register here", "點此註冊") }}</a>
   </p>
 </section>
+
 {% endblock %}
