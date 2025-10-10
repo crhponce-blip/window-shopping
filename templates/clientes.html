@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="clientes-section glass-card">
+<section class="clientes-section glass-card fade-in">
   <h2>{{ t("Empresas registradas", "Registered Companies", "已註冊的公司") }}</h2>
 
   {% if clientes %}
@@ -12,7 +12,7 @@
           <p><strong>{{ t("Rol", "Role", "角色") }}:</strong> {{ c.rol }}</p>
           <p><strong>{{ t("Descripción", "Description", "描述") }}:</strong> {{ c.descripcion }}</p>
         </div>
-        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn-primary">
+        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn">
           🔍 {{ t("Ver detalles", "View details", "查看詳情") }}
         </a>
       </li>
