@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="ayuda-container glass-card">
+<section class="ayuda-container fade-in">
   <h2>{{ t("Centro de Ayuda", "Help Center", "幫助中心") }}</h2>
   <p>{{ t("Aquí puedes encontrar información sobre cómo usar la plataforma, registrar usuarios o contactar soporte.",
           "Here you can find information about using the platform, registering users or contacting support.",
           "在這裡您可以找到使用平台、註冊用戶或聯絡支援的資訊。") }}</p>
 
-  <h3>{{ t("Preguntas frecuentes", "Frequently Asked Questions", "常見問題") }}</h3>
+  <h3 class="mt-3">{{ t("Preguntas frecuentes", "Frequently Asked Questions", "常見問題") }}</h3>
   <ul class="faq-list">
     <li>❓ {{ t("¿Cómo registro una nueva empresa?", "How do I register a new company?", "如何註冊新公司？") }}</li>
     <li>💡 {{ t("¿Cómo puedo comprar o vender productos?", "How can I buy or sell products?", "我如何購買或銷售產品？") }}</li>
