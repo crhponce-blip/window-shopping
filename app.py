@@ -928,8 +928,18 @@ def favicon():
         return send_from_directory(STATIC_DIR, "favicon.ico")
     return ("", 204)
 
+# -----------------------------------------------------
+# 🌐 Soporte multilenguaje (es, en, zh)
+# -----------------------------------------------------
+from flask import request, session, redirect, url_for
 
-
+@app.route('/set_lang', methods=['POST'])
+def set_lang():
+    """Recibe el idioma desde el formulario base.html y lo guarda en sesión."""
+    lang = request.form.get('lang', 'es')  # valor por defecto: español
+    session['lang'] = lang
+    print(f"Idioma establecido: {lang}")
+    return redirect(request.referrer or url_for('home'))
 
 # ---------------------------------------------------------
 # ARRANQUE FINAL
