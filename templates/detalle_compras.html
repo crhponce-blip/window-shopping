@@ -1,46 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
+<section class="detalle-container glass-card fade-in">
+  <h2>🛒 {{ t("Ofertas disponibles", "Available Offers", "可用的報價") }}</h2>
 
-<section class="detalle-container">
-    <h2>🛒 {{ t("Ofertas disponibles", "Available Offers", "可用的報價") }}</h2>
+  <form method="get" action="{{ url_for('compras') }}" class="search-bar mt-3">
+    <input type="text" name="q" placeholder="{{ t('Buscar por empresa o descripción...', 'Search by company or description...', '按公司或描述搜尋...') }}" value="{{ request.args.get('q', '') }}">
+    <button type="submit" class="btn">{{ t("Buscar", "Search", "搜尋") }}</button>
+  </form>
 
-    <!-- BUSCADOR -->
-    <form method="get" action="{{ url_for('compras') }}" class="search-bar">
-        <input type="text" name="q" placeholder="{{ t('Buscar por empresa o descripción...', 'Search by company or description...', '按公司或描述搜尋...') }}" value="{{ request.args.get('q', '') }}">
-        <button type="submit" class="btn btn-primary">{{ t("Buscar", "Search", "搜尋") }}</button>
-    </form>
+  {% if not data %}
+    <p class="no-results">{{ t("No hay ofertas disponibles para tu perfil.", "No offers available for your profile.", "目前沒有可用的報價。") }}</p>
+  {% else %}
+    <div class="detalle-list">
+      {% for empresa in data %}
+        <div class="detalle-card">
+          <h3>{{ empresa.empresa }}</h3>
+          <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ empresa.rol }}</p>
+          <p><strong>{{ t("Descripción:", "Description:", "描述：") }}</strong> {{ empresa.descripcion }}</p>
 
-    <!-- MENSAJE SI NO HAY DATOS -->
-    {% if not data %}
-        <p class="no-results">{{ t("No hay ofertas disponibles para tu perfil.", "No offers available for your profile.", "目前沒有可用的報價。") }}</p>
-    {% else %}
-        <!-- LISTADO DE OFERTAS -->
-        <div class="detalle-list">
-            {% for empresa in data %}
-                <div class="detalle-card">
-                    <h3>{{ empresa.empresa }}</h3>
-                    <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ empresa.rol }}</p>
-                    <p><strong>{{ t("Descripción:", "Description:", "描述：") }}</strong> {{ empresa.descripcion }}</p>
+          {% if empresa.items %}
+            <ul>
+              {% for item in empresa.items %}
+                {% if item.tipo == "oferta" %}
+                  <li>{{ item.nombre }} - {{ item.detalle }}</li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          {% endif %}
 
-                    {% if empresa.items %}
-                        <ul>
-                            {% for item in empresa.items %}
-                                {% if item.tipo == "oferta" %}
-                                    <li>{{ item.nombre }} - {{ item.detalle }}</li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-
-                    <form method="post" action="{{ url_for('agregar_carrito', username=empresa.username) }}">
-                        <button type="submit" class="btn btn-secondary">
-                            🛍️ {{ t("Agregar al carrito", "Add to Cart", "加入購物車") }}
-                        </button>
-                    </form>
-                </div>
-            {% endfor %}
+          <form method="post" action="{{ url_for('agregar_carrito', username=empresa.username) }}">
+            <button type="submit" class="btn secondary">🛍️ {{ t("Agregar al carrito", "Add to Cart", "加入購物車") }}</button>
+          </form>
         </div>
-    {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
 </section>
-
 {% endblock %}
