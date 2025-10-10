@@ -1,16 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
+
 <section class="ayuda-container fade-in">
   <h2>{{ t("Centro de Ayuda", "Help Center", "幫助中心") }}</h2>
-  <p>{{ t("Aquí puedes encontrar información sobre cómo usar la plataforma, registrar usuarios o contactar soporte.",
-          "Here you can find information about using the platform, registering users or contacting support.",
-          "在這裡您可以找到使用平台、註冊用戶或聯絡支援的資訊。") }}</p>
+  <p>{{ t("Encuentra aquí las respuestas a las preguntas más frecuentes.", "Find answers to frequently asked questions here.", "在這裡查找常見問題的答案。") }}</p>
 
   <h3 class="mt-3">{{ t("Preguntas frecuentes", "Frequently Asked Questions", "常見問題") }}</h3>
-  <ul class="faq-list">
-    <li>❓ {{ t("¿Cómo registro una nueva empresa?", "How do I register a new company?", "如何註冊新公司？") }}</li>
-    <li>💡 {{ t("¿Cómo puedo comprar o vender productos?", "How can I buy or sell products?", "我如何購買或銷售產品？") }}</li>
-    <li>📞 {{ t("¿Cómo contacto al soporte técnico?", "How do I contact support?", "如何聯絡技術支援？") }}</li>
+  <ul>
+    <li>{{ t("¿Cómo registro mi empresa?", "How do I register my company?", "如何註冊我的公司？") }}</li>
+    <li>{{ t("¿Puedo ofrecer servicios y productos a la vez?", "Can I offer both services and products?", "我可以同時提供服務和產品嗎？") }}</li>
+    <li>{{ t("¿Cómo contacto a un comprador extranjero?", "How do I contact a foreign buyer?", "如何聯繫外國買家？") }}</li>
+    <li>{{ t("¿Qué significa el perfil mixto?", "What does the mixed profile mean?", "什麼是混合型帳戶？") }}</li>
   </ul>
+
+  <p class="mt-3">{{ t("Si necesitas más ayuda, contáctanos a:", "If you need more help, contact us at:", "如需更多幫助，請聯繫我們：") }}
+    <a href="mailto:soporte@windowshopping.cl" class="link">soporte@windowshopping.cl</a>
+  </p>
 </section>
+
 {% endblock %}
