@@ -1,43 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
 
-<section class="dashboard-container">
-    <h2>{{ t("Panel Principal", "Main Dashboard", "主面板") }}</h2>
+<section class="dashboard-container fade-in">
+  <h2 class="title-gradient">{{ t("Panel Principal", "Main Dashboard", "主面板") }}</h2>
 
-    <!-- PERFIL DEL USUARIO ACTUAL -->
-    <div class="user-info">
-        <p><strong>{{ t("Usuario:", "User:", "使用者：") }}</strong> {{ session['user']['nombre'] }}</p>
-        <p><strong>{{ t("Correo:", "Email:", "電子郵件：") }}</strong> {{ session['user']['email'] }}</p>
-        <p><strong>{{ t("Perfil:", "Profile:", "檔案：") }}</strong> {{ session['user']['perfil'] | capitalize }}</p>
-        <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ session['user']['rol'] }}</p>
-    </div>
+  <!-- Información del usuario -->
+  <div class="user-info glass-card">
+    <p><strong>{{ t("Empresa:", "Company:", "公司：") }}</strong> {{ empresa }}</p>
+    <p><strong>{{ t("Correo:", "Email:", "電子郵件：") }}</strong> {{ email }}</p>
+    <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ rol }}</p>
+    <p><strong>{{ t("Tipo de Cuenta:", "Account Type:", "帳戶類型：") }}</strong> {{ tipo }}</p>
+  </div>
 
-    <!-- BOTONES DE ACCESO -->
-    <div class="dashboard-actions">
-        <a href="{{ url_for('compras') }}" class="btn btn-primary">
-            🛒 {{ t("Ir a Compras", "Go to Purchases", "前往採購") }}
-        </a>
+  <!-- Acciones según tipo -->
+  <div class="dashboard-actions">
+    {% if tipo == "compras" %}
+      <a href="{{ url_for('compras') }}" class="btn large primary">🛒 {{ t("Explorar Ofertas", "Browse Offers", "瀏覽商品") }}</a>
+    {% elif tipo == "servicios" %}
+      <a href="{{ url_for('servicios') }}" class="btn large secondary">🧰 {{ t("Ver Servicios", "View Services", "查看服務") }}</a>
+    {% elif tipo in ("compraventa", "mixto") %}
+      <a href="{{ url_for('ventas') }}" class="btn large primary">💰 {{ t("Ver Demandas", "View Demands", "查看需求") }}</a>
+      <a href="{{ url_for('compras') }}" class="btn large secondary">🛒 {{ t("Explorar Ofertas", "Browse Offers", "瀏覽商品") }}</a>
+    {% endif %}
+  </div>
 
-        <a href="{{ url_for('ventas') }}" class="btn btn-secondary">
-            💰 {{ t("Ir a Ventas", "Go to Sales", "前往銷售") }}
-        </a>
+  <hr>
 
-        <a href="{{ url_for('servicios') }}" class="btn btn-tertiary">
-            🧰 {{ t("Ir a Servicios", "Go to Services", "前往服務") }}
-        </a>
-    </div>
-
-    <hr>
-
-    <!-- INFORMACIÓN DE AYUDA -->
-    <div class="dashboard-info">
-        <h3>{{ t("¿Qué puedes hacer aquí?", "What can you do here?", "你可以在這裡做什麼？") }}</h3>
-        <ul>
-            <li>{{ t("Explorar publicaciones según tu rol y perfil.", "Browse listings based on your role and profile.", "根據您的角色和資料瀏覽列表。") }}</li>
-            <li>{{ t("Publicar tus productos, demandas o servicios.", "Post your products, demands or services.", "發布您的產品、需求或服務。") }}</li>
-            <li>{{ t("Conectar con empresas verificadas.", "Connect with verified companies.", "與已驗證的公司聯繫。") }}</li>
-        </ul>
-    </div>
+  <!-- Información -->
+  <div class="dashboard-info">
+    <h3>{{ t("¿Qué puedes hacer aquí?", "What can you do here?", "你可以在這裡做什麼？") }}</h3>
+    <ul>
+      <li>{{ t("Explorar publicaciones según tu rol y tipo de cuenta.", "Browse listings by role and account type.", "根據您的角色和帳戶類型瀏覽。") }}</li>
+      <li>{{ t("Publicar productos, servicios o demandas.", "Post products, services or demands.", "發布產品、服務或需求。") }}</li>
+      <li>{{ t("Conectar con empresas verificadas en la plataforma.", "Connect with verified companies.", "與平台上已驗證公司聯繫。") }}</li>
+    </ul>
+  </div>
 </section>
 
-{% endblock %
+{% endblock %}
