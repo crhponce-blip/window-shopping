@@ -1,82 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="auth-wrapper fade-in">
-  <div class="auth-box glass-card">
-    <h2 class="title-gradient">{{ t("Registro de empresa o usuario","Company or User Registration","公司或用戶註冊") }}</h2>
+<section class="form-container">
+  <h2>{{ t("Registro de Usuario") }}</h2>
 
-    <form action="{{ url_for('register') }}" method="POST" class="form-styled">
-      <div class="form-group">
-        <label for="username">{{ t("Correo electrónico","Email","電子郵件") }}</label>
-        <input type="email" id="username" name="username" required placeholder="{{ t('Ejemplo: contacto@empresa.cl','Example: contact@company.com','例如：contact@company.com') }}">
-      </div>
+  <form method="POST" enctype="multipart/form-data" action="{{ url_for('register') }}">
+    <label>{{ t("Correo electrónico", "Email") }}</label>
+    <input type="email" name="usuario" placeholder="usuario@ejemplo.com" required>
 
-      <div class="form-group">
-        <label for="password">{{ t("Contraseña","Password","密碼") }}</label>
-        <input type="password" id="password" name="password" required placeholder="{{ t('Ingresa una contraseña','Enter a password','輸入密碼') }}">
-      </div>
+    <label>{{ t("Contraseña", "Password") }}</label>
+    <input type="password" name="password" required>
 
-      <div class="form-group">
-        <label for="empresa">{{ t("Nombre de la empresa o usuario","Company or User Name","公司或用戶名稱") }}</label>
-        <input type="text" id="empresa" name="empresa" required placeholder="{{ t('Ejemplo: Exportadora Andina','Example: Andean Exporter','例如：安第斯出口公司') }}">
-      </div>
+    <label>{{ t("Empresa / Organización") }}</label>
+    <input type="text" name="empresa" placeholder="Nombre de empresa" required>
 
-      <div class="form-group">
-        <label for="tipo">{{ t("Selecciona tu tipo de perfil","Select your profile type","選擇您的個人資料類型") }}</label>
-        <select id="tipo" name="tipo" required>
-          <option value="">-- {{ t("Selecciona","Select","選擇") }} --</option>
-          {% for tval in tipos %}
-            <option value="{{ tval }}">{{ t(tval.capitalize()) }}</option>
-          {% endfor %}
-        </select>
-      </div>
+    <label>{{ t("Tipo de cuenta") }}</label>
+    <select name="tipo" required>
+      {% for tipo in tipos %}
+        <option value="{{ tipo }}" {% if tipo == request.args.get('tipo') %}selected{% endif %}>{{ tipo|capitalize }}</option>
+      {% endfor %}
+    </select>
 
-      <div class="form-group">
-        <label for="rol">{{ t("Selecciona tu rol","Select your role","選擇您的角色") }}</label>
-        <select id="rol" name="rol" required>
-          <option value="">-- {{ t("Selecciona un tipo primero","Select a type first","請先選擇類型") }} --</option>
-        </select>
-      </div>
+    <label>{{ t("Rol") }}</label>
+    <select name="rol" required>
+      {% for r in roles %}
+        <option value="{{ r }}">{{ r }}</option>
+      {% endfor %}
+    </select>
 
-      <div class="form-group">
-        <label for="pais">{{ t("País","Country","國家") }}</label>
-        <input type="text" id="pais" name="pais" placeholder="CL" maxlength="2">
-      </div>
+    <label>{{ t("País (Código ISO de 2 letras)") }}</label>
+    <input type="text" name="pais" maxlength="2" placeholder="CL" required>
 
-      <button type="submit" class="btn-gradient full-width">{{ t("Crear cuenta","Create Account","建立帳號") }}</button>
-    </form>
-  </div>
+    <label>{{ t("Subir RUT o documento") }}</label>
+    <input type="file" name="rut_file" accept=".pdf,.jpg,.jpeg,.png">
+
+    <button type="submit" class="btn btn-primary">{{ t("Registrar") }}</button>
+  </form>
+
+  <p><a href="{{ url_for('login') }}">{{ t("¿Ya tienes cuenta? Inicia sesión aquí") }}</a></p>
 </section>
-
-<!-- ✅ SCRIPT dinámico de roles -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const tipoSelect = document.getElementById("tipo");
-  const rolSelect = document.getElementById("rol");
-
-  tipoSelect.addEventListener("change", async () => {
-    const tipo = tipoSelect.value;
-    rolSelect.innerHTML = "<option>Cargando...</option>";
-
-    try {
-      const response = await fetch(`/api/roles/${tipo}`);
-      const data = await response.json();
-      rolSelect.innerHTML = "";
-
-      if (data.roles && data.roles.length > 0) {
-        data.roles.forEach(r => {
-          const opt = document.createElement("option");
-          opt.value = r;
-          opt.textContent = r;
-          rolSelect.appendChild(opt);
-        });
-      } else {
-        rolSelect.innerHTML = "<option value=''>Sin roles disponibles</option>";
-      }
-    } catch (error) {
-      rolSelect.innerHTML = "<option>Error al cargar roles</option>";
-      console.error("❌ Error al cargar roles:", error);
-    }
-  });
-});
-</script>
 {% endblock %}
