@@ -10,16 +10,16 @@
         <div class="cliente-info">
           <h3>{{ c.empresa }}</h3>
           <p><strong>{{ t("Rol","Role","角色") }}:</strong> {{ c.rol }}</p>
-          <p><strong>{{ t("Descripción","Description","描述") }}:</strong> {{ c.descripcion }}</p>
+          <p><strong>{{ t("Descripción","Description","描述") }}:</strong> {{ c.descripcion or t("Sin descripción","No description","無描述") }}</p>
         </div>
-        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">
+        <a href="{{ url_for('cliente_detalle', username=c.email) }}" class="btn btn-primary">
           🔍 {{ t("Ver detalles","View details","查看詳情") }}
         </a>
       </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p class="no-results">{{ t("No hay empresas registradas actualmente.","No companies registered yet.","目前沒有註冊公司。") }}</p>
+    <p class="no-results">{{ t("No hay empresas registradas actualmente。","No companies registered yet。","目前沒有註冊公司。") }}</p>
   {% endif %}
 </section>
 {% endblock %}
