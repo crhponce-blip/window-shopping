@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="servicios fade-in">
+  <h2>{{ t("Servicios Disponibles") }}</h2>
+  <div class="publicaciones-grid">
+    {% for pub in publicaciones %}
+      <div class="card">
+        <h3>{{ pub.producto }}</h3>
+        <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
+        <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
+        <p>{{ pub.descripcion }}</p>
+        <form action="{{ url_for('carrito_agregar', pub_id=pub.id) }}" method="get">
+          <button type="submit" class="btn btn-primary">🛒 {{ t("Agregar") }}</button>
+        </form>
+      </div>
+    {% else %}
+      <p>{{ t("No hay servicios disponibles.") }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
