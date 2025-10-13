@@ -1,50 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="detalle-servicio glass-card fade-in">
-  <h2 class="title-gradient">{{ comp.nombre }}</h2>
+<section class="detalle-container glass-card fade-in">
+  <h2 class="title-gradient">🧰 {{ t("Servicios Disponibles","Available Services","可用的服務") }}</h2>
 
-  <p><strong>{{ t("Rol","Role","角色") }}:</strong> {{ comp.rol }}</p>
-  <p><strong>{{ t("País","Country","國家") }}:</strong> {{ comp.pais }}</p>
-  <p><strong>{{ t("Email","Email","電子郵件") }}:</strong> {{ comp.email }}</p>
-  {% if comp.descripcion %}
-    <p><strong>{{ t("Descripción","Description","描述") }}:</strong> {{ comp.descripcion }}</p>
-  {% endif %}
-
-  <hr>
-  <h3>{{ t("Ítems disponibles","Available Items","可用項目") }}</h3>
-  {% if comp.items %}
-  <table class="item-table">
-    <thead>
-      <tr>
-        <th>{{ t("Tipo","Type","類型") }}</th>
-        <th>{{ t("Detalle","Detail","細節") }}</th>
-        <th>{{ t("Capacidad","Capacity","容量") }}</th>
-        <th>{{ t("Ubicación","Location","地點") }}</th>
-        <th>{{ t("Precio","Price","價格") }}</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for it in comp.items %}
-      <tr>
-        <td>{{ it.tipo|capitalize }}</td>
-        <td>{{ it.producto or it.servicio }}</td>
-        <td>{{ it.cantidad or it.capacidad }}</td>
-        <td>{{ it.origen or it.ubicacion }}</td>
-        <td>{{ it.precio or "-" }}</td>
-        <td>
-          <form method="post" action="{{ url_for('carrito_agregar_directo') }}">
-            <input type="hidden" name="empresa" value="{{ comp.nombre }}">
-            <input type="hidden" name="descripcion" value="{{ it.producto or it.servicio }}">
-            <button class="btn btn-secondary">{{ t("Agregar","Add","加入") }}</button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  {% if not data or data|length == 0 %}
+    <p class="no-results">{{ t("No hay servicios disponibles。","No services available。","目前沒有可用的服務。") }}</p>
   {% else %}
-    <p class="no-results">{{ t("Sin ítems disponibles。","No available items。","目前沒有項目。") }}</p>
+    <div class="detalle-list">
+      {% for s in data %}
+      <div class="detalle-card">
+        <h3>{{ s.empresa }}</h3>
+        <p><strong>{{ t("Rol:","Role:","角色：") }}</strong> {{ s.rol }}</p>
+        <p><strong>{{ t("País:","Country:","國家：") }}</strong> {{ s.pais }}</p>
+
+        <form method="post" action="{{ url_for('carrito_agregar', pub_id=s.id) }}">
+          <button type="submit" class="btn btn-secondary">➕ {{ t("Agregar al carrito","Add to cart","加入購物車") }}</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
   {% endif %}
 </section>
 {% endblock %}
