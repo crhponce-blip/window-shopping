@@ -9,25 +9,25 @@
     <button type="submit" class="btn btn-primary">{{ t("Buscar","Search","搜尋") }}</button>
   </form>
 
-  {% if not data %}
-    <p class="no-results">{{ t("No hay demandas disponibles para tu perfil.","No demands available for your profile.","目前沒有可用的需求。") }}</p>
+  {% if not demandas or demandas|length == 0 %}
+    <p class="no-results">{{ t("No hay demandas disponibles para tu perfil。","No demands available for your profile。","目前沒有可用的需求。") }}</p>
   {% else %}
     <div class="detalle-list">
-      {% for e in data %}
+      {% for d in demandas %}
       <div class="detalle-card">
-        <h3>{{ e.empresa }}</h3>
-        <p><strong>{{ t("Rol:","Role:","角色：") }}</strong> {{ e.rol }}</p>
-        <p><strong>{{ t("Descripción:","Description:","描述：") }}</strong> {{ e.descripcion }}</p>
+        <h3>{{ d.empresa }}</h3>
+        <p><strong>{{ t("Rol:","Role:","角色：") }}</strong> {{ d.rol }}</p>
+        <p><strong>{{ t("Descripción:","Description:","描述：") }}</strong> {{ d.descripcion }}</p>
 
-        {% if e.items %}
+        {% if d.items %}
           <ul>
-            {% for item in e.items if item.tipo == "demanda" %}
+            {% for item in d.items if item.tipo == "demanda" %}
               <li>{{ item.nombre }} — {{ item.detalle }}</li>
             {% endfor %}
           </ul>
         {% endif %}
 
-        <form method="post" action="{{ url_for('agregar_carrito', username=e.username) }}">
+        <form method="post" action="{{ url_for('carrito_agregar', username=d.email) }}">
           <button type="submit" class="btn btn-secondary">📦 {{ t("Ofertar producto","Offer Product","提供產品") }}</button>
         </form>
       </div>
