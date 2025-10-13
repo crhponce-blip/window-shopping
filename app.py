@@ -6,10 +6,11 @@
 import os
 import sqlite3
 from datetime import timedelta
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    session, flash, abort
+    session, flash, abort, jsonify
 )
 from werkzeug.utils import secure_filename
 
@@ -76,65 +77,38 @@ def init_db():
     conn.commit()
     conn.close()
 
+def _column_exists(cursor, table: str, column: str) -> bool:
+    cursor.execute(f"PRAGMA table_info({table})")
+    return any(row[1] == column for row in cursor.fetchall())
 
-def create_admin_if_missing():
-    """Crea el usuario administrador y usuarios ficticios si no existen."""
+def migrate_db():
+    """Migraciones suaves (añadir columnas si faltan)."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-
-    # === Admin principal ===
-    c.execute("SELECT * FROM users WHERE email = ?", ("admin@ws.com",))
-    if not c.fetchone():
-        c.execute("""
-            INSERT INTO users (email, password, empresa, rol, tipo, pais)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, ("admin@ws.com", "1234", "Window Shopping Admin",
-              "Exportador", "compraventa", "CL"))
-        conn.commit()
-        print("✅ Usuario admin creado: admin@ws.com / 1234")
-
-    # === Usuarios ficticios (por tipo y rol) ===
-
-    usuarios_ficticios = [
-        # --- COMPRAVENTA ---
-        ("prod1@demo.cl", "1234", "Productores del Sur", "Productor(planta)", "compraventa", "CL"),
-        ("prod2@demo.cl", "1234", "Agrícola Los Ríos", "Productor(planta)", "compraventa", "CL"),
-        ("pack1@demo.cl", "1234", "Packing Andes SpA", "Packing", "compraventa", "CL"),
-        ("pack2@demo.cl", "1234", "Packing Valle Central", "Packing", "compraventa", "CL"),
-        ("frio1@demo.cl", "1234", "Frigorífico Los Andes", "Frigorífico", "compraventa", "CL"),
-        ("frio2@demo.cl", "1234", "Frío Sur Ltda.", "Frigorífico", "compraventa", "CL"),
-        ("exp1@demo.cl", "1234", "Exportadora Chile Global", "Exportador", "compraventa", "CL"),
-        ("exp2@demo.cl", "1234", "Exportadora Andes SpA", "Exportador", "compraventa", "CL"),
-
-        # --- SERVICIOS ---
-        ("aduana1@demo.cl", "1234", "Agencia Andes", "Agencia de aduana", "servicios", "CL"),
-        ("aduana2@demo.cl", "1234", "Agencia Pacífico", "Agencia de aduana", "servicios", "CL"),
-        ("trans1@demo.cl", "1234", "Transporte del Maule", "Transporte", "servicios", "CL"),
-        ("trans2@demo.cl", "1234", "Trans Andes Cargo", "Transporte", "servicios", "CL"),
-        ("extra1@demo.cl", "1234", "Terminal Extraportuario Norte", "Extraportuario", "servicios", "CL"),
-        ("extra2@demo.cl", "1234", "Centro Logístico Sur", "Extraportuario", "servicios", "CL"),
-
-        # --- MIXTO ---
-        ("mixpack1@demo.cl", "1234", "Packing Mixto Norte", "Packing", "mixto", "CL"),
-        ("mixfrio1@demo.cl", "1234", "Frigorífico Integral SpA", "Frigorífico", "mixto", "CL"),
-
-        # --- COMPRAS ---
-        ("cliente1@ext.com", "1234", "Importadora Asia Ltd.", "Cliente extranjero", "compras", "CN"),
-        ("cliente2@ext.com", "1234", "Hong Kong Fresh Co.", "Cliente extranjero", "compras", "HK"),
-    ]
-
-    for email, password, empresa, rol, tipo, pais in usuarios_ficticios:
-        c.execute("SELECT * FROM users WHERE email = ?", (email,))
-        if not c.fetchone():
-            c.execute("""
-                INSERT INTO users (email, password, empresa, rol, tipo, pais)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (email, password, empresa, rol, tipo, pais))
-            print(f"🧑‍💼 Usuario ficticio agregado: {email}")
-
-    conn.commit()
+    # Añadir columna para almacenar el documento RUT si no existe
+    if not _column_exists(c, "users", "rut_doc"):
+        try:
+            c.execute("ALTER TABLE users ADD COLUMN rut_doc TEXT")
+            conn.commit()
+            print("🛠️ Migración: columna 'rut_doc' agregada a users.")
+        except Exception as e:
+            print(f"⚠️ No se pudo migrar 'rut_doc': {e}")
     conn.close()
 
+def create_admin_if_missing():
+    """Crea un usuario administrador si no existe."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT 1 FROM users WHERE email = ?", ("admin@ws.com",))
+    if not c.fetchone():
+        c.execute("""
+            INSERT INTO users (email, password, empresa, rol, tipo, pais, rut_doc)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, ("admin@ws.com", "1234", "Window Shopping Admin",
+              "Exportador", "compraventa", "CL", None))
+        conn.commit()
+        print("✅ Usuario admin creado: admin@ws.com / 1234")
+    conn.close()
 
 def get_user(email: str):
     """Obtiene un usuario por su email."""
@@ -146,16 +120,15 @@ def get_user(email: str):
     conn.close()
     return user
 
-
-def add_user(email, password, empresa, rol, tipo, pais):
+def add_user(email, password, empresa, rol, tipo, pais, rut_doc: Optional[str] = None):
     """Agrega un nuevo usuario al sistema."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     try:
         c.execute("""
-            INSERT INTO users (email, password, empresa, rol, tipo, pais)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (email, password, empresa, rol, tipo, pais))
+            INSERT INTO users (email, password, empresa, rol, tipo, pais, rut_doc)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (email, password, empresa, rol, tipo, pais, rut_doc))
         conn.commit()
         print(f"🆕 Usuario creado: {email}")
     except sqlite3.IntegrityError:
@@ -167,448 +140,400 @@ def add_user(email, password, empresa, rol, tipo, pais):
 # =========================================================
 # 📁 FUNCIÓN AUXILIAR PARA SUBIDA DE ARCHIVOS
 # =========================================================
-def save_uploaded_file(file_storage) -> str | None:
+def save_uploaded_file(file_storage) -> Optional[str]:
     """
     Guarda un archivo subido en la carpeta /static/uploads.
-    Retorna la ruta relativa del archivo guardado o None si falla.
+    Retorna la ruta relativa del archivo guardado (p.ej. 'uploads/archivo.pdf')
+    o None si falla/si no hay archivo.
     """
-    if not file_storage or file_storage.filename == "":
+    if not file_storage or getattr(file_storage, "filename", "") == "":
         return None
-
     if allowed_file(file_storage.filename):
         filename = secure_filename(file_storage.filename)
-        save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        # Evitar colisiones simples
+        base, ext = os.path.splitext(filename)
+        counter = 1
+        final_name = filename
+        while os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"], final_name)):
+            final_name = f"{base}_{counter}{ext}"
+            counter += 1
+        save_path = os.path.join(app.config["UPLOAD_FOLDER"], final_name)
         file_storage.save(save_path)
+        rel = f"uploads/{final_name}"
         print(f"📂 Archivo guardado: {save_path}")
-        return f"uploads/{filename}"
+        return rel
     else:
         print("⚠️ Formato de archivo no permitido.")
         return None
 
 
-# Inicialización automática
+# =========================================================
+# 👤 SEED: USUARIOS FICTICIOS (2 por rol)
+# =========================================================
+def seed_demo_users():
+    """
+    Crea 2 usuarios por rol respetando TIPOS/ROLES.
+    Contraseña por defecto: '1234'
+    """
+    demo: List[Dict[str, str]] = [
+        # ——— COMPRAVENTA (Productor, Packing, Frigorífico, Exportador) ———
+        {"email": "prod1@demo.cl",  "empresa": "Productora Valle 1", "rol": "Productor(planta)", "tipo": "compraventa", "pais": "CL"},
+        {"email": "prod2@demo.cl",  "empresa": "Agro Campo 2",       "rol": "Productor(planta)", "tipo": "compraventa", "pais": "CL"},
+
+        {"email": "pack1@demo.cl",  "empresa": "Packing Maule 1",    "rol": "Packing",           "tipo": "compraventa", "pais": "CL"},
+        {"email": "pack2@demo.cl",  "empresa": "Packing Ñuble 2",    "rol": "Packing",           "tipo": "compraventa", "pais": "CL"},
+
+        {"email": "frio1@demo.cl",  "empresa": "Frigorífico Sur 1",  "rol": "Frigorífico",       "tipo": "compraventa", "pais": "CL"},
+        {"email": "frio2@demo.cl",  "empresa": "Frigorífico Norte 2","rol": "Frigorífico",       "tipo": "compraventa", "pais": "CL"},
+
+        {"email": "exp1@demo.cl",   "empresa": "Exportadora Andes A","rol": "Exportador",        "tipo": "compraventa", "pais": "CL"},
+        {"email": "exp2@demo.cl",   "empresa": "Exportadora Pacífico","rol": "Exportador",       "tipo": "compraventa", "pais": "CL"},
+
+        # ——— SERVICIOS ———
+        {"email": "aduana1@demo.cl","empresa": "Agencia Andes",      "rol": "Agencia de aduana", "tipo": "servicios", "pais": "CL"},
+        {"email": "aduana2@demo.cl","empresa": "Agencia Pacífico",   "rol": "Agencia de aduana", "tipo": "servicios", "pais": "CL"},
+
+        {"email": "trans1@demo.cl", "empresa": "Transporte Ruta 5",  "rol": "Transporte",        "tipo": "servicios", "pais": "CL"},
+        {"email": "trans2@demo.cl", "empresa": "Logística Express",  "rol": "Transporte",        "tipo": "servicios", "pais": "CL"},
+
+        {"email": "extra1@demo.cl", "empresa": "Depósito San A.",    "rol": "Extraportuario",    "tipo": "servicios", "pais": "CL"},
+        {"email": "extra2@demo.cl", "empresa": "Depósito Los Andes", "rol": "Extraportuario",    "tipo": "servicios", "pais": "CL"},
+
+        {"email": "packserv1@demo.cl","empresa": "Packing Service 1","rol": "Packing",           "tipo": "servicios", "pais": "CL"},
+        {"email": "frioserv1@demo.cl","empresa": "Frigo Service 1",  "rol": "Frigorífico",       "tipo": "servicios", "pais": "CL"},
+
+        # ——— MIXTO (solo Packing / Frigorífico permitidos) ———
+        {"email": "mixpack1@demo.cl","empresa": "Packing Mixto Uno", "rol": "Packing",           "tipo": "mixto", "pais": "CL"},
+        {"email": "mixfrio1@demo.cl","empresa": "Frigo Mixto Uno",   "rol": "Frigorífico",       "tipo": "mixto", "pais": "CL"},
+
+        # ——— COMPRAS (cliente extranjero) ———
+        {"email": "cliente1@ext.com","empresa": "Buyer Asia LTD",    "rol": "Cliente extranjero","tipo": "compras", "pais": "CN"},
+        {"email": "cliente2@ext.com","empresa": "Import USA LLC",    "rol": "Cliente extranjero","tipo": "compras", "pais": "US"},
+    ]
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    for u in demo:
+        c.execute("SELECT 1 FROM users WHERE email = ?", (u["email"],))
+        if not c.fetchone():
+            try:
+                c.execute("""
+                    INSERT INTO users (email, password, empresa, rol, tipo, pais, rut_doc)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (u["email"], "1234", u["empresa"], u["rol"], u["tipo"], u["pais"], None))
+                conn.commit()
+                print(f"🧑‍💼 Usuario ficticio agregado: {u['email']}")
+            except Exception as e:
+                print(f"⚠️ No se pudo crear demo {u['email']}: {e}")
+    conn.close()
+
+
+# =========================================================
+# 🔌 INICIALIZACIÓN (no borra tu flujo)
+# =========================================================
 init_db()
+migrate_db()
 create_admin_if_missing()
+seed_demo_users()
 # =========================================================
-# 🧭 PARTE 2 — Autenticación (Login, Registro) + Validadores
+# 👥 AUTENTICACIÓN Y REGISTRO
 # =========================================================
 
-from flask import request  # aseguramos disponibilidad
+from flask import jsonify
 
-# ------------------------------
-# 🧾 VALIDADORES Y NORMALIZADORES
-# ------------------------------
-def _normaliza_tipo(tipo: str) -> str:
-    """Normaliza el tipo de cuenta (asegura formato uniforme)."""
-    tipo = (tipo or "").strip().lower()
-    if tipo in {"compra-venta", "compra_venta", "cv"}:
-        return "compraventa"
-    return tipo if tipo in TIPOS_VALIDOS else ""
-
-def _rol_valido_para_tipo(rol: str, tipo: str) -> bool:
-    """Valida si el rol pertenece al tipo de cuenta."""
-    return rol in ROLES_POR_TIPO.get(tipo, [])
-
-
-# ------------------------------
-# 🔒 LOGIN (SQLite)
-# ------------------------------
+# ---------------------------------------------------------
+# 🔐 LOGIN
+# ---------------------------------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Inicio de sesión conectado a la base de datos SQLite."""
     if request.method == "POST":
-        email = (
-            (request.form.get("username") or request.form.get("usuario") or "")
-            .strip()
-            .lower()
-        )
-        password = (request.form.get("password") or "").strip()
+        email = request.form.get("username")
+        password = request.form.get("password")
 
         user = get_user(email)
-        if user and user["password"] == password:
-            session["user"] = {
-                "id": user["id"],
-                "email": user["email"],
-                "empresa": user["empresa"],
-                "rol": user["rol"],
-                "tipo": user["tipo"],
-                "pais": user["pais"],
-            }
-            # Mantener sesión permanente
-            session.permanent = True
-            return redirect(url_for("dashboard"))
-        else:
-            flash("Credenciales incorrectas", "error")
-            return render_template("login.html", error="Credenciales incorrectas")
+        if not user or user["password"] != password:
+            return render_template("login.html", error="❌ Credenciales incorrectas")
+
+        # Crear sesión persistente
+        session.permanent = True
+        session["user"] = {
+            "email": user["email"],
+            "empresa": user["empresa"],
+            "rol": user["rol"],
+            "tipo": user["tipo"],
+            "pais": user["pais"],
+        }
+
+        flash(f"👋 Bienvenido {user['empresa']}!", "success")
+        return redirect(url_for("dashboard"))
 
     return render_template("login.html")
 
 
-# ------------------------------
-# 🧩 REGISTRO (SQLite) — con validaciones completas + archivo RUT
-# ------------------------------
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    """Registro de nuevos usuarios con validación por tipo/rol y archivo RUT."""
-    roles_catalogo = [
-        "Cliente extranjero",
-        "Productor(planta)",
-        "Packing",
-        "Frigorífico",
-        "Exportador",
-        "Agencia de aduana",
-        "Extraportuario",
-        "Transporte",
-    ]
-    tipos_catalogo = ["compras", "servicios", "mixto", "compraventa"]
-
-    if request.method == "POST":
-        # Campos del formulario
-        email = (
-            (request.form.get("usuario") or request.form.get("username") or "")
-            .strip()
-            .lower()
-        )
-        password = (request.form.get("password") or "").strip()
-        empresa = (request.form.get("empresa") or "").strip()
-        rol = (request.form.get("rol") or "").strip()
-        tipo = _normaliza_tipo(request.form.get("tipo") or "")
-        pais = (request.form.get("pais") or "CL").strip().upper()
-        rut_file = request.files.get("rut_file")
-
-        # Validaciones básicas
-        if not all([email, password, empresa, rol, tipo]):
-            flash("Todos los campos son obligatorios.", "error")
-            return redirect(url_for("register"))
-
-        if not _rol_valido_para_tipo(rol, tipo):
-            flash("El rol seleccionado no corresponde al tipo de cuenta.", "error")
-            return redirect(url_for("register"))
-
-        if rol == "Cliente extranjero" and tipo != "compras":
-            flash("Cliente extranjero solo puede ser tipo 'compras'.", "error")
-            return redirect(url_for("register"))
-
-        if rol == "Exportador" and tipo not in {"compraventa"}:
-            flash("Exportador debe ser tipo 'compraventa'.", "error")
-            return redirect(url_for("register"))
-
-        if len(pais) != 2:
-            flash("El código de país debe tener 2 letras (ej: CL, US).", "error")
-            return redirect(url_for("register"))
-
-        # Validar existencia previa
-        existing = get_user(email)
-        if existing:
-            flash("El usuario ya existe.", "error")
-            return redirect(url_for("register"))
-
-        # Subir archivo RUT
-        if rut_file:
-            saved_path = save_uploaded_file(rut_file)
-            if not saved_path:
-                flash("Error al subir el archivo RUT.", "error")
-                return redirect(url_for("register"))
-            else:
-                print(f"📎 Archivo RUT recibido para {email}: {saved_path}")
-        else:
-            flash("Debe adjuntar el archivo RUT (PDF o imagen).", "error")
-            return redirect(url_for("register"))
-
-        # Agregar usuario
-        add_user(email, password, empresa, rol, tipo, pais)
-        flash("Usuario registrado exitosamente.", "success")
-        return redirect(url_for("login"))
-
-    # GET
-    return render_template(
-        "register.html",
-        roles=roles_catalogo,
-        tipos=tipos_catalogo,
-        roles_por_tipo=ROLES_POR_TIPO,
-    )
-# =========================================================
-# 🧭 PARTE 3 — Dashboard, Publicaciones y Vistas Dinámicas
-# =========================================================
-
-# ------------------------------
-# 🧱 SIMULADOR DE PUBLICACIONES (Datos iniciales)
-# ------------------------------
-PUBLICACIONES = [
-    {
-        "id": 1,
-        "titulo": "Exportación de Trufas Negras",
-        "empresa": "Exportadora Chile Global",
-        "rol": "Exportador",
-        "tipo": "compraventa",
-        "descripcion": "Trufas negras frescas desde la Región del Maule, certificadas SAG y con envío aéreo.",
-        "precio": 12000,
-        "moneda": "USD/kg",
-        "pais": "CL",
-        "stock": "Disponible",
-    },
-    {
-        "id": 2,
-        "titulo": "Servicio de Transporte Refrigerado",
-        "empresa": "Trans Andes Cargo",
-        "rol": "Transporte",
-        "tipo": "servicios",
-        "descripcion": "Transporte nacional refrigerado para frutas y trufas con monitoreo GPS.",
-        "precio": 850,
-        "moneda": "USD/envío",
-        "pais": "CL",
-        "stock": "Disponible",
-    },
-    {
-        "id": 3,
-        "titulo": "Clientes internacionales buscan frutas frescas",
-        "empresa": "Importadora Asia Ltd.",
-        "rol": "Cliente extranjero",
-        "tipo": "compras",
-        "descripcion": "Buscamos exportadores chilenos de fruta fresca, especialmente ciruelas y cerezas.",
-        "precio": 0,
-        "moneda": "",
-        "pais": "CN",
-        "stock": "Abierto a cotizaciones",
-    },
-    {
-        "id": 4,
-        "titulo": "Servicio de Agencia de Aduana",
-        "empresa": "Agencia Pacífico",
-        "rol": "Agencia de aduana",
-        "tipo": "servicios",
-        "descripcion": "Gestión documental y tramitación de exportaciones e importaciones en puertos chilenos.",
-        "precio": 350,
-        "moneda": "USD/servicio",
-        "pais": "CL",
-        "stock": "Disponible",
-    },
-]
-
-# ------------------------------
-# 💼 DASHBOARD (Vista general)
-# ------------------------------
-@app.route("/dashboard")
-def dashboard():
-    """Panel principal del usuario según su tipo y rol."""
-    user = session.get("user")
-    if not user:
-        return redirect(url_for("login"))
-
-    rol = user.get("rol", "")
-    tipo = user.get("tipo", "")
-
-    # Filtrar publicaciones según visibilidad lógica
-    visibles = []
-    for p in PUBLICACIONES:
-        # Reglas de visibilidad simples y coherentes con los flujos reales:
-        if tipo == "compras" and p["tipo"] == "compraventa":
-            visibles.append(p)
-        elif tipo == "compraventa" and p["tipo"] in {"servicios", "compras"}:
-            visibles.append(p)
-        elif tipo == "servicios" and p["tipo"] in {"compraventa"}:
-            visibles.append(p)
-        elif tipo == "mixto" and p["tipo"] in {"servicios", "compraventa"}:
-            visibles.append(p)
-
-    return render_template(
-        "dashboard.html",
-        user=user,
-        publicaciones=visibles,
-    )
-
-
-# ------------------------------
-# 🛒 CARRITO (Vista de compras o servicios seleccionados)
-# ------------------------------
-@app.route("/carrito")
-def carrito():
-    """Carrito de compras o solicitudes de servicio."""
-    user = session.get("user")
-    if not user:
-        return redirect(url_for("login"))
-    return render_template("carrito.html", user=user)
-
-
-# ------------------------------
-# 📦 DETALLES DE PUBLICACIÓN (según tipo)
-# ------------------------------
-@app.route("/detalle/<int:pub_id>")
-def detalle(pub_id):
-    """Detalle de una publicación según el tipo de usuario."""
-    user = session.get("user")
-    if not user:
-        return redirect(url_for("login"))
-
-    publicacion = next((p for p in PUBLICACIONES if p["id"] == pub_id), None)
-    if not publicacion:
-        abort(404)
-
-    tipo = publicacion["tipo"]
-    if tipo == "compraventa":
-        template = "detalle_compras.html"
-    elif tipo == "servicios":
-        template = "detalle_servicios.html"
-    elif tipo == "compras":
-        template = "detalle_ventas.html"
-    else:
-        template = "detalle_generico.html"
-
-    return render_template(template, user=user, publicacion=publicacion)
-
-
-# ------------------------------
-# ❌ CIERRE DE SESIÓN
-# ------------------------------
+# ---------------------------------------------------------
+# 🚪 LOGOUT
+# ---------------------------------------------------------
 @app.route("/logout")
 def logout():
-    """Cierra la sesión actual."""
     session.pop("user", None)
-    flash("Has cerrado sesión correctamente.", "info")
-    return redirect(url_for("login"))
+    flash("👋 Sesión cerrada correctamente.", "info")
+    return redirect(url_for("home"))
+
+
+# ---------------------------------------------------------
+# 📝 REGISTRO DE NUEVOS USUARIOS
+# ---------------------------------------------------------
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    tipos = sorted(list(TIPOS_VALIDOS))
+    roles_default = sorted({r for roles in ROLES_POR_TIPO.values() for r in roles})
+
+    if request.method == "POST":
+        email = request.form.get("username")
+        password = request.form.get("password")
+        empresa = request.form.get("empresa")
+        tipo = request.form.get("tipo")
+        rol = request.form.get("rol")
+        pais = request.form.get("pais", "CL").upper()
+
+        if not all([email, password, empresa, tipo, rol]):
+            flash("⚠️ Todos los campos son obligatorios.", "warning")
+            return render_template("register.html", tipos=tipos, roles=roles_default)
+
+        if tipo not in TIPOS_VALIDOS:
+            flash("⚠️ Tipo de cuenta no válido.", "error")
+            return render_template("register.html", tipos=tipos, roles=roles_default)
+
+        if rol not in ROLES_POR_TIPO[tipo]:
+            flash("⚠️ El rol no coincide con el tipo seleccionado.", "error")
+            return render_template("register.html", tipos=tipos, roles=roles_default)
+
+        # Guardar documento RUT (opcional)
+        rut_doc_path = None
+        file = request.files.get("rut_doc")
+        if file and allowed_file(file.filename):
+            rut_doc_path = save_uploaded_file(file)
+
+        add_user(email, password, empresa, rol, tipo, pais, rut_doc_path)
+        flash("✅ Cuenta creada correctamente. Ahora puedes iniciar sesión.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("register.html", tipos=tipos, roles=roles_default)
+
+
+# ---------------------------------------------------------
+# 🔄 API INTERNA PARA ACTUALIZAR ROLES POR TIPO
+# ---------------------------------------------------------
+@app.route("/api/roles/<tipo>")
+def api_roles_por_tipo(tipo):
+    """Devuelve los roles válidos según el tipo elegido (para uso dinámico en el front)."""
+    roles = ROLES_POR_TIPO.get(tipo, [])
+    return jsonify({"roles": roles})
+
+
 # =========================================================
-# 🧭 PARTE 4 — Búsqueda, Carrito, Ocultar publicaciones y Errores
+# 🔒 FUNCIONES AUXILIARES DE SESIÓN
 # =========================================================
+def usuario_actual():
+    """Devuelve el usuario actualmente logueado (objeto sqlite Row o None)."""
+    if "user" not in session:
+        return None
+    data = session["user"]
+    return get_user(data["email"])
 
-# ------------------------------
-# 🛒 CARRITO — Lógica funcional completa
-# ------------------------------
-def get_cart():
-    """Obtiene el carrito actual desde la sesión."""
-    return session.setdefault("cart", [])
+def login_requerido(func):
+    """Decorador para rutas que exigen sesión activa."""
+    from functools import wraps
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if "user" not in session:
+            flash("⚠️ Debes iniciar sesión para acceder a esta página.", "warning")
+            return redirect(url_for("login"))
+        return func(*args, **kwargs)
+    return wrapper
+# =========================================================
+# 🧭 DASHBOARD Y SECCIONES PRINCIPALES
+# =========================================================
+@app.route("/dashboard")
+@login_requerido
+def dashboard():
+    user = usuario_actual()
+    if not user:
+        return redirect(url_for("login"))
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # Simulación: publicaciones relevantes (según tipo)
+    publicaciones = []
+    if user["tipo"] == "compras":
+        c.execute("SELECT * FROM users WHERE tipo='compraventa'")
+    elif user["tipo"] == "servicios":
+        c.execute("SELECT * FROM users WHERE tipo='compras' OR tipo='compraventa'")
+    elif user["tipo"] in ("compraventa", "mixto"):
+        c.execute("SELECT * FROM users WHERE tipo!='compras'")
+    publicaciones = c.fetchall()
+    conn.close()
+
+    return render_template("dashboard.html", user=user, publicaciones=publicaciones)
 
 
-def save_cart(cart):
-    """Guarda el carrito actualizado."""
-    session["cart"] = cart
+# =========================================================
+# 🛒 COMPRAS (solo clientes extranjeros)
+# =========================================================
+@app.route("/compras", methods=["GET"])
+@login_requerido
+def compras():
+    user = usuario_actual()
+    if not user:
+        return redirect(url_for("login"))
+
+    query = request.args.get("q", "").lower()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE tipo='compraventa'")
+    data = [d for d in c.fetchall() if query in d["empresa"].lower() or query in d["rol"].lower()]
+    conn.close()
+
+    return render_template("detalle_compras.html", data=data)
 
 
-@app.route("/carrito/agregar/<int:pub_id>")
+# =========================================================
+# 💰 VENTAS (solo nacional o mixto)
+# =========================================================
+@app.route("/ventas", methods=["GET"])
+@login_requerido
+def ventas():
+    user = usuario_actual()
+    if not user:
+        return redirect(url_for("login"))
+
+    query = request.args.get("q", "").lower()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE tipo='compras'")
+    demandas = [d for d in c.fetchall() if query in d["empresa"].lower() or query in d["rol"].lower()]
+    conn.close()
+
+    return render_template("detalle_ventas.html", demandas=demandas)
+
+
+# =========================================================
+# 🧰 SERVICIOS (packing, frigorífico, transporte, aduana)
+# =========================================================
+@app.route("/servicios", methods=["GET"])
+@login_requerido
+def servicios():
+    user = usuario_actual()
+    if not user:
+        return redirect(url_for("login"))
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE tipo='servicios'")
+    servicios_data = c.fetchall()
+    conn.close()
+
+    return render_template("detalle_servicios.html", data=servicios_data)
+
+
+# =========================================================
+# 🧾 CARRITO DE COMPRAS
+# =========================================================
+@app.route("/carrito")
+@login_requerido
+def carrito():
+    cart = session.get("cart", [])
+    return render_template("carrito.html", cart=cart)
+
+@app.route("/carrito/agregar/<pub_id>", methods=["POST"])
+@login_requerido
 def carrito_agregar(pub_id):
-    """Agrega una publicación al carrito."""
-    user = session.get("user")
-    if not user:
-        return redirect(url_for("login"))
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE id=?", (pub_id,))
+    pub = c.fetchone()
+    conn.close()
 
-    cart = get_cart()
-    publicacion = next((p for p in PUBLICACIONES if p["id"] == pub_id), None)
+    if not pub:
+        flash("⚠️ Publicación no encontrada.", "warning")
+        return redirect(url_for("dashboard"))
 
-    if publicacion and publicacion not in cart:
-        cart.append(publicacion)
-        save_cart(cart)
-        flash("✅ Publicación agregada al carrito.", "success")
-    else:
-        flash("⚠️ Esta publicación ya está en tu carrito o no existe.", "info")
-
+    cart = session.get("cart", [])
+    cart.append({
+        "empresa": pub["empresa"],
+        "rol": pub["rol"],
+        "descripcion": f"Oferta de {pub['empresa']} ({pub['rol']})",
+        "tipo": pub["tipo"]
+    })
+    session["cart"] = cart
+    flash(f"🛒 {pub['empresa']} agregado al carrito.", "success")
     return redirect(url_for("carrito"))
 
-
-@app.route("/carrito/eliminar/<int:pub_id>")
-def carrito_eliminar(pub_id):
-    """Elimina una publicación específica del carrito."""
-    user = session.get("user")
-    if not user:
-        return redirect(url_for("login"))
-
-    cart = get_cart()
-    cart = [p for p in cart if p["id"] != pub_id]
-    save_cart(cart)
-    flash("🗑️ Publicación eliminada del carrito.", "info")
+@app.route("/carrito/eliminar/<int:index>", methods=["POST"])
+@login_requerido
+def carrito_eliminar(index):
+    cart = session.get("cart", [])
+    if 0 <= index < len(cart):
+        eliminado = cart.pop(index)
+        session["cart"] = cart
+        flash(f"🗑️ {eliminado['empresa']} eliminado del carrito.", "info")
     return redirect(url_for("carrito"))
 
-
-@app.route("/carrito/vaciar")
+@app.route("/carrito/vaciar", methods=["POST"])
+@login_requerido
 def carrito_vaciar():
-    """Vacía completamente el carrito."""
     session["cart"] = []
     flash("🧺 Carrito vaciado correctamente.", "info")
     return redirect(url_for("carrito"))
 
-
-# ------------------------------
-# 🔍 BÚSQUEDA DE PUBLICACIONES
-# ------------------------------
-@app.route("/buscar", methods=["GET", "POST"])
-def buscar():
-    """Permite buscar publicaciones por palabra clave."""
-    user = session.get("user")
-    if not user:
-        return redirect(url_for("login"))
-
-    query = (request.form.get("q") or request.args.get("q") or "").strip().lower()
-    resultados = []
-
-    if query:
-        for p in PUBLICACIONES:
-            if (
-                query in p["titulo"].lower()
-                or query in p["empresa"].lower()
-                or query in p["descripcion"].lower()
-                or query in p["rol"].lower()
-            ):
-                resultados.append(p)
-
-    return render_template("buscar.html", user=user, query=query, resultados=resultados)
-
-
-# ------------------------------
-# 👁️ OCULTAR Y RESTAURAR PUBLICACIONES
-# ------------------------------
-def get_hidden_items():
-    """Obtiene IDs de publicaciones ocultas."""
-    return session.setdefault("hidden_items", [])
-
-
-@app.route("/ocultar/<int:pub_id>", methods=["POST"])
-def ocultar_publicacion(pub_id):
-    """Oculta una publicación del dashboard."""
-    user = session.get("user")
-    if not user:
-        return redirect(url_for("login"))
-
-    hidden = get_hidden_items()
-    if pub_id not in hidden:
-        hidden.append(pub_id)
-        session["hidden_items"] = hidden
-        flash("👁️ Publicación ocultada de tu vista.", "info")
-
-    return redirect(request.referrer or url_for("dashboard"))
-
-
-@app.route("/restablecer_ocultos", methods=["POST"])
-def restablecer_ocultos():
-    """Restaura todas las publicaciones ocultas."""
-    session["hidden_items"] = []
-    flash("🔄 Publicaciones restauradas correctamente.", "success")
+@app.route("/carrito/confirmar", methods=["POST"])
+@login_requerido
+def carrito_confirmar():
+    session["cart"] = []
+    flash("✅ Pedido confirmado y enviado.", "success")
     return redirect(url_for("dashboard"))
 
 
-# ------------------------------
-# ⚠️ MANEJO DE ERRORES PERSONALIZADO
-# ------------------------------
-@app.errorhandler(404)
-def not_found_error(error):
-    """Página no encontrada."""
-    try:
-        return render_template("404.html"), 404
-    except Exception:
-        return "<h1>404</h1><p>Página no encontrada</p>", 404
-
-
-@app.errorhandler(500)
-def internal_error(error):
-    """Error interno del servidor."""
-    try:
-        return render_template("500.html"), 500
-    except Exception:
-        return "<h1>500</h1><p>Error interno del servidor</p>", 500
 # =========================================================
-# 🌍 PARTE 5 — MULTILENGUAJE, ERRORES Y ARRANQUE
+# 🔍 DETALLES GENERALES
 # =========================================================
+@app.route("/detalle/<tipo>/<int:uid>")
+@login_requerido
+def detalle_generico(tipo, uid):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE id=?", (uid,))
+    comp = c.fetchone()
+    conn.close()
 
-# --- Diccionario base de traducciones ---
+    if not comp:
+        abort(404)
+
+    if tipo == "compras":
+        template = "detalle_compras.html"
+    elif tipo == "ventas":
+        template = "detalle_ventas.html"
+    elif tipo == "servicios":
+        template = "detalle_servicios.html"
+    else:
+        template = "detalle.html"
+
+    return render_template(template, comp=comp)
+
+
+# =========================================================
+# 🌍 MULTILENGUAJE Y HOME
+# =========================================================
 TRANSLATIONS = {
-    # Navegación / header
     "Inicio": {"en": "Home", "zh": "主頁"},
     "Empresas": {"en": "Companies", "zh": "公司"},
     "Servicios": {"en": "Services", "zh": "服務"},
@@ -619,114 +544,44 @@ TRANSLATIONS = {
     "Registrarse": {"en": "Register", "zh": "註冊"},
     "Salir": {"en": "Logout", "zh": "登出"},
     "Comercio Internacional": {"en": "International Trade", "zh": "國際貿易"},
-
-    # Home / Hero
-    "Bienvenido a Window Shopping": {
-        "en": "Welcome to Window Shopping",
-        "zh": "歡迎來到 Window Shopping",
-    },
-    "Conectamos productores chilenos con compradores internacionales": {
-        "en": "Connecting Chilean producers with international buyers",
-        "zh": "連接智利生產商與國際買家",
-    },
-    "Comienza ahora": {"en": "Start now", "zh": "立即開始"},
-    "Explora nuestros servicios": {"en": "Explore our services", "zh": "探索我們的服務"},
-    "Compra y Venta": {"en": "Buy & Sell", "zh": "買賣"},
-    "Servicios Logísticos": {"en": "Logistic Services", "zh": "物流服務"},
-    "Sostenibilidad": {"en": "Sustainability", "zh": "永續發展"},
-
-    # Dashboard / acciones
-    "Ver Demandas": {"en": "View Demands", "zh": "查看需求"},
-    "Explorar Ofertas": {"en": "Browse Offers", "zh": "瀏覽商品"},
-    "Explorar Servicios": {"en": "Explore Services", "zh": "探索服務"},
-    "Panel de Usuario": {"en": "User Dashboard", "zh": "用戶主頁"},
-
-    # Carrito / botones genéricos
-    "Agregado al carrito": {"en": "Added to cart", "zh": "已加入購物車"},
-    "Eliminado del carrito": {"en": "Removed from cart", "zh": "已刪除"},
-    "Carrito vaciado": {"en": "Cart cleared", "zh": "購物車已清空"},
-    "Publicación no encontrada": {"en": "Item not found", "zh": "找不到項目"},
-    "Publicación ocultada": {"en": "Item hidden", "zh": "項目已隱藏"},
-    "Publicaciones restauradas": {"en": "Hidden items restored", "zh": "已恢復隱藏項目"},
-
-    # Errores
     "Página no encontrada": {"en": "Page not found", "zh": "找不到頁面"},
     "Error interno del servidor": {"en": "Internal server error", "zh": "伺服器內部錯誤"},
 }
 
-# --- Inyección del traductor `t()` ---
 @app.context_processor
 def inject_translator():
     def t(es: str, en: str = None, zh: str = None) -> str:
-        """
-        Traductor dinámico:
-        - Usa session['lang'] (por defecto 'es').
-        - Prioridad: diccionario central -> parámetros en/en zh -> texto ES.
-        """
         lang = session.get("lang", "es")
         if lang == "en":
-            return TRANSLATIONS.get(es, {}).get("en") or (en if en else es)
+            return TRANSLATIONS.get(es, {}).get("en", en or es)
         if lang == "zh":
-            return TRANSLATIONS.get(es, {}).get("zh") or (zh if zh else es)
+            return TRANSLATIONS.get(es, {}).get("zh", zh or es)
         return es
-
     return dict(t=t)
 
-
-# --- Selector de idioma ---
 @app.route("/set_lang", methods=["POST"])
 def set_lang():
     lang = request.form.get("lang", "es")
     session["lang"] = lang
     flash("🌍 Idioma cambiado correctamente.", "info")
-    print(f"🌍 Idioma establecido: {lang}")
     return redirect(request.referrer or url_for("home"))
 
-
-# --- Rutas globales de ayuda y home ---
 @app.route("/")
 def home():
-    """Página principal de Window Shopping."""
     return render_template("home.html")
 
-
-@app.route("/ayuda")
-def ayuda():
-    """Centro de ayuda o preguntas frecuentes."""
-    return render_template("ayuda.html")
-
-
-# --- Registro Router (para elegir tipo antes del formulario) ---
-@app.route("/register_router")
-def register_router():
-    """Vista para elegir tipo de registro antes del formulario."""
-    return render_template("register_router.html")
-
-
-# --- Errores de respaldo ---
 @app.errorhandler(404)
 def not_found_error(error):
-    """Página no encontrada (backup general)."""
-    try:
-        return render_template("404.html"), 404
-    except Exception as e:
-        print(f"Error 404: {e}")
-        return "<h1>404</h1><p>Página no encontrada</p>", 404
-
+    return render_template("404.html"), 404
 
 @app.errorhandler(500)
 def internal_error(error):
-    """Error interno del servidor (backup general)."""
-    try:
-        return render_template("500.html"), 500
-    except Exception as e:
-        print(f"Error 500: {e}")
-        return "<h1>500</h1><p>Error interno del servidor</p>", 500
+    return render_template("500.html"), 500
 
 
 # =========================================================
-# 🚀 ARRANQUE DE LA APLICACIÓN
+# 🚀 EJECUCIÓN
 # =========================================================
 if __name__ == "__main__":
-    print("🚀 Iniciando Window Shopping (v3.3)…")
+    print("🚀 Iniciando Window Shopping (v3.3) — Flask server listo.")
     app.run(debug=True, host="0.0.0.0", port=5000)
