@@ -1,50 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
-
 <section class="auth-wrapper fade-in">
   <div class="auth-box glass-card">
-    <h2 class="title-gradient">{{ t("Registro de empresa o usuario", "Company or User Registration", "公司或用戶註冊") }}</h2>
+    <h2 class="title-gradient">{{ t("Registro de empresa o usuario","Company or User Registration","公司或用戶註冊") }}</h2>
 
     <form action="{{ url_for('register') }}" method="POST" class="form-styled">
-      <!-- EMAIL -->
       <div class="form-group">
-        <label for="usuario">{{ t("Correo electrónico", "Email", "電子郵件") }}</label>
-        <input type="email" id="usuario" name="usuario" required
-               placeholder="{{ t('Ejemplo: contacto@empresa.cl', 'Example: contact@company.com', '例如：contact@company.com') }}">
+        <label for="username">{{ t("Correo electrónico","Email","電子郵件") }}</label>
+        <input type="email" id="username" name="username" required placeholder="{{ t('Ejemplo: contacto@empresa.cl','Example: contact@company.com','例如：contact@company.com') }}">
       </div>
 
-      <!-- CONTRASEÑA -->
       <div class="form-group">
-        <label for="password">{{ t("Contraseña", "Password", "密碼") }}</label>
-        <input type="password" id="password" name="password" required
-               placeholder="{{ t('Ingresa una contraseña', 'Enter a password', '輸入密碼') }}">
+        <label for="password">{{ t("Contraseña","Password","密碼") }}</label>
+        <input type="password" id="password" name="password" required placeholder="{{ t('Ingresa una contraseña','Enter a password','輸入密碼') }}">
       </div>
 
-      <!-- EMPRESA -->
       <div class="form-group">
-        <label for="empresa">{{ t("Nombre de la empresa o usuario", "Company or User Name", "公司或用戶名稱") }}</label>
-        <input type="text" id="empresa" name="empresa" required
-               placeholder="{{ t('Ejemplo: Exportadora Andina', 'Example: Andean Exporter', '例如：安第斯出口公司') }}">
+        <label for="empresa">{{ t("Nombre de la empresa o usuario","Company or User Name","公司或用戶名稱") }}</label>
+        <input type="text" id="empresa" name="empresa" required placeholder="{{ t('Ejemplo: Exportadora Andina','Example: Andean Exporter','例如：安第斯出口公司') }}">
       </div>
 
-      <!-- PERFIL PRINCIPAL -->
       <div class="form-group">
-        <label for="tipo">{{ t("Selecciona tu tipo de perfil", "Select your profile type", "選擇您的個人資料類型") }}</label>
+        <label for="tipo">{{ t("Selecciona tu tipo de perfil","Select your profile type","選擇您的個人資料類型") }}</label>
         <select id="tipo" name="tipo" required>
           {% for tval in tipos %}
-            <option value="{{ tval }}">{{ {
-              'compraventa': t("Nacional - Compra/Venta", "National - Buy/Sell", "國內 - 買賣"),
-              'servicios': t("Nacional - Servicios", "National - Services", "國內 - 服務"),
-              'mixto': t("Nacional - Mixto (Fruta y Servicios)", "National - Mixed (Fruit & Services)", "國內 - 混合（水果與服務）"),
-              'compras': t("Cliente extranjero (solo compras)", "Foreign client (only purchases)", "外國客戶（僅購買）")
-            }[tval] }}</option>
+            <option value="{{ tval }}">{{ t(tval.capitalize()) }}</option>
           {% endfor %}
         </select>
       </div>
 
-      <!-- ROL -->
       <div class="form-group">
-        <label for="rol">{{ t("Selecciona tu rol", "Select your role", "選擇您的角色") }}</label>
+        <label for="rol">{{ t("Selecciona tu rol","Select your role","選擇您的角色") }}</label>
         <select id="rol" name="rol" required>
           {% for r in roles %}
             <option value="{{ r }}">{{ r }}</option>
@@ -52,47 +38,13 @@
         </select>
       </div>
 
-      <!-- País (opcional) -->
       <div class="form-group">
-        <label for="pais">País</label>
+        <label for="pais">{{ t("País","Country","國家") }}</label>
         <input type="text" id="pais" name="pais" placeholder="CL" maxlength="2">
       </div>
 
-      <button type="submit" class="btn-gradient full-width">{{ t("Crear cuenta", "Create Account", "建立帳號") }}</button>
+      <button type="submit" class="btn-gradient full-width">{{ t("Crear cuenta","Create Account","建立帳號") }}</button>
     </form>
-
-    <p class="text-center mt-3">
-      {{ t("¿Ya tienes una cuenta?", "Already have an account?", "已經有帳號了？") }}
-      <a href="{{ url_for('login') }}" class="link-contrast">{{ t("Inicia sesión aquí", "Log in here", "點此登入") }}</a>
-    </p>
   </div>
 </section>
-
-<script>
-  // Mapa de roles válidos por tipo (inyectado por backend)
-  const ROLES_POR_TIPO = {{ roles_por_tipo | tojson }};
-  const tipoSel = document.getElementById('tipo');
-  const rolSel  = document.getElementById('rol');
-
-  function filtraRoles() {
-    const tipo = (tipoSel.value || '').toLowerCase();
-    const valid = (ROLES_POR_TIPO[tipo] || []);
-
-    // Recorremos opciones y ocultamos/mostramos
-    for (const opt of rolSel.options) {
-      const allowed = valid.includes(opt.value);
-      opt.hidden = !allowed;
-      opt.disabled = !allowed;
-    }
-
-    // Selecciona la primera opción válida disponible
-    const firstValid = Array.from(rolSel.options).find(o => !o.disabled && !o.hidden);
-    if (firstValid) rolSel.value = firstValid.value;
-  }
-
-  tipoSel.addEventListener('change', filtraRoles);
-  // Primera carga
-  filtraRoles();
-</script>
-
 {% endblock %}
