@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="detalle-servicio glass-card fade-in">
+  <h2 class="title-gradient">{{ comp.nombre }}</h2>
+
+  <p><strong>{{ t("Rol","Role","角色") }}:</strong> {{ comp.rol }}</p>
+  {% if comp.rut %}<p><strong>RUT:</strong> {{ comp.rut }}</p>{% endif %}
+  <p><strong>{{ t("País","Country","國家") }}:</strong> {{ comp.pais }}</p>
+  <p><strong>{{ t("Email","Email","電子郵件") }}:</strong> {{ comp.email }}</p>
+  {% if comp.telefono %}<p><strong>{{ t("Teléfono","Phone","電話") }}:</strong> {{ comp.telefono }}</p>{% endif %}
+  {% if comp.direccion %}<p><strong>{{ t("Dirección","Address","地址") }}:</strong> {{ comp.direccion }}</p>{% endif %}
+  <p><strong>{{ t("Descripción","Description","描述") }}:</strong> {{ comp.descripcion }}</p>
+
+  <hr>
+  <h3>{{ t("Ítems disponibles","Available Items","可用項目") }}</h3>
+  {% if comp.items %}
+  <table class="item-table">
+    <thead>
+      <tr>
+        <th>{{ t("Tipo","Type","類型") }}</th>
+        <th>{{ t("Detalle","Detail","細節") }}</th>
+        <th>{{ t("Cantidad","Quantity","數量") }}</th>
+        <th>{{ t("Origen","Origin","來源") }}</th>
+        <th>{{ t("Precio","Price","價格") }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for it in comp.items %}
+      <tr>
+        <td>{{ it.tipo|capitalize }}</td>
+        <td>{{ it.producto or it.servicio }}</td>
+        <td>{{ it.cantidad or it.capacidad }}</td>
+        <td>{{ it.origen or it.ubicacion }}</td>
+        <td>{{ it.precio or "-" }}</td>
+        <td>
+          <form method="post" action="{{ url_for('carrito_agregar_directo') }}">
+            <input type="hidden" name="empresa" value="{{ comp.nombre }}">
+            <input type="hidden" name="producto" value="{{ it.producto or '' }}">
+            <input type="hidden" name="servicio" value="{{ it.servicio or '' }}">
+            <button class="btn btn-secondary">{{ t("Agregar","Add","加入") }}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="no-results">{{ t("Sin ítems disponibles。","No available items。","目前沒有項目。") }}</p>
+  {% endif %}
+</section>
+{% endblock %}
