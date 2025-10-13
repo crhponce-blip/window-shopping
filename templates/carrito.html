@@ -3,8 +3,8 @@
 <section class="carrito-container glass-card fade-in">
   <h2 class="title-gradient">🛍️ {{ t("Tu Carrito","Your Cart","你的購物車") }}</h2>
 
-  {% if not carrito or carrito|length == 0 %}
-    <p class="no-results">{{ t("Tu carrito está vacío.","Your cart is empty.","你的購物車是空的。") }}</p>
+  {% if not cart or cart|length == 0 %}
+    <p class="no-results">{{ t("Tu carrito está vacío。","Your cart is empty。","你的購物車是空的。") }}</p>
   {% else %}
     <table class="carrito-table mt-3">
       <thead>
@@ -17,14 +17,14 @@
         </tr>
       </thead>
       <tbody>
-        {% for item in carrito %}
+        {% for item in cart %}
         <tr>
           <td>{{ item.empresa }}</td>
           <td>{{ item.rol }}</td>
           <td>{{ item.descripcion }}</td>
           <td>{{ item.tipo }}</td>
           <td>
-            <form method="post" action="{{ url_for('eliminar_carrito', index=loop.index0) }}">
+            <form method="post" action="{{ url_for('carrito_eliminar', index=loop.index0) }}">
               <button type="submit" class="btn btn-danger">🗑️ {{ t("Eliminar","Remove","刪除") }}</button>
             </form>
           </td>
@@ -34,11 +34,11 @@
     </table>
 
     <div class="carrito-acciones mt-3">
-      <form method="post" action="{{ url_for('vaciar_carrito') }}">
+      <form method="post" action="{{ url_for('carrito_vaciar') }}">
         <button type="submit" class="btn btn-warning">⚠️ {{ t("Vaciar Carrito","Empty Cart","清空購物車") }}</button>
       </form>
 
-      <form method="post" action="{{ url_for('confirmar_carrito') }}">
+      <form method="post" action="{{ url_for('carrito_confirmar') }}">
         <button type="submit" class="btn btn-success">✅ {{ t("Confirmar Pedido","Confirm Order","確認訂單") }}</button>
       </form>
     </div>
