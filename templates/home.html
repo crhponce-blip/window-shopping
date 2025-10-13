@@ -1,16 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="hero glass-card fade-in">
-  <h1 class="title-gradient">{{ t("Bienvenido a Window Shopping","Welcome to Window Shopping","歡迎來到 Window Shopping") }}</h1>
-  <p>{{ t("Conectamos productores chilenos con compradores internacionales","Connecting Chilean producers with international buyers","連接智利生產商與國際買家") }}</p>
-
+<section class="hero fade-in">
+  <h1>{{ t("Bienvenido a Window Shopping") }}</h1>
+  <p>{{ t("Conectamos productores chilenos con compradores internacionales") }}</p>
   <div class="hero-buttons">
-    {% if 'user' not in session %}
-      <a href="{{ url_for('register_router') }}" class="btn btn-primary">{{ t("Comienza ahora","Start now","立即開始") }}</a>
-      <a href="{{ url_for('login') }}" class="btn btn-light">{{ t("Iniciar sesión","Login","登入") }}</a>
-    {% else %}
-      <a href="{{ url_for('dashboard') }}" class="btn btn-primary">{{ t("Ir al Panel","Go to Dashboard","前往主頁") }}</a>
-    {% endif %}
+    <a href="{{ url_for('register_router') }}" class="btn btn-primary">{{ t("Comienza ahora") }}</a>
+    <a href="{{ url_for('servicios') }}" class="btn btn-secondary">{{ t("Explora nuestros servicios") }}</a>
   </div>
 </section>
 {% endblock %}
