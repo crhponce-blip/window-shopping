@@ -1,20 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="ayuda-container glass-card fade-in">
-  <h2 class="title-gradient">{{ t("Centro de Ayuda","Help Center","幫助中心") }}</h2>
-  <p>{{ t("Encuentra aquí las respuestas a las preguntas más frecuentes。","Find answers to frequently asked questions here。","在這裡查找常見問題的答案。") }}</p>
+<section class="ayuda fade-in">
+  <h2>{{ t("Centro de Ayuda") }}</h2>
+  <p>{{ t("Aquí encontrarás información sobre cómo usar la plataforma Window Shopping.") }}</p>
 
-  <h3 class="mt-3">{{ t("Preguntas Frecuentes","Frequently Asked Questions","常見問題") }}</h3>
-  <ul class="faq-list">
-    <li>{{ t("¿Cómo registro mi empresa?","How do I register my company?","如何註冊我的公司？") }}</li>
-    <li>{{ t("¿Puedo ofrecer servicios y productos a la vez?","Can I offer both services and products?","我可以同時提供服務和產品嗎？") }}</li>
-    <li>{{ t("¿Cómo contacto a un comprador extranjero?","How do I contact a foreign buyer?","如何聯繫外國買家？") }}</li>
-    <li>{{ t("¿Qué significa el perfil mixto?","What does the mixed profile mean?","什麼是混合型帳戶？") }}</li>
+  <ul>
+    <li>{{ t("Para comprar, agrega productos o servicios al carrito y confirma tu pedido.") }}</li>
+    <li>{{ t("Los proveedores pueden publicar ofertas y servicios desde su panel.") }}</li>
+    <li>{{ t("Los clientes extranjeros solo pueden ver exportadores.") }}</li>
   </ul>
 
-  <p class="mt-3">
-    {{ t("Si necesitas más ayuda, contáctanos a:","If you need more help, contact us at:","如需更多幫助，請聯繫我們：") }}
-    <a href="mailto:soporte@windowshopping.cl" class="link-contrast">soporte@windowshopping.cl</a>
-  </p>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">{{ t("Volver al Panel") }}</a>
 </section>
 {% endblock %}
