@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
 <section class="perfil-container glass-card fade-in">
   <h2 class="title-gradient">{{ t("Tu Perfil", "Your Profile", "您的個人資料") }}</h2>
 
@@ -18,5 +17,4 @@
     <a href="{{ url_for('logout') }}" class="btn btn-secondary">🚪 {{ t("Cerrar Sesión","Log out","登出") }}</a>
   </div>
 </section>
-
 {% endblock %}
