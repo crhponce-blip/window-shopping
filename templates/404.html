@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="page-msg glass-card fade-in text-center">
-  <h2 class="title-gradient">❌ {{ t("Página no encontrada","Page not found","找不到頁面") }}</h2>
-  <p class="mt-2">{{ t("La página que buscas no existe o ha sido movida。","The page you are looking for does not exist or has been moved。","您要尋找的頁面不存在或已被移動。") }}</p>
-  <a href="{{ url_for('home') }}" class="btn btn-primary mt-3">{{ t("Volver al inicio","Back to home","返回主頁") }}</a>
+<section class="error-page glass-card fade-in">
+  <h1 class="error-code">404</h1>
+  <h2 class="title-gradient">{{ t("Página no encontrada","Page not found","找不到頁面") }}</h2>
+  <p>{{ t("La página que buscas no existe o fue movida。","The page you’re looking for doesn’t exist or has been moved。","您要找的頁面不存在或已被移動。") }}</p>
+  <a href="{{ url_for('home') }}" class="btn btn-primary mt-3">🏠 {{ t("Volver al inicio","Back to Home","返回主頁") }}</a>
 </section>
 {% endblock %}
