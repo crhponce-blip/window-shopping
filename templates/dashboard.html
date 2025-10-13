@@ -1,22 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="dashboard glass-card fade-in">
-  <h2 class="title-gradient">{{ t("Panel de Usuario","User Dashboard","用戶主頁") }}</h2>
-  <p>{{ t("Bienvenido","Welcome","歡迎") }}, <strong>{{ session['user']['empresa'] }}</strong></p>
+<section class="dashboard fade-in">
+  <h2>{{ t("Panel de Usuario") }}</h2>
+  <p>{{ t("Bienvenido") }} <strong>{{ user.empresa }}</strong> ({{ user.rol }} - {{ user.tipo }})</p>
 
-  <div class="dashboard-actions">
-    {% if session['user']['tipo'] == 'compras' %}
-      <a href="{{ url_for('compras') }}" class="btn btn-primary">{{ t("Explorar Ofertas","Browse Offers","瀏覽商品") }}</a>
-    {% elif session['user']['tipo'] == 'servicios' %}
-      <a href="{{ url_for('servicios') }}" class="btn btn-primary">{{ t("Explorar Servicios","Explore Services","探索服務") }}</a>
-    {% elif session['user']['tipo'] == 'compraventa' %}
-      <a href="{{ url_for('ventas') }}" class="btn btn-primary">{{ t("Ver Demandas","View Demands","查看需求") }}</a>
-    {% elif session['user']['tipo'] == 'mixto' %}
-      <a href="{{ url_for('compras') }}" class="btn btn-primary">{{ t("Explorar Ofertas","Browse Offers","瀏覽商品") }}</a>
-      <a href="{{ url_for('ventas') }}" class="btn btn-secondary">{{ t("Ver Demandas","View Demands","查看需求") }}</a>
-    {% endif %}
+  <div class="publicaciones-grid">
+    {% for pub in publicaciones %}
+      <div class="card">
+        <h3>{{ pub.producto }}</h3>
+        <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
+        <p><strong>{{ t("Tipo") }}:</strong> {{ pub.tipo }}</p>
+        <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
+        <p>{{ pub.descripcion }}</p>
+
+        <form action="{{ url_for('carrito_agregar', pub_id=pub.id) }}" method="get">
+          <button type="submit" class="btn btn-primary">🛒 {{ t("Agregar al carrito") }}</button>
+        </form>
+
+        <form action="{{ url_for('ocultar_publicacion', pub_id=pub.id) }}" method="post">
+          <button type="submit" class="btn btn-secondary">🙈 {{ t("Ocultar") }}</button>
+        </form>
+      </div>
+    {% else %}
+      <p>{{ t("No hay publicaciones visibles para tu rol") }}</p>
+    {% endfor %}
   </div>
 
-  <a href="{{ url_for('perfil') }}" class="btn btn-light mt-3">{{ t("Ver Perfil","View Profile","查看個人資料") }}</a>
+  <form action="{{ url_for('restablecer_ocultos') }}" method="post" style="margin-top:20px;">
+    <button type="submit" class="btn btn-secondary">🔁 {{ t("Restaurar ocultos") }}</button>
+  </form>
 </section>
 {% endblock %}
