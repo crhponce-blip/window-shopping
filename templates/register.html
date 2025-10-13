@@ -23,6 +23,7 @@
       <div class="form-group">
         <label for="tipo">{{ t("Selecciona tu tipo de perfil","Select your profile type","選擇您的個人資料類型") }}</label>
         <select id="tipo" name="tipo" required>
+          <option value="">-- {{ t("Selecciona","Select","選擇") }} --</option>
           {% for tval in tipos %}
             <option value="{{ tval }}">{{ t(tval.capitalize()) }}</option>
           {% endfor %}
@@ -32,9 +33,7 @@
       <div class="form-group">
         <label for="rol">{{ t("Selecciona tu rol","Select your role","選擇您的角色") }}</label>
         <select id="rol" name="rol" required>
-          {% for r in roles %}
-            <option value="{{ r }}">{{ r }}</option>
-          {% endfor %}
+          <option value="">-- {{ t("Selecciona un tipo primero","Select a type first","請先選擇類型") }} --</option>
         </select>
       </div>
 
@@ -47,4 +46,37 @@
     </form>
   </div>
 </section>
+
+<!-- ✅ SCRIPT dinámico de roles -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tipoSelect = document.getElementById("tipo");
+  const rolSelect = document.getElementById("rol");
+
+  tipoSelect.addEventListener("change", async () => {
+    const tipo = tipoSelect.value;
+    rolSelect.innerHTML = "<option>Cargando...</option>";
+
+    try {
+      const response = await fetch(`/api/roles/${tipo}`);
+      const data = await response.json();
+      rolSelect.innerHTML = "";
+
+      if (data.roles && data.roles.length > 0) {
+        data.roles.forEach(r => {
+          const opt = document.createElement("option");
+          opt.value = r;
+          opt.textContent = r;
+          rolSelect.appendChild(opt);
+        });
+      } else {
+        rolSelect.innerHTML = "<option value=''>Sin roles disponibles</option>";
+      }
+    } catch (error) {
+      rolSelect.innerHTML = "<option>Error al cargar roles</option>";
+      console.error("❌ Error al cargar roles:", error);
+    }
+  });
+});
+</script>
 {% endblock %}
