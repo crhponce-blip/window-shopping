@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="ventas fade-in">
+  <h2>{{ t("Demandas y Solicitudes") }}</h2>
+  <div class="publicaciones-grid">
+    {% for pub in publicaciones %}
+      <div class="card">
+        <h3>{{ pub.producto }}</h3>
+        <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
+        <p>{{ pub.descripcion }}</p>
+        <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
+      </div>
+    {% else %}
+      <p>{{ t("No hay demandas disponibles.") }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
