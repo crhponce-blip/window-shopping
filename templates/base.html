@@ -1,55 +1,50 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('lang','es') }}">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌐 Window Shopping</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ titulo or "Window Shopping" }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 <body>
-  <header class="navbar glass-card">
-    <div class="logo">🪟 <b>WS</b></div>
+  <header class="navbar">
+    <div class="logo">WS</div>
     <nav>
-      <a href="{{ url_for('home') }}">{{ t("Inicio","Home","主頁") }}</a>
-      <a href="{{ url_for('compras') }}">{{ t("Empresas","Companies","公司") }}</a>
-      <a href="{{ url_for('servicios') }}">{{ t("Servicios","Services","服務") }}</a>
-      <a href="{{ url_for('carrito') }}">{{ t("Carrito","Cart","購物車") }}</a>
-
-      {% if 'user' in session %}
-        <a href="{{ url_for('dashboard') }}">{{ t("Panel de Usuario","User Dashboard","用戶主頁") }}</a>
-        <a href="{{ url_for('perfil') }}">{{ t("Perfil","Profile","個人資料") }}</a>
-        <a href="{{ url_for('logout') }}">{{ t("Salir","Logout","登出") }}</a>
+      <a href="{{ url_for('home') }}">{{ t("Inicio") }}</a>
+      <a href="{{ url_for('clientes') }}">{{ t("Empresas") }}</a>
+      <a href="{{ url_for('servicios') }}">{{ t("Servicios") }}</a>
+      {% if session.get("user") %}
+        <a href="{{ url_for('carrito') }}">{{ t("Carrito") }}</a>
+        <a href="{{ url_for('perfil') }}">{{ t("Perfil") }}</a>
+        <a href="{{ url_for('logout') }}">{{ t("Salir") }}</a>
       {% else %}
-        <a href="{{ url_for('login') }}">{{ t("Iniciar sesión","Login","登入") }}</a>
-        <a href="{{ url_for('register_router') }}">{{ t("Registrarse","Register","註冊") }}</a>
+        <a href="{{ url_for('login') }}">{{ t("Iniciar sesión") }}</a>
+        <a href="{{ url_for('register_router') }}">{{ t("Registrarse") }}</a>
       {% endif %}
     </nav>
-
     <form method="post" action="{{ url_for('set_lang') }}" class="lang-form">
       <select name="lang" onchange="this.form.submit()">
-        <option value="es" {% if session.get('lang','es')=='es' %}selected{% endif %}>🇨🇱 ES</option>
-        <option value="en" {% if session.get('lang')=='en' %}selected{% endif %}>🇺🇸 EN</option>
-        <option value="zh" {% if session.get('lang')=='zh' %}selected{% endif %}>🇨🇳 中文</option>
+        <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>🇪🇸</option>
+        <option value="en" {% if session.get('lang') == 'en' %}selected{% endif %}>🇬🇧</option>
+        <option value="zh" {% if session.get('lang') == 'zh' %}selected{% endif %}>🇨🇳</option>
       </select>
     </form>
   </header>
 
-  <main class="main-content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-container">
-          {% for category, msg in messages %}
-            <div class="flash {{ category }}">{{ msg }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+  <main>
+    <div class="flash-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+    </div>
+
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="footer glass-card">
-    <p>© 2025 Window Shopping — {{ t("Conectamos productores chilenos con compradores internacionales","Connecting Chilean producers with international buyers","連接智利生產商與國際買家") }}</p>
+  <footer class="footer">
+    © 2025 Window Shopping — All Rights Reserved
   </footer>
 </body>
 </html>
