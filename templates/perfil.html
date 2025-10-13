@@ -1,20 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="perfil-container glass-card fade-in">
-  <h2 class="title-gradient">{{ t("Tu Perfil", "Your Profile", "您的個人資料") }}</h2>
+<section class="perfil glass-card fade-in">
+  <h2 class="title-gradient">👤 {{ t("Perfil de Usuario","User Profile","用戶資料") }}</h2>
 
-  <p><strong>{{ t("Empresa:", "Company:", "公司：") }}</strong> {{ user.empresa }}</p>
-  <p><strong>{{ t("Correo:", "Email:", "電子郵件：") }}</strong> {{ user.email }}</p>
-  <p><strong>{{ t("Rol:", "Role:", "角色：") }}</strong> {{ user.rol }}</p>
-  <p><strong>{{ t("Tipo de Cuenta:", "Account Type:", "帳戶類型：") }}</strong> {{ user.tipo }}</p>
-
-  {% if user.descripcion %}
-    <p><strong>{{ t("Descripción:", "Description:", "描述：") }}</strong> {{ user.descripcion }}</p>
+  {% if session.get('user') %}
+    <ul class="perfil-list">
+      <li><strong>Email:</strong> {{ session['user']['email'] }}</li>
+      <li><strong>{{ t("Empresa","Company","公司") }}:</strong> {{ session['user']['empresa'] }}</li>
+      <li><strong>{{ t("Rol","Role","角色") }}:</strong> {{ session['user']['rol'] }}</li>
+      <li><strong>{{ t("Tipo","Type","類型") }}:</strong> {{ session['user']['tipo'] }}</li>
+      <li><strong>{{ t("País","Country","國家") }}:</strong> {{ session['user']['pais'] }}</li>
+    </ul>
+  {% else %}
+    <p>{{ t("No hay información de perfil disponible。","No profile information available。","目前沒有個人資料。") }}</p>
   {% endif %}
-
-  <div class="mt-3" style="display:flex; gap:10px; flex-wrap:wrap;">
-    <a href="{{ url_for('editar_perfil') }}" class="btn btn-primary">⚙️ {{ t("Editar Perfil","Edit Profile","編輯個人資料") }}</a>
-    <a href="{{ url_for('logout') }}" class="btn btn-secondary">🚪 {{ t("Cerrar Sesión","Log out","登出") }}</a>
-  </div>
 </section>
 {% endblock %}
