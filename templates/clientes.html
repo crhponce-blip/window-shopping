@@ -1,25 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="clientes-section glass-card fade-in">
-  <h2 class="title-gradient">{{ t("Empresas Registradas","Registered Companies","已註冊的公司") }}</h2>
+<section class="clientes">
+  <h2>{{ t("Empresas Registradas") }}</h2>
 
-  {% if clientes %}
-    <ul class="clientes-list">
-      {% for c in clientes %}
-      <li class="cliente-card">
-        <div class="cliente-info">
-          <h3>{{ c.empresa }}</h3>
-          <p><strong>{{ t("Rol","Role","角色") }}:</strong> {{ c.rol }}</p>
-          <p><strong>{{ t("Descripción","Description","描述") }}:</strong> {{ c.descripcion or t("Sin descripción","No description","無描述") }}</p>
-        </div>
-        <a href="{{ url_for('cliente_detalle', username=c.email) }}" class="btn btn-primary">
-          🔍 {{ t("Ver detalles","View details","查看詳情") }}
-        </a>
-      </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="no-results">{{ t("No hay empresas registradas actualmente。","No companies registered yet。","目前沒有註冊公司。") }}</p>
-  {% endif %}
+  <div class="clientes-grid">
+    {% for c in clientes %}
+      <div class="card">
+        <h3>{{ c.empresa }}</h3>
+        <p><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
+        <p><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
+        <p>{{ c.descripcion }}</p>
+        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">{{ t("Ver Detalle") }}</a>
+      </div>
+    {% else %}
+      <p>{{ t("No hay empresas registradas para mostrar.") }}</p>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}
