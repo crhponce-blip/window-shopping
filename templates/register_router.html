@@ -6,9 +6,9 @@
     <p class="mt-2">{{ t("Selecciona el tipo de cuenta que deseas crear:","Select the type of account you want to create:","選擇您要建立的帳戶類型：") }}</p>
 
     <div class="router-buttons mt-4">
-      <a href="{{ url_for('register', tipo='nacional') }}" class="btn btn-primary large glow">🇨🇱 {{ t("Nacional","National","本地帳戶") }}</a>
-      <a href="{{ url_for('register', tipo='extranjero') }}" class="btn btn-secondary large glow">🌍 {{ t("Cliente Extranjero","Foreign Client","外國客戶") }}</a>
-      <a href="{{ url_for('register', tipo='servicio') }}" class="btn btn-accent large glow">🧰 {{ t("Servicios","Services","服務提供者") }}</a>
+      <a href="{{ url_for('register', tipo='compraventa') }}" class="btn btn-primary large glow">🇨🇱 {{ t("Nacional","National","本地帳戶") }}</a>
+      <a href="{{ url_for('register', tipo='compras') }}" class="btn btn-secondary large glow">🌍 {{ t("Cliente Extranjero","Foreign Client","外國客戶") }}</a>
+      <a href="{{ url_for('register', tipo='servicios') }}" class="btn btn-accent large glow">🧰 {{ t("Servicios","Services","服務提供者") }}</a>
       <a href="{{ url_for('register', tipo='mixto') }}" class="btn btn-gradient large glow">🔄 {{ t("Mixto","Mixed","混合類型") }}</a>
     </div>
 
