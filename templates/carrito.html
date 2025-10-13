@@ -1,39 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="carrito glass-card fade-in">
-  <h2 class="title-gradient">🛍️ {{ t("Tu Carrito","Your Cart","購物車") }}</h2>
+<section class="carrito fade-in">
+  <h2>{{ t("Carrito de Compras") }}</h2>
 
-  {% if not carrito or carrito|length == 0 %}
-    <p class="no-results">{{ t("El carrito está vacío","The cart is empty","購物車是空的") }}</p>
-  {% else %}
+  {% if cart %}
     <table class="cart-table">
-      <thead>
+      <tr>
+        <th>#</th>
+        <th>{{ t("Producto / Servicio") }}</th>
+        <th>{{ t("Empresa") }}</th>
+        <th>{{ t("Acciones") }}</th>
+      </tr>
+      {% for item in cart %}
         <tr>
-          <th>{{ t("Empresa","Company","公司") }}</th>
-          <th>{{ t("Rol","Role","角色") }}</th>
-          <th>{{ t("País","Country","國家") }}</th>
-          <th>{{ t("Acciones","Actions","操作") }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in carrito %}
-        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ item.descripcion or item.producto }}</td>
           <td>{{ item.empresa }}</td>
-          <td>{{ item.rol }}</td>
-          <td>{{ item.pais }}</td>
           <td>
-            <form method="post" action="{{ url_for('carrito_eliminar', pub_id=item.id) }}">
-              <button type="submit" class="btn btn-danger">🗑️ {{ t("Eliminar","Remove","刪除") }}</button>
+            <form action="{{ url_for('carrito_eliminar', index=loop.index0) }}" method="post">
+              <button type="submit" class="btn btn-danger">🗑️ {{ t("Eliminar") }}</button>
             </form>
           </td>
         </tr>
-        {% endfor %}
-      </tbody>
+      {% endfor %}
     </table>
 
-    <form method="post" action="{{ url_for('carrito_vaciar') }}">
-      <button type="submit" class="btn btn-warning full-width mt-3">🧹 {{ t("Vaciar Carrito","Clear Cart","清空購物車") }}</button>
+    <form action="{{ url_for('carrito_vaciar') }}" method="post" style="margin-top:10px;">
+      <button type="submit" class="btn btn-secondary">🧹 {{ t("Vaciar Carrito") }}</button>
     </form>
+
+    <form action="{{ url_for('carrito_confirmar') }}" method="post" style="margin-top:10px;">
+      <button type="submit" class="btn btn-primary">✅ {{ t("Confirmar Pedido") }}</button>
+    </form>
+  {% else %}
+    <p>{{ t("Tu carrito está vacío.") }}</p>
   {% endif %}
 </section>
 {% endblock %}
