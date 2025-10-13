@@ -2,13 +2,17 @@
 {% block content %}
 <section class="detalle-container glass-card fade-in">
   <div class="detalle-card">
-    <h2>{{ producto.nombre }}</h2>
+    <h2 class="title-gradient">{{ producto.nombre }}</h2>
+
     <p><strong>{{ t("Categoría", "Category", "類別") }}:</strong> {{ producto.categoria }}</p>
 
-    <img src="{{ producto.imagen or url_for('static', filename='images/default_product.png') }}" alt="{{ producto.nombre }}" class="detalle-img">
+    <img src="{{ producto.imagen or url_for('static', filename='images/default_product.png') }}"
+         alt="{{ producto.nombre }}" class="detalle-img" style="max-width:100%;border-radius:10px;">
+
     <p>{{ producto.descripcion }}</p>
 
     <p><strong>{{ t("Precio", "Price", "價格") }}:</strong> ${{ producto.precio }}</p>
+
     <p><strong>{{ t("Disponibilidad", "Availability", "可用性") }}:</strong>
       {% if producto.stock > 0 %}
         {{ t("En stock", "In stock", "有庫存") }}
@@ -16,19 +20,20 @@
         {{ t("Agotado", "Out of stock", "缺貨") }}
       {% endif %}
     </p>
+
     <p><strong>{{ t("Vendedor", "Seller", "賣家") }}:</strong>
       <a href="{{ url_for('perfil_publico', id=producto.vendedor_id) }}" class="link">{{ producto.vendedor_nombre }}</a>
     </p>
 
     <div class="detalle-actions mt-3">
-      <form action="{{ url_for('cart_add') }}" method="POST" class="inline-form">
-        <input type="hidden" name="producto_id" value="{{ producto.id }}">
-        <button type="submit" class="btn success">{{ t("Agregar al carrito", "Add to Cart", "加入購物車") }}</button>
+      <form action="{{ url_for('carrito_agregar_directo') }}" method="POST" class="inline-form">
+        <input type="hidden" name="empresa" value="{{ producto.vendedor_nombre }}">
+        <input type="hidden" name="descripcion" value="{{ producto.nombre }}">
+        <button type="submit" class="btn btn-success">🛒 {{ t("Agregar al carrito", "Add to Cart", "加入購物車") }}</button>
       </form>
 
-      <form action="{{ url_for('hide_from_view') }}" method="POST" class="inline-form">
-        <input type="hidden" name="item_id" value="{{ producto.id }}">
-        <button type="submit" class="btn secondary">{{ t("Eliminar de vista", "Remove from view", "從視圖中刪除") }}</button>
+      <form action="{{ url_for('ocultar_publicacion', pub_id=producto.id) }}" method="POST" class="inline-form">
+        <button type="submit" class="btn btn-secondary">🙈 {{ t("Eliminar de vista", "Remove from view", "從視圖中刪除") }}</button>
       </form>
     </div>
 
@@ -36,10 +41,10 @@
       {% if not cooldown_activo %}
         <form method="POST" action="{{ url_for('enviar_mensaje', id=producto.vendedor_id) }}">
           <textarea name="mensaje" placeholder="{{ t('Escribe tu mensaje al vendedor...', 'Write your message to the seller...', '寫信給賣家...') }}" required></textarea>
-          <button type="submit" class="btn">{{ t("Enviar Mensaje", "Send Message", "發送訊息") }}</button>
+          <button type="submit" class="btn btn-primary">{{ t("Enviar Mensaje", "Send Message", "發送訊息") }}</button>
         </form>
       {% else %}
-        <div class="alert warning">
+        <div class="flash warning">
           {{ t("Solo puedes enviar un mensaje cada 3 días ⏳", "You can only send a message every 3 days ⏳", "您每3天只能發送一次訊息 ⏳") }}
         </div>
       {% endif %}
