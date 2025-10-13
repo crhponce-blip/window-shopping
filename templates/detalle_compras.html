@@ -4,13 +4,14 @@
   <h2 class="title-gradient">🛒 {{ t("Ofertas Disponibles","Available Offers","可用的報價") }}</h2>
 
   <form method="get" action="{{ url_for('compras') }}" class="search-bar mt-3">
-    <input type="text" name="q" placeholder="{{ t('Buscar por empresa o producto…','Search by company or product…','按公司或產品搜尋…') }}"
+    <input type="text" name="q"
+           placeholder="{{ t('Buscar por empresa o producto…','Search by company or product…','按公司或產品搜尋…') }}"
            value="{{ request.args.get('q','') }}">
     <button type="submit" class="btn btn-primary">{{ t("Buscar","Search","搜尋") }}</button>
   </form>
 
   {% if not data %}
-    <p class="no-results">{{ t("No hay ofertas disponibles para tu perfil.","No offers available for your profile.","目前沒有可用的報價。") }}</p>
+    <p class="no-results">{{ t("No hay ofertas disponibles para tu perfil。","No offers available for your profile。","目前沒有可用的報價。") }}</p>
   {% else %}
     <div class="detalle-list">
       {% for e in data %}
@@ -20,14 +21,16 @@
         <p><strong>{{ t("Descripción:","Description:","描述：") }}</strong> {{ e.descripcion }}</p>
 
         {% if e.items %}
-          <ul>
-            {% for item in e.items if item.tipo == "oferta" %}
-              <li>{{ item.nombre }} — {{ item.detalle }}</li>
-            {% endfor %}
-          </ul>
+        <ul>
+          {% for item in e.items if item.tipo == "oferta" %}
+          <li>{{ item.nombre }} — {{ item.detalle }}</li>
+          {% endfor %}
+        </ul>
         {% endif %}
 
-        <form method="post" action="{{ url_for('agregar_carrito', username=e.username) }}">
+        <form method="post" action="{{ url_for('carrito_agregar_directo') }}">
+          <input type="hidden" name="empresa" value="{{ e.empresa }}">
+          <input type="hidden" name="descripcion" value="{{ e.descripcion }}">
           <button type="submit" class="btn btn-secondary">🛍️ {{ t("Agregar al carrito","Add to cart","加入購物車") }}</button>
         </form>
       </div>
