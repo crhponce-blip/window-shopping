@@ -1,25 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="dashboard-container fade-in">
-  <h2 class="title-gradient">{{ t("Panel Principal","Main Dashboard","主面板") }}</h2>
+<section class="dashboard glass-card fade-in">
+  <h2 class="title-gradient">{{ t("Panel de Usuario","User Dashboard","用戶主頁") }}</h2>
+  <p>{{ t("Bienvenido","Welcome","歡迎") }}, <strong>{{ session['user']['empresa'] }}</strong></p>
 
-  <div class="user-info glass-card mt-2">
-    <p><strong>{{ t("Empresa:","Company:","公司：") }}</strong> {{ user.empresa }}</p>
-    <p><strong>{{ t("Correo:","Email:","電子郵件：") }}</strong> {{ user.email }}</p>
-    <p><strong>{{ t("Rol:","Role:","角色：") }}</strong> {{ user.rol }}</p>
-    <p><strong>{{ t("Tipo de Cuenta:","Account Type:","帳戶類型：") }}</strong> {{ user.tipo }}</p>
-  </div>
-
-  <div class="dashboard-actions mt-3" style="display:flex;gap:12px;flex-wrap:wrap;">
-    {% if user.tipo == "compras" %}
-      <a href="{{ url_for('compras') }}" class="btn btn-primary">🛒 {{ t("Explorar Ofertas","Browse Offers","瀏覽商品") }}</a>
-    {% elif user.tipo == "servicios" %}
-      <a href="{{ url_for('servicios') }}" class="btn btn-secondary">🧰 {{ t("Ver Servicios","View Services","查看服務") }}</a>
-    {% elif user.tipo in ("compraventa","mixto") %}
-      <a href="{{ url_for('ventas') }}" class="btn btn-primary">💰 {{ t("Ver Demandas","View Demands","查看需求") }}</a>
-      <a href="{{ url_for('compras') }}" class="btn btn-secondary">🛒 {{ t("Explorar Ofertas","Browse Offers","瀏覽商品") }}</a>
-      <a href="{{ url_for('servicios') }}" class="btn btn-secondary">🧰 {{ t("Explorar Servicios","Browse Services","探索服務") }}</a>
+  <div class="dashboard-actions">
+    {% if session['user']['tipo'] == 'compras' %}
+      <a href="{{ url_for('compras') }}" class="btn btn-primary">{{ t("Explorar Ofertas","Browse Offers","瀏覽商品") }}</a>
+    {% elif session['user']['tipo'] == 'servicios' %}
+      <a href="{{ url_for('servicios') }}" class="btn btn-primary">{{ t("Explorar Servicios","Explore Services","探索服務") }}</a>
+    {% elif session['user']['tipo'] == 'compraventa' %}
+      <a href="{{ url_for('ventas') }}" class="btn btn-primary">{{ t("Ver Demandas","View Demands","查看需求") }}</a>
+    {% elif session['user']['tipo'] == 'mixto' %}
+      <a href="{{ url_for('compras') }}" class="btn btn-primary">{{ t("Explorar Ofertas","Browse Offers","瀏覽商品") }}</a>
+      <a href="{{ url_for('ventas') }}" class="btn btn-secondary">{{ t("Ver Demandas","View Demands","查看需求") }}</a>
     {% endif %}
   </div>
+
+  <a href="{{ url_for('perfil') }}" class="btn btn-light mt-3">{{ t("Ver Perfil","View Profile","查看個人資料") }}</a>
 </section>
 {% endblock %}
