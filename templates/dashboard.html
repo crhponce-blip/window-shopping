@@ -21,36 +21,5 @@
       <a href="{{ url_for('servicios') }}" class="btn btn-secondary">🧰 {{ t("Explorar Servicios","Browse Services","探索服務") }}</a>
     {% endif %}
   </div>
-
-  {% if publicaciones %}
-    <div class="glass-card mt-2">
-      <h3>{{ t("Sugerencias para ti","Suggestions for you","為你推薦") }}</h3>
-      <ul class="detalle-list">
-        {% for p in publicaciones %}
-        <li class="detalle-card">
-          <h4>{{ p.empresa }}</h4>
-          <p><strong>{{ t("Tipo","Type","類型") }}:</strong> {{ p.tipo }}</p>
-          <p><strong>{{ t("Rol","Role","角色") }}:</strong> {{ p.rol }}</p>
-          {% if p.producto %}<p><strong>{{ t("Producto","Product","產品") }}:</strong> {{ p.producto }}</p>{% endif %}
-          {% if p.precio %}<p><strong>{{ t("Precio","Price","價格") }}:</strong> {{ p.precio }}</p>{% endif %}
-          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-            <a href="{{ url_for('carrito_agregar', pub_id=p.id) }}" class="btn btn-secondary">🛍️ {{ t("Agregar al carrito","Add to Cart","加入購物車") }}</a>
-            <form method="post" action="{{ url_for('ocultar_publicacion', pub_id=p.id) }}">
-              <button type="submit" class="btn btn-secondary">🙈 {{ t("Eliminar de mi vista","Hide from my view","從我的視圖隱藏") }}</button>
-            </form>
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-
-      <form method="post" action="{{ url_for('restablecer_ocultos') }}" class="mt-2">
-        <button type="submit" class="btn btn-warning">♻️ {{ t("Restablecer ocultos","Restore hidden","恢復隱藏項目") }}</button>
-      </form>
-    </div>
-  {% else %}
-    <div class="glass-card mt-2">
-      <p class="no-results">{{ t("Aún no hay publicaciones para tu perfil。","There are no listings for your profile yet。","目前沒有適合你個人資料的貼文。") }}</p>
-    </div>
-  {% endif %}
 </section>
 {% endblock %}
