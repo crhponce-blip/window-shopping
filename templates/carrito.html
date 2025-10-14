@@ -1,39 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="carrito fade-in">
-  <h2>{{ t("Carrito de Compras") }}</h2>
+  <h2 class="title-gradient">🛒 {{ t("Carrito de Compras") }}</h2>
 
-  {% if cart %}
-    <table class="cart-table">
+  {% if cart and cart|length > 0 %}
+    <table class="cart-table glass-card">
       <tr>
         <th>#</th>
         <th>{{ t("Producto / Servicio") }}</th>
         <th>{{ t("Empresa") }}</th>
+        <th>{{ t("Precio") }}</th>
         <th>{{ t("Acciones") }}</th>
       </tr>
+
       {% for item in cart %}
-        <tr>
-          <td>{{ loop.index }}</td>
-          <td>{{ item.descripcion or item.producto }}</td>
-          <td>{{ item.empresa }}</td>
-          <td>
-            <form action="{{ url_for('carrito_eliminar', index=loop.index0) }}" method="post">
-              <button type="submit" class="btn btn-danger">🗑️ {{ t("Eliminar") }}</button>
-            </form>
-          </td>
-        </tr>
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.producto or item.descripcion }}</td>
+        <td>{{ item.empresa }}</td>
+        <td>{{ item.precio }}</td>
+        <td>
+          <form action="{{ url_for('carrito_eliminar', index=loop.index0) }}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger">🗑️ {{ t("Eliminar") }}</button>
+          </form>
+        </td>
+      </tr>
       {% endfor %}
     </table>
 
-    <form action="{{ url_for('carrito_vaciar') }}" method="post" style="margin-top:10px;">
-      <button type="submit" class="btn btn-secondary">🧹 {{ t("Vaciar Carrito") }}</button>
-    </form>
+    <div class="carrito-actions" style="margin-top:20px;">
+      <form action="{{ url_for('carrito_vaciar') }}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-secondary">🧹 {{ t("Vaciar Carrito") }}</button>
+      </form>
 
-    <form action="{{ url_for('carrito_confirmar') }}" method="post" style="margin-top:10px;">
-      <button type="submit" class="btn btn-primary">✅ {{ t("Confirmar Pedido") }}</button>
-    </form>
+      <form action="{{ url_for('dashboard') }}" method="get" style="display:inline;">
+        <button type="submit" class="btn btn-primary">✅ {{ t("Confirmar Pedido") }}</button>
+      </form>
+    </div>
+
   {% else %}
     <p>{{ t("Tu carrito está vacío.") }}</p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-light">← {{ t("Volver al Panel") }}</a>
   {% endif %}
 </section>
 {% endblock %}
