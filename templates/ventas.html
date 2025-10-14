@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="ventas fade-in">
-  <h2>{{ t("Demandas y Solicitudes") }}</h2>
-  <div class="publicaciones-grid">
+  <h2 class="title-gradient">{{ t("Demandas y Solicitudes") }}</h2>
+  <div class="detalle-list">
     {% for pub in publicaciones %}
-      <div class="card">
+      <div class="detalle-card">
         <h3>{{ pub.producto }}</h3>
         <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
         <p>{{ pub.descripcion }}</p>
