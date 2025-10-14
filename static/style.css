@@ -1,7 +1,8 @@
 /* =========================================================
-   🌐 WINDOW SHOPPING STYLE v3.3
+   🌐 WINDOW SHOPPING STYLE v3.4 — "Neon Glass"
    Autor: Christopher Ponce & GPT-5
-   Tema: Futuristic Glassmorphism + Gradient Motion
+   Tema: Futuristic Glassmorphism + Neon + Gradient Motion
+   Compatible con app.py v3.3 y templates WS 2025
    ========================================================= */
 
 /* --- RESET & BASE -------------------------------------- */
@@ -12,88 +13,78 @@
   font-family: "Poppins", "Segoe UI", sans-serif;
 }
 
+html, body {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: radial-gradient(circle at top, #111827, #0f172a, #020617);
+  background: radial-gradient(circle at top, #0a0f1c, #0a1123, #020617);
   color: #f9fafb;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  transition: background 0.6s ease;
 }
 
-/* --- GLOBAL UTILS -------------------------------------- */
+/* --- DARK MODE AUTO ------------------------------------ */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: radial-gradient(circle at 25% 25%, #0a0f1c, #111827, #020617);
+  }
+}
+
+/* --- GLOBAL LINKS -------------------------------------- */
 a {
   color: inherit;
   text-decoration: none;
-  transition: 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 a:hover {
   color: #60a5fa;
-  text-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
+  text-shadow: 0 0 15px rgba(96, 165, 250, 0.7);
 }
 
-button {
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: 0.25s ease;
-}
-
-input, select {
+/* --- INPUTS & SELECTS ---------------------------------- */
+input, select, textarea {
   width: 100%;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background: rgba(255, 255, 255, 0.12);
-  color: #f9fafb;
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
   outline: none;
+  backdrop-filter: blur(10px);
+  font-size: 1rem;
 }
 
-input::placeholder {
+input::placeholder, textarea::placeholder {
   color: #94a3b8;
 }
 
-/* --- GLASS CARD ---------------------------------------- */
-.glass-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(12px);
-  padding: 25px;
-  margin: 20px auto;
-  width: 90%;
-  max-width: 950px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.glass-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 45px rgba(59, 130, 246, 0.35);
-}
-
-/* --- HEADER / NAVBAR ----------------------------------- */
+/* --- NAVBAR -------------------------------------------- */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(30, 41, 59, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(30, 41, 59, 0.55);
   padding: 15px 5%;
   position: sticky;
   top: 0;
-  z-index: 999;
-  backdrop-filter: blur(14px);
-  animation: fade-slide 1s ease;
+  z-index: 1000;
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  animation: fade-slide 0.8s ease forwards;
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: #93c5fd;
-  text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  text-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+  letter-spacing: 0.5px;
 }
 
 nav a {
@@ -109,8 +100,8 @@ nav a::after {
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
-  transition: 0.3s;
+  background: linear-gradient(90deg, #60a5fa, #38bdf8, #818cf8);
+  transition: width 0.3s;
 }
 
 nav a:hover::after {
@@ -126,33 +117,29 @@ nav a:hover::after {
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* --- TITLES / GRADIENT TEXT ---------------------------- */
-.title-gradient {
-  font-size: 1.7rem;
+/* --- HERO ---------------------------------------------- */
+.hero {
   text-align: center;
+  padding: 100px 20px 80px 20px;
+  animation: fade-in 1s ease;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
   margin-bottom: 15px;
-  background: linear-gradient(90deg, #60a5fa, #38bdf8, #a5b4fc);
+  background: linear-gradient(90deg, #60a5fa, #a5b4fc, #38bdf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 700;
 }
 
-/* --- HERO SECTION -------------------------------------- */
-.hero {
-  text-align: center;
-  padding: 80px 20px;
-}
-
-.hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  background: linear-gradient(90deg, #60a5fa, #a5b4fc, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.hero p {
+  color: #cbd5e1;
+  font-size: 1.1rem;
 }
 
 .hero-buttons {
-  margin-top: 25px;
+  margin-top: 35px;
   display: flex;
   justify-content: center;
   gap: 15px;
@@ -160,14 +147,22 @@ nav a:hover::after {
 
 /* --- BUTTONS ------------------------------------------- */
 .btn {
-  padding: 10px 18px;
+  padding: 10px 20px;
   border-radius: 10px;
   font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: #fff;
+  box-shadow: 0 0 10px rgba(59,130,246,0.5);
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(96,165,250,0.6);
 }
 
 .btn-secondary {
@@ -176,7 +171,7 @@ nav a:hover::after {
 }
 
 .btn-light {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255,255,255,0.15);
   color: #e0f2fe;
 }
 
@@ -190,23 +185,26 @@ nav a:hover::after {
   color: #111;
 }
 
-.btn:hover {
-  transform: scale(1.05);
-  filter: brightness(1.15);
-}
-
-.full-width {
-  width: 100%;
-}
-
 /* --- DASHBOARD / CARDS -------------------------------- */
-.dashboard-actions {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 25px;
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 4px 35px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  padding: 25px;
+  margin: 25px auto;
+  width: 90%;
+  max-width: 950px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 50px rgba(59,130,246,0.35);
+}
+
+/* --- DETAIL CARDS GRID -------------------------------- */
 .detalle-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -215,17 +213,18 @@ nav a:hover::after {
 }
 
 .detalle-card {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255,255,255,0.06);
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 25px rgba(0,0,0,0.25);
   transition: 0.3s ease;
+  backdrop-filter: blur(8px);
 }
 
 .detalle-card:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255,255,255,0.12);
   transform: translateY(-4px);
-  box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 35px rgba(59,130,246,0.45);
 }
 
 /* --- TABLES -------------------------------------------- */
@@ -236,26 +235,15 @@ nav a:hover::after {
 }
 
 .cart-table th, .cart-table td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
   padding: 10px;
   text-align: center;
 }
 
 .cart-table th {
   color: #93c5fd;
-}
-
-/* --- FORMS --------------------------------------------- */
-.form-styled {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.form-group label {
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #cbd5e1;
+  text-transform: uppercase;
+  font-size: 0.9rem;
 }
 
 /* --- FLASH MESSAGES ------------------------------------ */
@@ -275,15 +263,15 @@ nav a:hover::after {
 }
 
 .flash.info {
-  background: rgba(96, 165, 250, 0.25);
+  background: rgba(96,165,250,0.25);
 }
 
 .flash.success {
-  background: rgba(34, 197, 94, 0.25);
+  background: rgba(34,197,94,0.25);
 }
 
 .flash.error {
-  background: rgba(239, 68, 68, 0.25);
+  background: rgba(239,68,68,0.25);
 }
 
 /* --- FOOTER -------------------------------------------- */
@@ -292,7 +280,7 @@ nav a:hover::after {
   padding: 25px 10px;
   color: #94a3b8;
   font-size: 0.9rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255,255,255,0.1);
   margin-top: auto;
 }
 
@@ -322,10 +310,6 @@ nav a:hover::after {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in {
-  animation: fade-in 0.8s ease forwards;
-}
-
 /* --- SCROLLBAR ----------------------------------------- */
 ::-webkit-scrollbar {
   width: 8px;
@@ -337,14 +321,14 @@ nav a:hover::after {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0,0,0,0.25);
 }
 
 /* --- MEDIA QUERIES ------------------------------------- */
 @media (max-width: 768px) {
   .navbar {
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   .dashboard-actions {
