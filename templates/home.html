@@ -1,11 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="hero fade-in">
-  <h1>{{ t("Bienvenido a Window Shopping") }}</h1>
-  <p>{{ t("Conectamos productores chilenos con compradores internacionales") }}</p>
-  <div class="hero-buttons">
-    <a href="{{ url_for('register_router') }}" class="btn btn-primary">{{ t("Comienza ahora") }}</a>
-    <a href="{{ url_for('servicios') }}" class="btn btn-secondary">{{ t("Explora nuestros servicios") }}</a>
+  <div class="hero-inner glass-card">
+    <h1 class="title-gradient">{{ t("Bienvenido a Window Shopping") }}</h1>
+    <p>{{ t("Conectamos productores chilenos con compradores internacionales") }}</p>
+    <div class="hero-buttons">
+      <a href="{{ url_for('register_router') }}" class="btn btn-primary">🚀 {{ t("Comienza ahora") }}</a>
+      <a href="{{ url_for('servicios') }}" class="btn btn-secondary">⚙️ {{ t("Explora nuestros servicios") }}</a>
+    </div>
+  </div>
+
+  <div class="hero-extra">
+    <p style="margin-top:20px; opacity:0.8;">
+      {{ t("Versión 3.3 — Plataforma colaborativa de comercio internacional", 
+            "Version 3.3 — International trade collaborative platform", 
+            "版本 3.3 — 國際貿易協作平台") }}
+    </p>
   </div>
 </section>
 {% endblock %}
