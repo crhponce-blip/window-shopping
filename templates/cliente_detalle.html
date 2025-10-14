@@ -1,23 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="detalle fade-in">
-  <h2>{{ c.empresa }}</h2>
+  <h2 class="title-gradient">{{ c.empresa }}</h2>
   <p><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
   <p><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
   <p>{{ c.descripcion }}</p>
 
   <h3>{{ t("Productos o Servicios") }}</h3>
-  <ul>
+  <div class="detalle-list">
     {% for item in c.items %}
-      <li><strong>{{ item.nombre }}</strong> — {{ item.detalle }}</li>
+      <div class="detalle-card">
+        <label>
+          <input type="checkbox" name="select_item">
+          <strong>{{ item.nombre }}</strong>
+        </label>
+        <p>{{ item.detalle }}</p>
+        <form method="get" action="{{ url_for('carrito_agregar', pub_id=item.id or 'direct-' ~ c.username ~ '-' ~ loop.index) }}">
+          <button type="submit" class="btn btn-secondary">🛒 {{ t("Agregar al carrito") }}</button>
+        </form>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
 
   <form method="post" action="{{ url_for('enviar_mensaje', username=c.username) }}">
     <textarea name="mensaje" placeholder="{{ t('Escribe un mensaje...') }}" required></textarea>
     <button type="submit" class="btn btn-primary">✉️ {{ t("Enviar mensaje") }}</button>
   </form>
 
-  <a href="{{ url_for('clientes') }}" class="btn btn-secondary">{{ t("Volver") }}</a>
+  <a href="{{ url_for('clientes') }}" class="btn btn-light">← {{ t("Volver") }}</a>
 </section>
 {% endblock %}
