@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mis-publicaciones fade-in">
+  <h2 class="title-gradient">📄 {{ t("Mis Publicaciones") }}</h2>
+
+  {% if publicaciones %}
+    <div class="detalle-list">
+      {% for pub in publicaciones %}
+      <div class="detalle-card">
+        <h3>{{ pub.producto }}</h3>
+        <p><strong>{{ t("Tipo") }}:</strong> {{ pub.tipo }}</p>
+        <p><strong>{{ t("Descripción") }}:</strong> {{ pub.descripcion }}</p>
+        <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
+
+        <form method="post" action="{{ url_for('eliminar_publicacion', pub_id=pub.id) }}">
+          <button type="submit" class="btn btn-danger">🗑️ {{ t("Eliminar") }}</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>{{ t("Aún no tienes publicaciones creadas.") }}</p>
+  {% endif %}
+
+  <a href="{{ url_for('dashboard') }}" class="btn btn-light">← {{ t("Volver al Panel") }}</a>
+</section>
+{% endblock %}
