@@ -1,24 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="form-container">
-  <h2>{{ t("Registro de Usuario") }}</h2>
+<section class="form-container fade-in">
+  <h2 class="title-gradient">{{ t("Registro de Usuario") }}</h2>
 
-  <form method="POST" enctype="multipart/form-data" action="{{ url_for('register') }}">
+  <form method="POST" enctype="multipart/form-data">
     <label>{{ t("Correo electrónico", "Email") }}</label>
-    <input type="email" name="usuario" placeholder="usuario@ejemplo.com" required>
+    <input type="email" name="email" placeholder="usuario@ejemplo.com" required>
 
     <label>{{ t("Contraseña", "Password") }}</label>
     <input type="password" name="password" required>
 
     <label>{{ t("Empresa / Organización") }}</label>
     <input type="text" name="empresa" placeholder="Nombre de empresa" required>
-
-    <label>{{ t("Tipo de cuenta") }}</label>
-    <select name="tipo" required>
-      {% for tipo in tipos %}
-        <option value="{{ tipo }}" {% if tipo == request.args.get('tipo') %}selected{% endif %}>{{ tipo|capitalize }}</option>
-      {% endfor %}
-    </select>
 
     <label>{{ t("Rol") }}</label>
     <select name="rol" required>
@@ -30,8 +23,14 @@
     <label>{{ t("País (Código ISO de 2 letras)") }}</label>
     <input type="text" name="pais" maxlength="2" placeholder="CL" required>
 
+    <label>{{ t("Dirección", "Address") }}</label>
+    <input type="text" name="direccion" placeholder="{{ t('Ej: Santiago, CL') }}" required>
+
+    <label>{{ t("Teléfono", "Phone") }}</label>
+    <input type="text" name="telefono" placeholder="+56 9 XXXX XXXX" required>
+
     <label>{{ t("Subir RUT o documento") }}</label>
-    <input type="file" name="rut_file" accept=".pdf,.jpg,.jpeg,.png">
+    <input type="file" name="rut_doc" accept=".pdf,.jpg,.jpeg,.png">
 
     <button type="submit" class="btn btn-primary">{{ t("Registrar") }}</button>
   </form>
