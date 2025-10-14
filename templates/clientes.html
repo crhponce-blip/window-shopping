@@ -10,7 +10,9 @@
         <p><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
         <p><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
         <p>{{ c.descripcion }}</p>
-        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">{{ t("Ver Perfil") }}</a>
+        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">
+          🔍 {{ t("Ver Detalle", "View Detail") }}
+        </a>
       </div>
     {% else %}
       <p>{{ t("No hay empresas registradas para mostrar.") }}</p>
