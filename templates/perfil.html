@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="perfil-container">
-  <h2>{{ t("Perfil de Usuario") }}</h2>
+<section class="perfil-container fade-in">
+  <h2 class="title-gradient">{{ t("Perfil de Usuario") }}</h2>
 
-  <div class="perfil-card">
+  <div class="perfil-card glass-card">
     <p><strong>Email:</strong> {{ user.email }}</p>
     <p><strong>{{ t("Empresa") }}:</strong> {{ user.empresa }}</p>
     <p><strong>{{ t("Rol") }}:</strong> {{ user.rol }}</p>
@@ -15,8 +15,17 @@
         <a href="{{ url_for('static', filename=user.rut_doc) }}" target="_blank">{{ t("Ver archivo") }}</a>
       </p>
     {% endif %}
+
+    <hr>
+
+    <h3>{{ t("Opciones") }}</h3>
+    <div class="dashboard-actions">
+      <button class="btn btn-primary">{{ t("Agregar ítem") }}</button>
+      <button class="btn btn-warning">{{ t("Eliminar ítem") }}</button>
+      <button class="btn btn-secondary">{{ t("Ocultar de vista") }}</button>
+    </div>
   </div>
 
-  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">{{ t("Volver al Panel") }}</a>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-light">{{ t("Volver al Panel") }}</a>
 </section>
 {% endblock %}
