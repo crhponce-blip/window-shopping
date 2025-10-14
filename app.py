@@ -1,14 +1,12 @@
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App Final (v3.5, Octubre 2025)
+# 🌐 WINDOW SHOPPING — Flask App Final (v3.3, Octubre 2025)
 # Autor: Christopher Ponce & GPT-5
 # =========================================================
 
 import os
 import sqlite3
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import List, Dict, Any
-from types import SimpleNamespace  # 👈 para el fix de c.items en templates
-
 from flask import (
     Flask, render_template, request, redirect, url_for,
     session, flash, abort
@@ -22,31 +20,24 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 app.permanent_session_lifetime = timedelta(days=14)
 
+# Directorios
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 UPLOAD_FOLDER = os.path.join(STATIC_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# 🔹 Permitir subida de archivos (RUT / documentos)
+# 🔹 Subida de archivos
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg"}
 
 def allowed_file(filename: str) -> bool:
-    """Valida la extensión de archivos subidos."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
 
-
 # =========================================================
-# 🌎 SISTEMA MULTI-IDIOMA (ACTIVACIÓN GLOBAL)
+# 🌎 SISTEMA MULTI-IDIOMA
 # =========================================================
 def t(es, en="", zh=""):
-    """
-    Traducción dinámica:
-    - Usa session["lang"] (por defecto 'es').
-    - Si está en inglés o chino, devuelve la traducción correspondiente.
-    - Si no, devuelve el texto original en español.
-    """
     lang = session.get("lang", "es")
     if lang == "en" and en:
         return en
@@ -54,75 +45,17 @@ def t(es, en="", zh=""):
         return zh
     return es
 
-# --- Inyección global en Jinja ---
 app.jinja_env.globals.update(t=t)
 
-# --- Cambio rápido de idioma (ruta directa) ---
+from flask import session as _s, redirect as _r, request as _rq
+
 @app.route("/lang/<code>")
 def cambiar_idioma(code):
-    """
-    Cambia el idioma de la sesión actual.
-    Ejemplos:
-        /lang/es -> español
-        /lang/en -> inglés
-        /lang/zh -> chino
-    """
-    session["lang"] = code
-    return redirect(request.referrer or url_for("home"))
+    _s["lang"] = code
+    return _r(_rq.referrer or url_for("home"))
 
-TRANSLATIONS = {
-    "Inicio": {"en": "Home", "zh": "主頁"},
-    "Empresas": {"en": "Companies", "zh": "公司"},
-    "Servicios": {"en": "Services", "zh": "服務"},
-    "Carrito": {"en": "Cart", "zh": "購物車"},
-    "Perfil": {"en": "Profile", "zh": "個人資料"},
-    "Ayuda": {"en": "Help", "zh": "幫助"},
-    "Iniciar sesión": {"en": "Login", "zh": "登入"},
-    "Registrarse": {"en": "Register", "zh": "註冊"},
-    "Salir": {"en": "Logout", "zh": "登出"},
-    "Comercio Internacional": {"en": "International Trade", "zh": "國際貿易"},
-    "Bienvenido a Window Shopping": {"en": "Welcome to Window Shopping","zh": "歡迎來到 Window Shopping"},
-    "Conectamos productores chilenos con compradores internacionales":
-        {"en": "Connecting Chilean producers with international buyers","zh": "連接智利生產商與國際買家"},
-    "Comienza ahora": {"en": "Start now", "zh": "立即開始"},
-    "Explora nuestros servicios": {"en": "Explore our services", "zh": "探索我們的服務"},
-    "Compra y Venta": {"en": "Buy & Sell", "zh": "買賣"},
-    "Servicios Logísticos": {"en": "Logistic Services", "zh": "物流服務"},
-    "Sostenibilidad": {"en": "Sustainability", "zh": "永續發展"},
-    "Ver Demandas": {"en": "View Demands", "zh": "查看需求"},
-    "Explorar Ofertas": {"en": "Browse Offers", "zh": "瀏覽商品"},
-    "Explorar Servicios": {"en": "Explore Services", "zh": "探索服務"},
-    "Panel de Usuario": {"en": "User Dashboard", "zh": "用戶主頁"},
-    "Agregado al carrito": {"en": "Added to cart", "zh": "已加入購物車"},
-    "Eliminado del carrito": {"en": "Removed from cart", "zh": "已刪除"},
-    "Carrito vaciado": {"en": "Cart cleared", "zh": "購物車已清空"},
-    "Publicación no encontrada": {"en": "Item not found", "zh": "找不到項目"},
-    "Publicación ocultada": {"en": "Item hidden", "zh": "項目已隱藏"},
-    "Publicaciones restauradas": {"en": "Hidden items restored", "zh": "已恢復隱藏項目"},
-    "Página no encontrada": {"en": "Page not found", "zh": "找不到頁面"},
-    "Error interno del servidor": {"en": "Internal server error", "zh": "伺服器內部錯誤"},
-}
-
-@app.context_processor
-def inject_translator():
-    def _t(es: str, en: str = None, zh: str = None) -> str:
-        lang = session.get("lang", "es")
-        if lang == "en":
-            return TRANSLATIONS.get(es, {}).get("en") or (en if en else es)
-        if lang == "zh":
-            return TRANSLATIONS.get(es, {}).get("zh") or (zh if zh else es)
-        return es
-    return dict(t=_t)
-
-@app.route("/set_lang", methods=["POST"])
-def set_lang():
-    lang = request.form.get("lang", "es")
-    session["lang"] = lang
-    flash("🌍 Idioma cambiado correctamente.", "info")
-    print(f"🌍 Idioma establecido: {lang}")
-    return redirect(request.referrer or url_for("home"))
 # =========================================================
-# 🧩 TIPOS Y ROLES (Reglas de creación de usuario)
+# 🧩 TIPOS Y ROLES
 # =========================================================
 TIPOS_VALIDOS = {"compras", "servicios", "mixto", "compraventa"}
 
@@ -139,7 +72,6 @@ ROLES_POR_TIPO: Dict[str, List[str]] = {
 DB_PATH = os.path.join(BASE_DIR, "users.db")
 
 def init_db():
-    """Crea la base y la tabla de usuarios si no existen."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
@@ -151,27 +83,34 @@ def init_db():
             rol TEXT,
             tipo TEXT,
             pais TEXT,
-            rut_doc TEXT
+            rut_doc TEXT,
+            direccion TEXT,
+            telefono TEXT
         )
     """)
     conn.commit()
     conn.close()
 
-def migrate_add_rut_doc():
-    """Asegura columna rut_doc (idempotente)."""
+def migrate_add_column(colname: str):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     try:
-        c.execute("ALTER TABLE users ADD COLUMN rut_doc TEXT")
+        c.execute(f"ALTER TABLE users ADD COLUMN {colname} TEXT")
         conn.commit()
-        print("🛠️ Migración: columna 'rut_doc' agregada a users.")
+        print(f"🛠️ Migración: columna '{colname}' agregada a users.")
     except sqlite3.OperationalError:
         pass
     finally:
         conn.close()
 
+def migrate_add_rut_doc():
+    migrate_add_column("rut_doc")
+
+def migrate_add_contact_fields():
+    migrate_add_column("direccion")
+    migrate_add_column("telefono")
+
 def get_user(email: str):
-    """Obtiene un usuario por su email."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
@@ -180,15 +119,14 @@ def get_user(email: str):
     conn.close()
     return user
 
-def add_user(email, password, empresa, rol, tipo, pais, rut_doc=None):
-    """Agrega un nuevo usuario al sistema."""
+def add_user(email, password, empresa, rol, tipo, pais, rut_doc=None, direccion=None, telefono=None):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     try:
         c.execute("""
-            INSERT INTO users (email, password, empresa, rol, tipo, pais, rut_doc)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (email, password, empresa, rol, tipo, pais, rut_doc))
+            INSERT INTO users (email, password, empresa, rol, tipo, pais, rut_doc, direccion, telefono)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (email, password, empresa, rol, tipo, pais, rut_doc, direccion, telefono))
         conn.commit()
         print(f"🆕 Usuario creado: {email}")
     except sqlite3.IntegrityError:
@@ -200,10 +138,6 @@ def add_user(email, password, empresa, rol, tipo, pais, rut_doc=None):
 # 📁 SUBIDA DE ARCHIVOS
 # =========================================================
 def save_uploaded_file(file_storage) -> str | None:
-    """
-    Guarda un archivo subido en /static/uploads.
-    Retorna la ruta relativa ("uploads/archivo.ext") o None si falla.
-    """
     if not file_storage or file_storage.filename == "":
         return None
     if allowed_file(file_storage.filename):
@@ -216,10 +150,9 @@ def save_uploaded_file(file_storage) -> str | None:
     return None
 
 # =========================================================
-# 👤 SEMILLA — Admin + 2 usuarios por rol (visibilidad de data)
+# 👤 SEMILLA — Admin + 2 usuarios por rol
 # =========================================================
 def create_admin_if_missing():
-    """Crea un usuario administrador si no existe."""
     if not get_user("admin@ws.com"):
         add_user(
             email="admin@ws.com",
@@ -229,56 +162,51 @@ def create_admin_if_missing():
             tipo="compraventa",
             pais="CL",
             rut_doc=None,
+            direccion="Santiago, CL",
+            telefono="+56 2 2222 2222",
         )
         print("✅ Usuario admin creado: admin@ws.com / 1234")
 
 def seed_demo_users():
-    """
-    Inserta 2 usuarios por cada rol/tipo relevante
-    (valida existencia para no duplicar).
-    Password por defecto: 1234
-    """
     seeds = [
         # compraventa
-        ("prod1@demo.cl", "1234", "Productora Valle SpA", "Productor(planta)", "compraventa", "CL"),
-        ("prod2@demo.cl", "1234", "Agro Cordillera Ltda.", "Productor(planta)", "compraventa", "CL"),
-        ("pack1@demo.cl", "1234", "Packing Maule SpA", "Packing", "compraventa", "CL"),
-        ("pack2@demo.cl", "1234", "Packing Sur SpA", "Packing", "compraventa", "CL"),
-        ("frio1@demo.cl", "1234", "Frío Centro SpA", "Frigorífico", "compraventa", "CL"),
-        ("frio2@demo.cl", "1234", "Patagonia Cold SA", "Frigorífico", "compraventa", "CL"),
-        ("exp1@demo.cl", "1234", "Exportadora Andes", "Exportador", "compraventa", "CL"),
-        ("exp2@demo.cl", "1234", "Exportadora Pacífico", "Exportador", "compraventa", "CL"),
-
+        ("prod1@demo.cl","1234","Productora Valle SpA","Productor(planta)","compraventa","CL","", "Curicó, CL","+56 9 1111 1111"),
+        ("prod2@demo.cl","1234","Agro Cordillera Ltda.","Productor(planta)","compraventa","CL","", "Rancagua, CL","+56 9 2222 2222"),
+        ("pack1@demo.cl","1234","Packing Maule SpA","Packing","compraventa","CL","", "Talca, CL","+56 9 3333 3333"),
+        ("pack2@demo.cl","1234","Packing Sur SpA","Packing","compraventa","CL","", "Osorno, CL","+56 9 4444 4444"),
+        ("frio1@demo.cl","1234","Frío Centro SpA","Frigorífico","compraventa","CL","", "San Fernando, CL","+56 9 5555 5555"),
+        ("frio2@demo.cl","1234","Patagonia Cold SA","Frigorífico","compraventa","CL","", "Punta Arenas, CL","+56 9 6666 6666"),
+        ("exp1@demo.cl","1234","Exportadora Andes","Exportador","compraventa","CL","", "Providencia, CL","+56 2 2345 6789"),
+        ("exp2@demo.cl","1234","Exportadora Pacífico","Exportador","compraventa","CL","", "Vitacura, CL","+56 2 2567 8901"),
         # servicios
-        ("aduana1@demo.cl", "1234", "Agencia Andes", "Agencia de aduana", "servicios", "CL"),
-        ("aduana2@demo.cl", "1234", "Agencia Sur", "Agencia de aduana", "servicios", "CL"),
-        ("trans1@demo.cl", "1234", "Transporte Rápido", "Transporte", "servicios", "CL"),
-        ("trans2@demo.cl", "1234", "Logística Express", "Transporte", "servicios", "CL"),
-        ("extra1@demo.cl", "1234", "Extraportuario Norte", "Extraportuario", "servicios", "CL"),
-        ("extra2@demo.cl", "1234", "Extraportuario Sur", "Extraportuario", "servicios", "CL"),
-
+        ("aduana1@demo.cl","1234","Agencia Andes","Agencia de aduana","servicios","CL","", "Valparaíso, CL","+56 32 222 2222"),
+        ("aduana2@demo.cl","1234","Agencia Sur","Agencia de aduana","servicios","CL","", "San Antonio, CL","+56 35 233 3333"),
+        ("trans1@demo.cl","1234","Transporte Rápido","Transporte","servicios","CL","", "Santiago, CL","+56 2 2777 7777"),
+        ("trans2@demo.cl","1234","Logística Express","Transporte","servicios","CL","", "Concepción, CL","+56 41 2888 8888"),
+        ("extra1@demo.cl","1234","Extraportuario Norte","Extraportuario","servicios","CL","", "Antofagasta, CL","+56 55 2999 9999"),
+        ("extra2@demo.cl","1234","Extraportuario Sur","Extraportuario","servicios","CL","", "Puerto Montt, CL","+56 65 211 1111"),
         # mixto
-        ("mixpack1@demo.cl", "1234", "Mixto Packing Uno", "Packing", "mixto", "CL"),
-        ("mixfrio1@demo.cl", "1234", "Mixto Frio Uno", "Frigorífico", "mixto", "CL"),
-
+        ("mixpack1@demo.cl","1234","Mixto Packing Uno","Packing","mixto","CL","", "Talagante, CL","+56 2 2123 4567"),
+        ("mixfrio1@demo.cl","1234","Mixto Frio Uno","Frigorífico","mixto","CL","", "Chillán, CL","+56 42 2987 6543"),
         # compras (cliente extranjero)
-        ("cliente1@ext.com", "1234", "Importadora Asia Ltd.", "Cliente extranjero", "compras", "US"),
-        ("cliente2@ext.com", "1234", "Global Retail HK", "Cliente extranjero", "compras", "HK"),
-
-        # servicio-only con nombres alternos
-        ("packserv1@demo.cl", "1234", "Packing Servicios SPA", "Packing", "servicios", "CL"),
-        ("frioserv1@demo.cl", "1234", "Frío Servicios SPA", "Frigorífico", "servicios", "CL"),
+        ("cliente1@ext.com","1234","Importadora Asia Ltd.","Cliente extranjero","compras","US","", "Miami, US","+1 305 555 0101"),
+        ("cliente2@ext.com","1234","Global Retail HK","Cliente extranjero","compras","HK","", "Kowloon, HK","+852 5555 0101"),
+        # servicio-only extra
+        ("packserv1@demo.cl","1234","Packing Servicios SPA","Packing","servicios","CL","", "Quillota, CL","+56 33 244 4444"),
+        ("frioserv1@demo.cl","1234","Frío Servicios SPA","Frigorífico","servicios","CL","", "La Calera, CL","+56 33 255 5555"),
     ]
-    for email, pwd, empresa, rol, tipo, pais in seeds:
+    for email, pwd, empresa, rol, tipo, pais, rut_doc, direccion, telefono in seeds:
         if not get_user(email):
-            add_user(email, pwd, empresa, rol, tipo, pais)
+            add_user(email, pwd, empresa, rol, tipo, pais, rut_doc=rut_doc, direccion=direccion, telefono=telefono)
             print(f"🧑‍💼 Usuario ficticio agregado: {email}")
 
-# Inicialización automática
+# Inicialización
 init_db()
 migrate_add_rut_doc()
+migrate_add_contact_fields()
 create_admin_if_missing()
 seed_demo_users()
+
 # =========================================================
 # 📦 PUBLICACIONES DEMO + Carrito + Ocultos (helpers)
 # =========================================================
@@ -318,9 +246,7 @@ def add_to_cart(item: Dict[str, Any]) -> None:
 def remove_from_cart(index: int) -> bool:
     cart = get_cart()
     if 0 <= index < len(cart):
-        cart.pop(index)
-        save_cart(cart)
-        return True
+        cart.pop(index); save_cart(cart); return True
     return False
 
 def clear_cart() -> None:
@@ -347,7 +273,7 @@ PERMISOS: Dict[str, Dict[str, List[str]]] = {
         "Frigorífico": ["Productor(planta)", "Packing"],
         "Exportador": ["Productor(planta)", "Packing", "Frigorífico", "Exportador"],
         "Cliente extranjero": ["Exportador"],
-        "Productor(planta)": ["Packing", "Frigorífico", "Exportador"],
+        "Productor(planta)": ["Packing", "Frigorífico", "Exportador"],  # puede vender a estos
         "Agencia de aduana": [], "Transporte": [], "Extraportuario": [],
     },
     "fruta_demanda_visible_por_rol": {
@@ -380,10 +306,19 @@ def publica_es_visible_para_rol(pub: Dict[str, Any], rol_usuario: str) -> bool:
         return rol_pub in PERMISOS["servicios_compra_de"].get(rol_usuario, [])
     return False
 
+def publicaciones_visibles(usuario: Dict[str, Any]) -> List[Dict[str, Any]]:
+    hidden = set(session.get("hidden_items", []))
+    rol = (usuario or {}).get("rol", "")
+    out: List[Dict[str, Any]] = []
+    for p in PUBLICACIONES:
+        if p.get("id") in hidden:
+            continue
+        if publica_es_visible_para_rol(p, rol):
+            out.append(p)
+    return out
+
 # =========================================================
 # 👥 USERS DEMO para vistas /clientes y detalles
-#   (FIX: devolvemos SimpleNamespace para que 'c.items' en Jinja
-#    sea una LISTA y no choque con dict.items)
 # =========================================================
 def _normaliza_items(items: List[Dict[str, Any]] | None) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -394,8 +329,8 @@ def _normaliza_items(items: List[Dict[str, Any]] | None) -> List[Dict[str, Any]]
         out.append({"nombre": nombre, "tipo": tipo, "detalle": detalle})
     return out
 
-def _armar_cliente_desde_users(username: str, data: Dict[str, Any]):
-    dto = {
+def _armar_cliente_desde_users(username: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    return {
         "username": username,
         "empresa": data.get("empresa", username),
         "rol": data.get("rol", ""),
@@ -405,10 +340,7 @@ def _armar_cliente_desde_users(username: str, data: Dict[str, Any]):
         "email": data.get("email", username),
         "perfil_tipo": data.get("tipo", ""),
     }
-    # 👇 Devolver objeto con atributos (para que c.items en Jinja sea la lista)
-    return SimpleNamespace(**dto)
 
-# Diccionario demo para /clientes (coherente con semillas)
 USERS: Dict[str, Dict[str, Any]] = {
     "exp1@demo.cl": {"empresa": "Exportadora Andes", "rol": "Exportador", "tipo": "compraventa",
         "descripcion": "Exportación fruta fresca.", "items": [
@@ -429,306 +361,670 @@ USERS: Dict[str, Dict[str, Any]] = {
 }
 
 # =========================================================
-# 🧭 Helper de navegación de "Empresas" según rol/tipo
+# 🌍 MULTILENGUAJE (inyector + set_lang)
 # =========================================================
-def destino_empresas_para(user: Dict[str, Any]) -> str:
-    """
-    Devuelve endpoint al que debe ir 'Empresas' según el rol del usuario:
-    - Cliente extranjero -> '/compras' (ver ofertas/servicios)
-    - Exportador         -> '/ventas'  (ver demandas)
-    - Productor/Packing/Frigorífico -> '/servicios' (comprar servicios) + '/compras' (ofertas)
-      Por simplicidad: mandamos a '/servicios' (como primera parada).
-    - Roles de servicios (aduana/transporte/extraportuario) -> '/clientes' (red de empresas)
-    """
-    if not user:
-        return "clientes"
-    rol = (user or {}).get("rol", "")
-    if rol == "Cliente extranjero":
-        return "compras"
-    if rol == "Exportador":
-        return "ventas"
-    if rol in {"Productor(planta)", "Packing", "Frigorífico"}:
-        return "servicios"
-    if rol in {"Agencia de aduana", "Transporte", "Extraportuario"}:
-        return "clientes"
-    return "clientes"
+TRANSLATIONS = {
+    "Inicio": {"en": "Home", "zh": "主頁"},
+    "Empresas": {"en": "Companies", "zh": "公司"},
+    "Servicios": {"en": "Services", "zh": "服務"},
+    "Carrito": {"en": "Cart", "zh": "購物車"},
+    "Perfil": {"en": "Profile", "zh": "個人資料"},
+    "Ayuda": {"en": "Help", "zh": "幫助"},
+    "Iniciar sesión": {"en": "Login", "zh": "登入"},
+    "Registrarse": {"en": "Register", "zh": "註冊"},
+    "Salir": {"en": "Logout", "zh": "登出"},
+    "Comercio Internacional": {"en": "International Trade", "zh": "國際貿易"},
+    "Bienvenido a Window Shopping": {"en": "Welcome to Window Shopping","zh": "歡迎來到 Window Shopping"},
+    "Conectamos productores chilenos con compradores internacionales":
+        {"en": "Connecting Chilean producers with international buyers","zh": "連接智利生產商與國際買家"},
+    "Comienza ahora": {"en": "Start now", "zh": "立即開始"},
+    "Explora nuestros servicios": {"en": "Explore our services", "zh": "探索我們的服務"},
+    "Compra y Venta": {"en": "Buy & Sell", "zh": "買賣"},
+    "Servicios Logísticos": {"en": "Logistic Services", "zh": "物流服務"},
+    "Sostenibilidad": {"en": "Sustainability", "zh": "永續發展"},
+    "Ver Demandas": {"en": "View Demands", "zh": "查看需求"},
+    "Explorar Ofertas": {"en": "Browse Offers", "zh": "瀏覽商品"},
+    "Explorar Servicios": {"en": "Explore Services", "zh": "探索服務"},
+    "Panel de Usuario": {"en": "User Dashboard", "zh": "用戶主頁"},
+    "Agregado al carrito": {"en": "Added to cart", "zh": "已加入購物車"},
+    "Eliminado del carrito": {"en": "Removed from cart", "zh": "已刪除"},
+    "Carrito vaciado": {"en": "Cart cleared", "zh": "購物車已清空"},
+    "Publicación no encontrada": {"en": "Item not found", "zh": "找不到項目"},
+    "Publicación ocultada": {"en": "Item hidden", "zh": "項目已隱藏"},
+    "Publicaciones restauradas": {"en": "Hidden items restored", "zh": "已恢復隱藏項目"},
+    "Página no encontrada": {"en": "Page not found", "zh": "找不到頁面"},
+    "Error interno del servidor": {"en": "Internal server error", "zh": "伺服器內部錯誤"},
+    # Nuevas claves usadas en formularios y panel
+    "Dirección": {"en": "Address", "zh": "地址"},
+    "Teléfono": {"en": "Phone", "zh": "電話"},
+    "Oferta": {"en": "Offer", "zh": "供應"},
+    "Demanda": {"en": "Demand", "zh": "需求"},
+    "Compra": {"en": "Buy", "zh": "採購"},
+    "Venta": {"en": "Sell", "zh": "銷售"},
+    "Servicio": {"en": "Service", "zh": "服務"},
+    "Agregar ítem": {"en": "Add item", "zh": "新增項目"},
+    "Eliminar ítem": {"en": "Remove item", "zh": "刪除項目"},
+    "Guardar": {"en": "Save", "zh": "儲存"},
+    "Cancelar": {"en": "Cancel", "zh": "取消"},
+    "Enviar mensaje": {"en": "Send message", "zh": "發送訊息"},
+    "Rol": {"en": "Role", "zh": "角色"},
+    "Tipo": {"en": "Type", "zh": "類型"},
+    "País": {"en": "Country", "zh": "國家"},
+    "Empresa": {"en": "Company", "zh": "公司"},
+    "Precio": {"en": "Price", "zh": "價格"},
+    "Ver Detalle": {"en": "View Detail", "zh": "查看詳情"},
+    "Empresas Registradas": {"en": "Registered Companies", "zh": "已註冊公司"},
+    "No hay empresas registradas para mostrar.": {"en": "No companies to show.", "zh": "沒有可顯示的公司。"},
+    "Productos o Servicios": {"en": "Products or Services", "zh": "產品或服務"},
+    "Escribe un mensaje...": {"en": "Write a message...", "zh": "寫一條訊息..."},
+    "Volver": {"en": "Back", "zh": "返回"},
+    "Perfil de Usuario": {"en": "User Profile", "zh": "用戶檔案"},
+       "Documento RUT": {"en": "RUT document", "zh": "稅號文件"},
+    "Opciones": {"en": "Options", "zh": "選項"},
+    "Agregar item": {"en": "Add item", "zh": "新增項目"},
+    "Eliminar item": {"en": "Delete item", "zh": "刪除項目"},
+    "Ocultar de vista": {"en": "Hide from view", "zh": "隱藏"},
+    "Restaurar ocultos": {"en": "Restore hidden", "zh": "恢復隱藏"},
+    "Ofertas Disponibles": {"en": "Available Offers", "zh": "可用報價"},
+    "Demandas y Solicitudes": {"en": "Demands and Requests", "zh": "需求與請求"},
+    "No hay servicios disponibles.": {"en": "No services available.", "zh": "目前沒有可用的服務。"},
+    "No hay publicaciones visibles para tu rol": {"en": "No publications visible for your role", "zh": "你的角色無可見的項目"},
+    "Publicaciones": {"en": "Publications", "zh": "刊登"},
+    "Buscar": {"en": "Search", "zh": "搜尋"},
+    "País (Código ISO de 2 letras)": {"en": "Country (ISO 2-letter code)", "zh": "國家（ISO 2 字母代碼）"}
+}
 # =========================================================
-# 🔑 AUTH (login / logout / register con RUT y rol por tipo)
+# 🌐 FUNCIONES DE IDIOMA
 # =========================================================
-def _normaliza_tipo(tipo: str) -> str:
-    tipo = (tipo or "").strip().lower()
-    if tipo in {"compra-venta", "compra_venta", "cv"}:
-        return "compraventa"
-    return tipo if tipo in TIPOS_VALIDOS else ""
+@app.context_processor
+def inject_translations():
+    """Permite usar traducciones desde cualquier template."""
+    def translate(text):
+        lang = session.get("lang", "es")
+        if text in TRANSLATIONS and lang in TRANSLATIONS[text]:
+            return TRANSLATIONS[text][lang]
+        return text
+    return dict(t=translate)
 
-def _rol_valido_para_tipo(rol: str, tipo: str) -> bool:
-    return rol in ROLES_POR_TIPO.get(tipo, [])
+@app.route("/set_lang", methods=["POST", "GET"])
+def set_lang():
+    """Establece el idioma actual de sesión."""
+    lang = request.args.get("lang") or request.form.get("lang") or "es"
+    session["lang"] = lang
+    flash(f"🌐 Idioma cambiado a: {lang}", "info")
+    return redirect(request.referrer or url_for("home"))
+# =========================================================
+# 🧭 RUTAS PRINCIPALES
+# =========================================================
+
+@app.route("/")
+def home():
+    lang = session.get("lang", "es")
+    titulo = t("Inicio", "Home", "主頁")
+    return render_template("home.html", titulo=titulo)
+
+
+# =========================================================
+# 🔐 LOGIN / LOGOUT / REGISTRO
+# =========================================================
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = ((request.form.get("username") or request.form.get("usuario") or "").strip().lower())
-        password = (request.form.get("password") or "").strip()
+        email = request.form.get("email")
+        password = request.form.get("password")
         user = get_user(email)
+
         if user and user["password"] == password:
-            session["user"] = {
-                "id": user["id"], "email": user["email"], "empresa": user["empresa"],
-                "rol": user["rol"], "tipo": user["tipo"], "pais": user["pais"], "rut_doc": user["rut_doc"]
-            }
-            session.permanent = True
-            # 👇 Cambio solicitado: ir directo al perfil
-            return redirect(url_for("perfil"))
-        flash("Credenciales incorrectas", "error")
-        return render_template("login.html", error="Credenciales incorrectas")
-    return render_template("login.html")
+            session["user"] = dict(user)
+            flash(t("Inicio de sesión exitoso", "Login successful", "登入成功"), "success")
+            return redirect(url_for("dashboard"))
+        else:
+            flash(t("Correo o contraseña incorrectos", "Invalid credentials", "電子郵件或密碼錯誤"), "error")
+
+    return render_template("login.html", titulo=t("Iniciar sesión", "Login", "登入"))
+
 
 @app.route("/logout")
 def logout():
-    session.clear()
-    flash("Sesión cerrada.", "info")
+    session.pop("user", None)
+    flash(t("Has cerrado sesión", "You have logged out", "您已登出"), "info")
     return redirect(url_for("home"))
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    roles_catalogo = [
-        "Cliente extranjero", "Productor(planta)", "Packing", "Frigorífico",
-        "Exportador", "Agencia de aduana", "Extraportuario", "Transporte",
-    ]
-    tipos_catalogo = ["compras", "servicios", "mixto", "compraventa"]
-
-    if request.method == "POST":
-        email = ((request.form.get("usuario") or request.form.get("username") or "").strip().lower())
-        password = (request.form.get("password") or "").strip()
-        empresa = (request.form.get("empresa") or "").strip()
-        rol = (request.form.get("rol") or "").strip()
-        tipo = _normaliza_tipo(request.form.get("tipo") or "")
-        pais = (request.form.get("pais") or "CL").strip().upper()
-
-        rut_file = request.files.get("rut_file")
-        rut_doc_path = save_uploaded_file(rut_file) if rut_file else None
-
-        if not all([email, password, empresa, rol, tipo]):
-            flash("Todos los campos son obligatorios.", "error"); return redirect(url_for("register"))
-        if not _rol_valido_para_tipo(rol, tipo):
-            flash("El rol seleccionado no corresponde al tipo de cuenta.", "error"); return redirect(url_for("register"))
-        if rol == "Cliente extranjero" and tipo != "compras":
-            flash("Cliente extranjero solo puede ser tipo 'compras'.", "error"); return redirect(url_for("register"))
-        if rol == "Exportador" and tipo not in {"compraventa"}:
-            flash("Exportador debe ser tipo 'compraventa'.", "error"); return redirect(url_for("register"))
-        if len(pais) != 2:
-            flash("El código de país debe tener 2 letras (ej: CL, US).", "error"); return redirect(url_for("register"))
-        if get_user(email):
-            flash("El usuario ya existe.", "error"); return redirect(url_for("register"))
-
-        add_user(email, password, empresa, rol, tipo, pais, rut_doc=rut_doc_path)
-        flash("Usuario registrado exitosamente.", "success")
-        return redirect(url_for("login"))
-
-    # GET con preset ?tipo=
-    pre_tipo = _normaliza_tipo(request.args.get("tipo") or "")
-    roles_filtrados = ROLES_POR_TIPO.get(pre_tipo, roles_catalogo) if pre_tipo else roles_catalogo
-    return render_template("register.html",
-                           roles=roles_filtrados, tipos=tipos_catalogo, roles_por_tipo=ROLES_POR_TIPO)
 
 @app.route("/register_router")
 def register_router():
-    return render_template("register_router.html")
+    return render_template("registro_tipo.html", titulo=t("Tipo de cuenta", "Account type", "帳戶類型"))
+
+
+@app.route("/register/<tipo>", methods=["GET", "POST"])
+def register(tipo):
+    if request.method == "POST":
+        data = {k: request.form.get(k) for k in
+                ["email", "password", "empresa", "rol", "pais", "direccion", "telefono"]}
+        file = request.files.get("rut_doc")
+        rut_path = save_uploaded_file(file)
+
+        add_user(
+            email=data["email"],
+            password=data["password"],
+            empresa=data["empresa"],
+            rol=data["rol"],
+            tipo=tipo,
+            pais=data["pais"],
+            rut_doc=rut_path,
+            direccion=data["direccion"],
+            telefono=data["telefono"],
+        )
+        flash(t("Registro exitoso", "Registration successful", "註冊成功"), "success")
+        return redirect(url_for("login"))
+
+    roles = ROLES_POR_TIPO.get(tipo, [])
+    return render_template("registro.html", tipo=tipo, roles=roles, titulo=t("Registro", "Register", "註冊"))
+
 
 # =========================================================
-# 🧭 RUTAS — Dashboard, Compras, Ventas, Servicios, Clientes
+# 🧑‍💼 DASHBOARD
 # =========================================================
-def login_requerido():
-    if "user" not in session:
-        flash("Debes iniciar sesión para acceder a esta sección.", "error")
-        return False
-    return True
-
-@app.route("/empresas")
-def empresas():
-    """Router único de 'Empresas' en el navbar."""
-    dest = "clientes"
-    if "user" in session:
-        dest = destino_empresas_para(session.get("user"))
-    return redirect(url_for(dest))
 
 @app.route("/dashboard")
 def dashboard():
-    if not login_requerido(): return redirect(url_for("login"))
-    user = session.get("user", {})
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    rol = user.get("rol", "")
     publicaciones = publicaciones_visibles(user)
-    return render_template("dashboard.html",
-                           user=user, publicaciones=publicaciones,
-                           rol=user.get("rol",""), tipo=user.get("tipo",""),
-                           empresa=user.get("empresa",""), pais=user.get("pais",""),
-                           titulo="Panel de Usuario")
 
-@app.route("/compras")
-def compras():
-    if not login_requerido(): return redirect(url_for("login"))
-    user = session["user"]
-    publicaciones = [p for p in PUBLICACIONES if p["tipo"] in ("oferta","servicio")
-                     and publica_es_visible_para_rol(p, user["rol"])]
-    return render_template("compras.html", publicaciones=publicaciones)
+    return render_template(
+        "dashboard.html",
+        user=user,
+        publicaciones=publicaciones,
+        titulo=t("Panel de Usuario", "User Dashboard", "用戶主頁")
+    )
 
-@app.route("/ventas")
-def ventas():
-    if not login_requerido(): return redirect(url_for("login"))
-    user = session["user"]
-    publicaciones = [p for p in PUBLICACIONES if p["tipo"]=="demanda"
-                     and publica_es_visible_para_rol(p, user["rol"])]
-    try:
-        return render_template("ventas.html", publicaciones=publicaciones, demandas=publicaciones)
-    except:
-        return render_template("detalle_ventas.html", publicaciones=publicaciones, demandas=publicaciones)
-
-@app.route("/servicios")
-def servicios():
-    if not login_requerido(): return redirect(url_for("login"))
-    user = session["user"]
-    publicaciones = [p for p in PUBLICACIONES if p["tipo"]=="servicio"
-                     and publica_es_visible_para_rol(p, user["rol"])]
-    try:
-        return render_template("servicios.html", publicaciones=publicaciones)
-    except:
-        return render_template("detalle_servicios.html", publicaciones=publicaciones)
-
-@app.route("/clientes")
-def clientes():
-    if not login_requerido(): return redirect(url_for("login"))
-    lista = [_armar_cliente_desde_users(username, data) for username, data in USERS.items()]
-    lista.sort(key=lambda c: (c.empresa or "").lower())
-    return render_template("clientes.html", clientes=lista)
-
-@app.route("/clientes/<username>")
-def cliente_detalle(username):
-    if username not in USERS: abort(404)
-    c = _armar_cliente_desde_users(username, USERS[username])
-    # Ahora c.items es una lista real (gracias a SimpleNamespace)
-    try:
-        return render_template("cliente_detalle.html", c=c)
-    except:
-        return render_template("detalle_servicios.html", comp=c)
-
-@app.route("/clientes/<username>/mensaje", methods=["POST"])
-def enviar_mensaje(username):
-    if not login_requerido(): return redirect(url_for("login"))
-    if username not in USERS: abort(404)
-    mensaje = (request.form.get("mensaje") or "").strip()
-    if not mensaje:
-        flash("El mensaje no puede estar vacío.", "error")
-        return redirect(url_for("cliente_detalle", username=username))
-    flash("Mensaje enviado correctamente.", "success")
-    return redirect(url_for("cliente_detalle", username=username))
 
 # =========================================================
-# 🛒 CARRITO — agregar, eliminar(POST), vaciar(POST), confirmar(POST)
+# 🧺 CARRITO
 # =========================================================
+
 @app.route("/carrito")
 def carrito():
-    if not login_requerido(): return redirect(url_for("login"))
-    return render_template("carrito.html", cart=get_cart())
+    cart = get_cart()
+    return render_template("carrito.html", cart=cart, titulo=t("Carrito", "Cart", "購物車"))
 
-@app.route("/carrito/agregar/<pub_id>")
+
+@app.route("/carrito/agregar/<pub_id>", methods=["POST", "GET"])
 def carrito_agregar(pub_id):
-    if not login_requerido(): return redirect(url_for("login"))
     pub = next((p for p in PUBLICACIONES if p["id"] == pub_id), None)
-    if pub:
-        add_to_cart(pub); flash("Agregado al carrito.", "success")
-    else:
-        flash("Publicación no encontrada.", "error")
+    if not pub:
+        flash(t("Publicación no encontrada", "Item not found", "找不到項目"), "error")
+        return redirect(request.referrer or url_for("dashboard"))
+    add_to_cart(pub)
+    flash(t("Agregado al carrito", "Added to cart", "已加入購物車"), "success")
     return redirect(request.referrer or url_for("carrito"))
 
-@app.route("/carrito/agregar_directo", methods=["POST"])
-def carrito_agregar_directo():
-    if not login_requerido(): return redirect(url_for("login"))
-    empresa = request.form.get("empresa")
-    producto = request.form.get("producto") or ""
-    servicio = request.form.get("servicio") or ""
-    item = {"id": f"direct-{empresa}-{producto or servicio}", "empresa": empresa,
-            "rol": "-", "descripcion": producto or servicio, "tipo": "servicio"}
-    add_to_cart(item); flash("Agregado al carrito.", "success")
-    return redirect(request.referrer or url_for("carrito"))
 
 @app.route("/carrito/eliminar/<int:index>", methods=["POST"])
 def carrito_eliminar(index):
-    if not login_requerido(): return redirect(url_for("login"))
     if remove_from_cart(index):
-        flash("Eliminado del carrito.", "success")
-    else:
-        flash("Ítem no encontrado.", "error")
+        flash(t("Eliminado del carrito", "Removed from cart", "已刪除"), "info")
     return redirect(url_for("carrito"))
+
 
 @app.route("/carrito/vaciar", methods=["POST"])
 def carrito_vaciar():
-    if not login_requerido(): return redirect(url_for("login"))
-    clear_cart(); flash("Carrito vaciado.", "info")
-    return redirect(url_for("carrito"))
-
-@app.route("/carrito/confirmar", methods=["POST"])
-def carrito_confirmar():
-    if not login_requerido(): return redirect(url_for("login"))
-    if not get_cart():
-        flash("Tu carrito está vacío.", "warning")
-        return redirect(url_for("carrito"))
-    # (Simulación de confirmar pedido)
     clear_cart()
-    flash("✅ Pedido confirmado. Te contactaremos pronto.", "success")
+    flash(t("Carrito vaciado", "Cart cleared", "購物車已清空"), "info")
     return redirect(url_for("carrito"))
 
+
 # =========================================================
-# 👁️ Ocultar/Restaurar publicaciones
+# 🧱 PUBLICACIONES / OCULTAR
 # =========================================================
+
 @app.route("/ocultar/<pub_id>", methods=["POST"])
 def ocultar_publicacion(pub_id):
-    if not login_requerido(): return redirect(url_for("login"))
-    hide_item(pub_id); flash("Publicación ocultada.", "info")
-    return redirect(request.referrer or url_for("dashboard"))
+    hide_item(pub_id)
+    flash(t("Publicación ocultada", "Item hidden", "項目已隱藏"), "info")
+    return redirect(url_for("dashboard"))
+
 
 @app.route("/restablecer_ocultos", methods=["POST"])
 def restablecer_ocultos():
-    if not login_requerido(): return redirect(url_for("login"))
-    unhide_all(); flash("Publicaciones restauradas.", "success")
+    unhide_all()
+    flash(t("Publicaciones restauradas", "Hidden items restored", "已恢復隱藏項目"), "success")
+    return redirect(url_for("dashboard"))
+
+
+# =========================================================
+# 🏢 CLIENTES / DETALLE
+# =========================================================
+
+@app.route("/clientes")
+def clientes():
+    data = []
+    for username, info in USERS.items():
+        data.append(_armar_cliente_desde_users(username, info))
+    return render_template("clientes.html", clientes=data, titulo=t("Empresas", "Companies", "公司"))
+
+
+@app.route("/clientes/<username>")
+def cliente_detalle(username):
+    if username not in USERS:
+        abort(404)
+    cliente = _armar_cliente_desde_users(username, USERS[username])
+    return render_template("cliente_detalle.html", c=cliente, titulo=cliente["empresa"])
+
+
+# =========================================================
+# 🛒 COMPRAS / VENTAS / SERVICIOS
+# =========================================================
+
+@app.route("/compras")
+def compras():
+    q = request.args.get("q", "").lower()
+    visibles = [p for p in PUBLICACIONES if p["tipo"] == "oferta"]
+    if q:
+        visibles = [p for p in visibles if q in p["empresa"].lower() or q in p["producto"].lower()]
+    return render_template("compras.html", data=visibles, titulo=t("Ofertas Disponibles", "Available Offers", "可用報價"))
+
+
+@app.route("/ventas")
+def ventas():
+    visibles = [p for p in PUBLICACIONES if p["tipo"] == "demanda"]
+    return render_template("ventas.html", publicaciones=visibles, titulo=t("Demandas y Solicitudes", "Demands and Requests", "需求與請求"))
+
+
+@app.route("/servicios")
+def servicios():
+    visibles = [p for p in PUBLICACIONES if p["tipo"] == "servicio"]
+    return render_template("servicios.html", publicaciones=visibles, titulo=t("Servicios", "Services", "服務"))
+
+
+# =========================================================
+# ⚙️ ERRORES
+# =========================================================
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("error.html", code=404, message=t("Página no encontrada", "Page not found", "找不到頁面")), 404
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template("error.html", code=500, message=t("Error interno del servidor", "Internal server error", "伺服器內部錯誤")), 500
+
+
+# =========================================================
+# 🚀 RUN LOCAL (solo debug)
+# =========================================================
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
+# =========================================================
+# 🧩 GESTIÓN DE PUBLICACIONES (OFERTA / DEMANDA / SERVICIO)
+# =========================================================
+
+import uuid  # Para generar IDs únicos de publicaciones
+
+# --- Subtipos según flujo y tipo ---
+SUBTIPOS_POR_TIPO = {
+    "oferta": ["Compra", "Venta", "Servicio"],
+    "demanda": ["Compra", "Venta", "Servicio"]
+}
+
+
+@app.route("/publicar", methods=["GET", "POST"])
+def publicar():
+    """Permite crear una nueva publicación (oferta o demanda) según perfil."""
+    user = session.get("user")
+    if not user:
+        flash(t("Debes iniciar sesión para publicar.", "You must log in to post.", "您必須登入以發布"), "error")
+        return redirect(url_for("login"))
+
+    rol = user.get("rol", "")
+    tipo_cuenta = user.get("tipo", "")
+
+    if request.method == "POST":
+        tipo_pub = request.form.get("tipo_pub")          # oferta / demanda
+        subtipo = request.form.get("subtipo")            # compra / venta / servicio
+        producto = request.form.get("producto", "").strip()
+        descripcion = request.form.get("descripcion", "").strip()
+        precio = request.form.get("precio", "").strip()
+
+        # Validación de campos
+        if not all([tipo_pub, subtipo, producto, descripcion]):
+            flash(t("Todos los campos son obligatorios.", "All fields are required.", "所有欄位都是必填的"), "error")
+            return redirect(url_for("publicar"))
+
+        # Asegurar precio legible
+        if not precio:
+            precio = "Consultar"
+
+        # Generar ID único seguro
+        pub_id = f"pub_{uuid.uuid4().hex[:8]}"
+
+        nueva_pub = {
+            "id": pub_id,
+            "usuario": user.get("email"),
+            "tipo": tipo_pub,                # oferta o demanda
+            "rol": rol,
+            "empresa": user.get("empresa"),
+            "producto": producto,
+            "precio": precio,
+            "descripcion": f"{subtipo.upper()} — {descripcion}",
+            "fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        }
+
+        PUBLICACIONES.append(nueva_pub)
+        flash(t("Publicación agregada correctamente.", "Post added successfully.", "成功新增發布"), "success")
+        return redirect(url_for("dashboard"))
+
+    return render_template(
+        "publicar.html",
+        subtipo_opciones=SUBTIPOS_POR_TIPO,
+        titulo=t("Nueva Publicación", "New Post", "新增發布"),
+        user=user
+    )
+
+
+# =========================================================
+# 🧹 ELIMINAR PUBLICACIÓN (Solo propias)
+# =========================================================
+
+@app.route("/publicacion/eliminar/<pub_id>", methods=["POST"])
+def eliminar_publicacion(pub_id):
+    """Permite eliminar publicaciones creadas por el usuario logueado."""
+    user = session.get("user")
+    if not user:
+        flash(t("Debes iniciar sesión.", "You must log in.", "您必須登入"), "error")
+        return redirect(url_for("login"))
+
+    global PUBLICACIONES
+    antes = len(PUBLICACIONES)
+
+    # Filtra publicaciones que no coinciden con el ID o no pertenecen al usuario
+    PUBLICACIONES = [
+        p for p in PUBLICACIONES
+        if not (p["id"] == pub_id and p["usuario"] == user["email"])
+    ]
+
+    despues = len(PUBLICACIONES)
+
+    if antes > despues:
+        flash(t("Publicación eliminada correctamente.", "Post deleted successfully.", "已刪除發布"), "success")
+    else:
+        flash(t("No se encontró la publicación o no tienes permiso.", "Not found or no permission.", "未找到或無權限"), "error")
+
     return redirect(url_for("dashboard"))
 # =========================================================
-# 🙍 Perfil + Home + Ayuda
+# 🧭 DASHBOARD EXTENDIDO CON FILTROS Y VISTAS POR PERFIL
 # =========================================================
+
+@app.route("/dashboard", methods=["GET", "POST"])
+def dashboard():
+    """Muestra el panel de usuario con publicaciones filtradas y acciones dinámicas."""
+    user = session.get("user")
+    if not user:
+        flash(t("Debes iniciar sesión.", "You must log in.", "您必須登入"), "error")
+        return redirect(url_for("login"))
+
+    rol = user.get("rol", "")
+    tipo = user.get("tipo", "")
+    filtro = request.args.get("filtro", "oferta")  # valor por defecto
+
+    # Determina el conjunto de publicaciones visibles según permisos
+    publicaciones = [
+        p for p in PUBLICACIONES
+        if publica_es_visible_para_rol(p, rol) and p["tipo"] == filtro
+    ]
+
+    # Ordenar publicaciones más recientes primero (por fecha si existe)
+    publicaciones.sort(key=lambda p: p.get("fecha", ""), reverse=True)
+
+    # Extrae solo las publicaciones del propio usuario
+    propias = [p for p in PUBLICACIONES if p["usuario"] == user["email"]]
+    propias.sort(key=lambda p: p.get("fecha", ""), reverse=True)
+
+    return render_template(
+        "dashboard.html",
+        user=user,
+        publicaciones=publicaciones,
+        propias=propias,
+        filtro=filtro,
+        titulo=t("Panel de Usuario", "User Dashboard", "用戶主頁"),
+    )
+
+
+# =========================================================
+# 🔄 CAMBIO DE FILTRO EN DASHBOARD (AJAX SIMPLIFICADO)
+# =========================================================
+
+@app.route("/dashboard/filtro/<tipo>")
+def cambiar_filtro_dashboard(tipo):
+    """Permite cambiar el filtro de vista del panel (oferta/demanda/servicio)."""
+    if tipo not in ["oferta", "demanda", "servicio"]:
+        flash(t("Filtro inválido", "Invalid filter", "無效的篩選條件"), "error")
+        return redirect(url_for("dashboard"))
+    return redirect(url_for("dashboard", filtro=tipo))
+
+
+# =========================================================
+# 📊 PANEL DE CONTROL: RESUMEN POR ROL Y ACCIONES RÁPIDAS
+# =========================================================
+
+@app.route("/panel_info")
+def panel_info():
+    """Devuelve un resumen visual del rol y tipo actual (demo para templates)."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    rol = user.get("rol", "")
+    tipo = user.get("tipo", "")
+
+    info = {
+        "rol": rol,
+        "tipo": tipo,
+        "total_publicaciones": len([p for p in PUBLICACIONES if p["usuario"] == user["email"]]),
+        "puede_ofertar": tipo in ["compraventa", "mixto"],
+        "puede_demandar": tipo in ["compras", "compraventa", "mixto"],
+        "puede_servicios": tipo in ["servicios", "mixto", "compraventa"],
+    }
+
+    return info
+
+
+# =========================================================
+# ⚡ ACTUALIZACIÓN VISUAL DE LAS VISTAS (RUTAS DE AYUDA)
+# =========================================================
+
+@app.route("/refresh_dashboard")
+def refresh_dashboard():
+    """Recarga el panel manteniendo el filtro actual."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+    filtro_actual = request.args.get("filtro", "oferta")
+    return redirect(url_for("dashboard", filtro=filtro_actual))
+
+
+@app.route("/mis_publicaciones")
+def mis_publicaciones():
+    """Muestra solo las publicaciones propias del usuario."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    propias = [p for p in PUBLICACIONES if p["usuario"] == user["email"]]
+    propias.sort(key=lambda p: p.get("fecha", ""), reverse=True)
+
+    return render_template(
+        "mis_publicaciones.html",
+        user=user,
+        publicaciones=propias,
+        titulo=t("Mis Publicaciones", "My Posts", "我的發布")
+    )
+
+
+# =========================================================
+# 🧭 LÓGICA PARA COMBINAR VISTAS (COMPRAS / VENTAS / SERVICIOS)
+# =========================================================
+
+@app.route("/empresas_filtradas/<categoria>")
+def empresas_filtradas(categoria):
+    """
+    Muestra empresas según la categoría seleccionada:
+    compras -> empresas que venden
+    ventas  -> empresas que compran
+    servicios -> empresas que ofrecen servicios
+    """
+    if categoria not in ["compras", "ventas", "servicios"]:
+        abort(404)
+
+    data = []
+    for username, info in USERS.items():
+        if categoria == "compras" and info["tipo"] in ["compraventa", "mixto"]:
+            data.append(_armar_cliente_desde_users(username, info))
+        elif categoria == "ventas" and info["tipo"] in ["compras", "compraventa"]:
+            data.append(_armar_cliente_desde_users(username, info))
+        elif categoria == "servicios" and info["tipo"] == "servicios":
+            data.append(_armar_cliente_desde_users(username, info))
+
+    # ✅ Mejora visual: ordenar empresas alfabéticamente
+    data.sort(key=lambda x: x["empresa"])
+
+    return render_template(
+        "clientes.html",
+        clientes=data,
+        titulo=t("Empresas", "Companies", "公司"),
+        categoria=categoria
+    )
+# =========================================================
+# 💬 MENSAJERÍA ENTRE USUARIOS (desde perfil empresa)
+# =========================================================
+
+MENSAJES: list[dict[str, str]] = []  # almacenamiento temporal en memoria
+
+@app.route("/mensaje/enviar/<username>", methods=["POST"])
+def enviar_mensaje(username):
+    """Permite enviar un mensaje a otra empresa registrada."""
+    user = session.get("user")
+    if not user:
+        flash(t("Debes iniciar sesión para enviar mensajes.",
+                "You must log in to send messages.",
+                "您必須登入才能發送訊息"), "error")
+        return redirect(url_for("login"))
+
+    if username not in USERS:
+        flash(t("Usuario destino no encontrado.",
+                "Target user not found.",
+                "找不到目標用戶"), "error")
+        return redirect(url_for("clientes"))
+
+    contenido = request.form.get("mensaje", "").strip()
+    if not contenido:
+        flash(t("El mensaje no puede estar vacío.",
+                "Message cannot be empty.",
+                "訊息不能為空"), "error")
+        return redirect(url_for("cliente_detalle", username=username))
+
+    mensaje = {
+        "de": user.get("empresa"),
+        "para": USERS[username]["empresa"],
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "contenido": contenido,
+    }
+    MENSAJES.append(mensaje)
+
+    flash(t("Mensaje enviado correctamente.",
+            "Message sent successfully.",
+            "訊息已成功發送"), "success")
+    return redirect(url_for("cliente_detalle", username=username))
+
+
+@app.route("/mensajes")
+def ver_mensajes():
+    """Muestra los mensajes recibidos (solo modo demo)."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    empresa_actual = user.get("empresa")
+    recibidos = [m for m in MENSAJES if m["para"] == empresa_actual]
+
+    return render_template(
+        "mensajes.html",
+        mensajes=recibidos,
+        titulo=t("Mensajes recibidos", "Received messages", "收到的訊息")
+    )
+
+
+# =========================================================
+# 🌍 IDIOMA / TRADUCCIONES FINALES
+# =========================================================
+
+@app.route("/set_lang", methods=["POST", "GET"])
+def set_lang():
+    """Cambia el idioma de la sesión (desde el menú o bandera)."""
+    lang = request.form.get("lang") or request.args.get("lang")
+    if lang in ["es", "en", "zh"]:
+        session["lang"] = lang
+        flash(t("Idioma cambiado correctamente.",
+                "Language changed successfully.",
+                "語言已成功更改"), "info")
+    else:
+        flash(t("Idioma no soportado.",
+                "Unsupported language.",
+                "不支援的語言"), "error")
+    return redirect(request.referrer or url_for("home"))
+
+
+@app.context_processor
+def inject_translations():
+    """Inyector global de función t() para usar en todos los templates."""
+    return dict(t=t)
+
+
+# =========================================================
+# 🧭 RUTAS ADICIONALES / UTILIDADES
+# =========================================================
+
 @app.route("/perfil")
 def perfil():
-    if "user" not in session:
-        flash("Debes iniciar sesión para ver tu perfil.", "error")
+    """Muestra el perfil actual del usuario logueado."""
+    user = session.get("user")
+    if not user:
+        flash(t("Debes iniciar sesión para ver tu perfil.",
+                "You must log in to view your profile.",
+                "您必須登入才能查看個人資料"), "error")
         return redirect(url_for("login"))
-    return render_template("perfil.html", user=session["user"])
+    return render_template("perfil.html", user=user,
+                           titulo=t("Perfil de Usuario",
+                                    "User Profile",
+                                    "用戶檔案"))
 
-@app.route("/")
-def home():
-    return render_template("home.html")
 
 @app.route("/ayuda")
 def ayuda():
-    return render_template("ayuda.html")
+    """Vista informativa o página de ayuda (demo)."""
+    return render_template("ayuda.html",
+                           titulo=t("Ayuda", "Help", "幫助"))
+
 
 # =========================================================
-# 🧯 Errores
+# ✅ CONFIRMACIÓN FINAL DE SISTEMA
 # =========================================================
-@app.errorhandler(404)
-def not_found_error(error):
-    try:
-        return render_template("404.html"), 404
-    except Exception as e:
-        print(f"Error 404: {e}")
-        return "<h1>404</h1><p>Página no encontrada</p>", 404
 
-@app.errorhandler(500)
-def internal_error(error):
-    try:
-        return render_template("500.html"), 500
-    except Exception as e:
-        print(f"Error 500: {e}")
-        return "<h1>500</h1><p>Error interno del servidor</p>", 500
-
-# =========================================================
-# 🚀 Arranque local (Render usa: gunicorn app:app)
-# =========================================================
-if __name__ == "__main__":
-    print("🚀 Iniciando Window Shopping (v3.5)…")
-    app.run(debug=True, host="0.0.0.0", port=5000)
+@app.route("/status")
+def status():
+    """Ruta interna para verificar el estado general del sistema."""
+    estado = {
+        "usuarios": len(seed_demo_users.__code__.co_consts),
+        "publicaciones": len(PUBLICACIONES),
+        "mensajes": len(MENSAJES),
+        "idioma": session.get("lang", "es"),
+        "estado": "OK ✅"
+    }
+    return estado
