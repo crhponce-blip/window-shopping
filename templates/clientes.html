@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="clientes">
-  <h2>{{ t("Empresas Registradas") }}</h2>
+<section class="clientes fade-in">
+  <h2 class="title-gradient">{{ t("Empresas Registradas") }}</h2>
 
   <div class="clientes-grid">
     {% for c in clientes %}
-      <div class="card">
+      <div class="card glass-card">
         <h3>{{ c.empresa }}</h3>
         <p><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
         <p><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
         <p>{{ c.descripcion }}</p>
-        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">{{ t("Ver Detalle") }}</a>
+        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">{{ t("Ver Perfil") }}</a>
       </div>
     {% else %}
       <p>{{ t("No hay empresas registradas para mostrar.") }}</p>
