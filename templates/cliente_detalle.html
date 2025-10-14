@@ -21,8 +21,10 @@
     {% endfor %}
   </div>
 
-  <form method="post" action="{{ url_for('enviar_mensaje', username=c.username) }}" class="mensaje-form">
-    <textarea name="mensaje" placeholder="{{ t('Escribe un mensaje...') }}" required></textarea>
+  <!-- ✅ Mensajería conectada con /mensajes -->
+  <form method="post" action="{{ url_for('mensajes') }}" class="mensaje-form">
+    <input type="hidden" name="destino" value="{{ c.email }}">
+    <textarea name="contenido" placeholder="{{ t('Escribe un mensaje...') }}" required></textarea>
     <button type="submit" class="btn btn-primary">✉️ {{ t("Enviar mensaje") }}</button>
   </form>
 
