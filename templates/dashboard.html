@@ -16,18 +16,18 @@
         <form action="{{ url_for('carrito_agregar', pub_id=pub.id) }}" method="get">
           <button type="submit" class="btn btn-primary">🛒 {{ t("Agregar al carrito") }}</button>
         </form>
-
-        <form action="{{ url_for('ocultar_publicacion', pub_id=pub.id) }}" method="post">
-          <button type="submit" class="btn btn-secondary">🙈 {{ t("Ocultar") }}</button>
-        </form>
       </div>
     {% else %}
       <p>{{ t("No hay publicaciones visibles para tu rol") }}</p>
     {% endfor %}
   </div>
 
-  <form action="{{ url_for('restablecer_ocultos') }}" method="post" style="margin-top:20px;">
-    <button type="submit" class="btn btn-light">🔁 {{ t("Restaurar ocultos") }}</button>
-  </form>
+  <div class="dashboard-actions">
+    <a href="{{ url_for('publicar') }}" class="btn btn-primary">➕ {{ t("Agregar ítem") }}</a>
+    <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis publicaciones") }}</a>
+    <form action="{{ url_for('restablecer_ocultos') }}" method="post" style="display:inline;">
+      <button type="submit" class="btn btn-light">🔁 {{ t("Restaurar ocultos") }}</button>
+    </form>
+  </div>
 </section>
 {% endblock %}
