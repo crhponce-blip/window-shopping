@@ -4,22 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ titulo or "Window Shopping" }}</title>
-
-  <!-- ✅ CORREGIDO: ahora apunta directo a /static/style.css -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <header class="navbar">
     <div class="logo">WS</div>
     <nav>
-      <a href="{{ url_for('home') }}">{{ t("Inicio") }}</a>
-      <a href="{{ url_for('clientes') }}">{{ t("Empresas") }}</a>
-      <a href="{{ url_for('servicios') }}">{{ t("Servicios") }}</a>
       {% if session.get("user") %}
+        <a href="{{ url_for('home') }}">{{ t("Inicio") }}</a>
+        <a href="{{ url_for('empresas') }}">{{ t("Empresas") }}</a>
         <a href="{{ url_for('carrito') }}">{{ t("Carrito") }}</a>
         <a href="{{ url_for('perfil') }}">{{ t("Perfil") }}</a>
         <a href="{{ url_for('logout') }}">{{ t("Salir") }}</a>
       {% else %}
+        <a href="{{ url_for('home') }}">{{ t("Inicio") }}</a>
         <a href="{{ url_for('login') }}">{{ t("Iniciar sesión") }}</a>
         <a href="{{ url_for('register_router') }}">{{ t("Registrarse") }}</a>
       {% endif %}
@@ -42,19 +40,11 @@
         {% endfor %}
       {% endwith %}
     </div>
-
     {% block content %}{% endblock %}
   </main>
 
   <footer class="footer">
     © 2025 Window Shopping — All Rights Reserved
   </footer>
-
-  <!-- 🔻 Este bloque se movió dentro del <body> -->
-  <div style="float:right; margin-right:20px;">
-    <a href="{{ url_for('set_lang') }}?lang=es">🇨🇱 ES</a> |
-    <a href="{{ url_for('set_lang') }}?lang=en">🇺🇸 EN</a> |
-    <a href="{{ url_for('set_lang') }}?lang=zh">🇨🇳 中文</a>
-  </div>
 </body>
 </html>
