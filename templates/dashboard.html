@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="dashboard fade-in">
-  <h2>{{ t("Panel de Usuario") }}</h2>
+  <h2 class="title-gradient">{{ t("Panel de Usuario") }}</h2>
   <p>{{ t("Bienvenido") }} <strong>{{ user.empresa }}</strong> ({{ user.rol }} - {{ user.tipo }})</p>
 
-  <div class="publicaciones-grid">
+  <div class="detalle-list">
     {% for pub in publicaciones %}
-      <div class="card">
+      <div class="detalle-card">
         <h3>{{ pub.producto }}</h3>
         <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
         <p><strong>{{ t("Tipo") }}:</strong> {{ pub.tipo }}</p>
@@ -27,7 +27,7 @@
   </div>
 
   <form action="{{ url_for('restablecer_ocultos') }}" method="post" style="margin-top:20px;">
-    <button type="submit" class="btn btn-secondary">🔁 {{ t("Restaurar ocultos") }}</button>
+    <button type="submit" class="btn btn-light">🔁 {{ t("Restaurar ocultos") }}</button>
   </form>
 </section>
 {% endblock %}
