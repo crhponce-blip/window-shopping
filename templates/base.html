@@ -6,6 +6,7 @@
   <title>{{ titulo or "Window Shopping" }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
   <header class="navbar">
     <div class="logo">WS</div>
@@ -23,13 +24,15 @@
       {% endif %}
     </nav>
 
-    <form method="post" action="{{ url_for('set_lang') }}" class="lang-form">
-      <select name="lang" onchange="this.form.submit()">
+    <!-- 🌍 Selector de idioma corregido -->
+    <form class="lang-form">
+      <select onchange="window.location.href='/set_lang/' + this.value;">
         <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>🇪🇸</option>
         <option value="en" {% if session.get('lang') == 'en' %}selected{% endif %}>🇬🇧</option>
         <option value="zh" {% if session.get('lang') == 'zh' %}selected{% endif %}>🇨🇳</option>
       </select>
     </form>
+    <!-- ✅ Ya no usa url_for('set_lang') directo, así evitas el BuildError -->
   </header>
 
   <main>
