@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ titulo or "Window Shopping" }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- ✅ CORREGIDO: ahora apunta directo a /static/style.css -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <header class="navbar">
@@ -22,6 +24,7 @@
         <a href="{{ url_for('register_router') }}">{{ t("Registrarse") }}</a>
       {% endif %}
     </nav>
+
     <form method="post" action="{{ url_for('set_lang') }}" class="lang-form">
       <select name="lang" onchange="this.form.submit()">
         <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>🇪🇸</option>
@@ -46,10 +49,12 @@
   <footer class="footer">
     © 2025 Window Shopping — All Rights Reserved
   </footer>
+
+  <!-- 🔻 Este bloque se movió dentro del <body> -->
+  <div style="float:right; margin-right:20px;">
+    <a href="{{ url_for('set_lang') }}?lang=es">🇨🇱 ES</a> |
+    <a href="{{ url_for('set_lang') }}?lang=en">🇺🇸 EN</a> |
+    <a href="{{ url_for('set_lang') }}?lang=zh">🇨🇳 中文</a>
+  </div>
 </body>
 </html>
-<div style="float:right; margin-right:20px;">
-  <a href="{{ url_for('cambiar_idioma', code='es') }}">🇨🇱 ES</a> |
-  <a href="{{ url_for('cambiar_idioma', code='en') }}">🇺🇸 EN</a> |
-  <a href="{{ url_for('cambiar_idioma', code='zh') }}">🇨🇳 中文</a>
-</div>
