@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="form-container fade-in">
+  <h2 class="title-gradient">{{ t("Nueva Publicación") }}</h2>
+
+  <form method="POST">
+    <label>{{ t("Tipo de Publicación") }}</label>
+    <select name="tipo_pub" required>
+      <option value="oferta">{{ t("Oferta") }}</option>
+      <option value="demanda">{{ t("Demanda") }}</option>
+      <option value="servicio">{{ t("Servicio") }}</option>
+    </select>
+
+    <label>{{ t("Subtipo") }}</label>
+    <select name="subtipo" required>
+      <option value="compra">{{ t("Compra") }}</option>
+      <option value="venta">{{ t("Venta") }}</option>
+      <option value="servicio">{{ t("Servicio") }}</option>
+    </select>
+
+    <label>{{ t("Producto o Servicio") }}</label>
+    <input type="text" name="producto" placeholder="{{ t('Ej: Cereza Lapins / Embalaje flowpack') }}" required>
+
+    <label>{{ t("Descripción Detallada") }}</label>
+    <textarea name="descripcion" placeholder="{{ t('Describe las condiciones, variedades o características...') }}" required></textarea>
+
+    <label>{{ t("Precio Referencial") }}</label>
+    <input type="text" name="precio" placeholder="USD 0.00 / unidad">
+
+    <button type="submit" class="btn btn-primary">{{ t("Publicar") }}</button>
+  </form>
+
+  <a href="{{ url_for('dashboard') }}" class="btn btn-light">← {{ t("Volver al Panel") }}</a>
+</section>
+{% endblock %}
