@@ -20,6 +20,42 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 app.permanent_session_lifetime = timedelta(days=14)
 
+# =========================================================
+# 🌎 SISTEMA MULTI-IDIOMA (ACTIVACIÓN GLOBAL)
+# =========================================================
+from flask import session, redirect, request
+
+# --- Función traductora global ---
+def t(es, en="", zh=""):
+    """
+    Traducción dinámica:
+    - Usa session["lang"] (por defecto 'es').
+    - Si está en inglés o chino, devuelve la traducción correspondiente.
+    - Si no, devuelve el texto original en español.
+    """
+    lang = session.get("lang", "es")
+    if lang == "en" and en:
+        return en
+    elif lang == "zh" and zh:
+        return zh
+    return es
+
+# --- Inyección global en Jinja ---
+app.jinja_env.globals.update(t=t)
+
+# --- Cambio rápido de idioma (ruta directa) ---
+@app.route("/lang/<code>")
+def cambiar_idioma(code):
+    """
+    Cambia el idioma de la sesión actual.
+    Ejemplos:
+        /lang/es -> español
+        /lang/en -> inglés
+        /lang/zh -> chino
+    """
+    session["lang"] = code
+    return redirect(request.referrer or url_for("home"))
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
