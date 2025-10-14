@@ -3,11 +3,11 @@
 <section class="detalle-container glass-card fade-in">
   <h2 class="title-gradient">🛒 {{ t("Ofertas Disponibles") }}</h2>
 
-  {% if publicaciones|length == 0 %}
+  {% if data|length == 0 %}
     <p>{{ t("No hay ofertas disponibles para tu perfil.") }}</p>
   {% else %}
     <div class="detalle-list">
-      {% for e in publicaciones %}
+      {% for e in data %}
       <div class="detalle-card">
         <h3>{{ e.empresa }}</h3>
         <p><strong>{{ t("Rol") }}:</strong> {{ e.rol }}</p>
