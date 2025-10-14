@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="ventas fade-in">
-  <h2 class="title-gradient">{{ t("Demandas y Solicitudes") }}</h2>
+  <h2 class="title-gradient">📦 {{ t("Demandas y Solicitudes") }}</h2>
   <div class="detalle-list">
     {% for pub in publicaciones %}
       <div class="detalle-card">
@@ -9,6 +9,9 @@
         <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
         <p>{{ pub.descripcion }}</p>
         <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
+        <form method="get" action="{{ url_for('carrito_agregar', pub_id=pub.id) }}">
+          <button type="submit" class="btn btn-secondary">🛒 {{ t("Agregar al carrito") }}</button>
+        </form>
       </div>
     {% else %}
       <p>{{ t("No hay demandas disponibles.") }}</p>
