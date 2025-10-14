@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="detalle-container glass-card fade-in">
+  <h2 class="title-gradient">🛒 {{ t("Ofertas Disponibles") }}</h2>
+
+  {% if publicaciones|length == 0 %}
+    <p>{{ t("No hay ofertas disponibles para tu perfil.") }}</p>
+  {% else %}
+    <div class="detalle-list">
+      {% for e in publicaciones %}
+      <div class="detalle-card">
+        <h3>{{ e.empresa }}</h3>
+        <p><strong>{{ t("Rol") }}:</strong> {{ e.rol }}</p>
+        <p><strong>{{ t("Producto") }}:</strong> {{ e.producto }}</p>
+        <p><strong>{{ t("Precio") }}:</strong> {{ e.precio }}</p>
+        <p>{{ e.descripcion }}</p>
+        <form method="get" action="{{ url_for('carrito_agregar', pub_id=e.id) }}">
+          <button type="submit" class="btn btn-primary">🛍️ {{ t("Agregar al carrito") }}</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
