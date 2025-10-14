@@ -22,10 +22,10 @@
     {% endif %}
   </div>
 
-  <div class="perfil-actions">
-    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">🏠 {{ t("Volver al Panel") }}</a>
+  <div class="perfil-actions dashboard-actions">
+    <a href="{{ url_for('dashboard_ext') }}" class="btn btn-primary">🏠 {{ t("Volver al Panel") }}</a>
     <a href="{{ url_for('publicar') }}" class="btn btn-secondary">➕ {{ t("Nueva Publicación") }}</a>
-    <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a>
+    <!-- <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a> -->
   </div>
 </section>
 {% endblock %}
