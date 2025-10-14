@@ -12,7 +12,7 @@
     <nav>
       {% if session.get("user") %}
         <a href="{{ url_for('home') }}">{{ t("Inicio") }}</a>
-        <a href="{{ url_for('empresas') }}">{{ t("Empresas") }}</a>
+        <a href="{{ url_for('clientes') }}">{{ t("Empresas") }}</a>
         <a href="{{ url_for('carrito') }}">{{ t("Carrito") }}</a>
         <a href="{{ url_for('perfil') }}">{{ t("Perfil") }}</a>
         <a href="{{ url_for('logout') }}">{{ t("Salir") }}</a>
@@ -40,6 +40,7 @@
         {% endfor %}
       {% endwith %}
     </div>
+
     {% block content %}{% endblock %}
   </main>
 
