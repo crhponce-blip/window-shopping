@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="ayuda fade-in">
-  <h2>{{ t("Centro de Ayuda") }}</h2>
+  <h2 class="title-gradient">💬 {{ t("Centro de Ayuda") }}</h2>
   <p>{{ t("Aquí encontrarás información sobre cómo usar la plataforma Window Shopping.") }}</p>
 
-  <ul>
-    <li>{{ t("Para comprar, agrega productos o servicios al carrito y confirma tu pedido.") }}</li>
-    <li>{{ t("Los proveedores pueden publicar ofertas y servicios desde su panel.") }}</li>
-    <li>{{ t("Los clientes extranjeros solo pueden ver exportadores.") }}</li>
+  <ul class="ayuda-lista glass-card">
+    <li>📦 {{ t("Para comprar, agrega productos o servicios al carrito y confirma tu pedido.") }}</li>
+    <li>🚚 {{ t("Los proveedores pueden publicar ofertas, demandas o servicios desde su panel.") }}</li>
+    <li>🌍 {{ t("Los clientes extranjeros solo pueden ver exportadores y comprar productos.") }}</li>
+    <li>💡 {{ t("El idioma se puede cambiar desde el menú superior (ES / EN / 中文).") }}</li>
   </ul>
 
-  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">{{ t("Volver al Panel") }}</a>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← {{ t("Volver al Panel") }}</a>
 </section>
 {% endblock %}
