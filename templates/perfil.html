@@ -9,23 +9,23 @@
     <p><strong>{{ t("Rol") }}:</strong> {{ user.rol }}</p>
     <p><strong>{{ t("Tipo") }}:</strong> {{ user.tipo }}</p>
     <p><strong>{{ t("País") }}:</strong> {{ user.pais }}</p>
-
+    {% if user.direccion %}
+      <p><strong>{{ t("Dirección") }}:</strong> {{ user.direccion }}</p>
+    {% endif %}
+    {% if user.telefono %}
+      <p><strong>{{ t("Teléfono") }}:</strong> {{ user.telefono }}</p>
+    {% endif %}
     {% if user.rut_doc %}
       <p><strong>{{ t("Documento RUT") }}:</strong>
         <a href="{{ url_for('static', filename=user.rut_doc) }}" target="_blank">{{ t("Ver archivo") }}</a>
       </p>
     {% endif %}
-
-    <hr>
-
-    <h3>{{ t("Opciones") }}</h3>
-    <div class="dashboard-actions">
-      <button class="btn btn-primary">{{ t("Agregar ítem") }}</button>
-      <button class="btn btn-warning">{{ t("Eliminar ítem") }}</button>
-      <button class="btn btn-secondary">{{ t("Ocultar de vista") }}</button>
-    </div>
   </div>
 
-  <a href="{{ url_for('dashboard') }}" class="btn btn-light">{{ t("Volver al Panel") }}</a>
+  <div class="perfil-actions">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">🏠 {{ t("Volver al Panel") }}</a>
+    <a href="{{ url_for('publicar') }}" class="btn btn-secondary">➕ {{ t("Nueva Publicación") }}</a>
+    <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a>
+  </div>
 </section>
 {% endblock %}
