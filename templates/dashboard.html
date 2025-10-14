@@ -24,7 +24,8 @@
 
   <div class="dashboard-actions">
     <a href="{{ url_for('publicar') }}" class="btn btn-primary">➕ {{ t("Agregar ítem") }}</a>
-    <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis publicaciones") }}</a>
+    <!-- La ruta mis_publicaciones no existe, se deja comentada -->
+    <!-- <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a> -->
     <form action="{{ url_for('restablecer_ocultos') }}" method="post" style="display:inline;">
       <button type="submit" class="btn btn-light">🔁 {{ t("Restaurar ocultos") }}</button>
     </form>
