@@ -1,31 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="perfil-container fade-in">
-  <h2 class="title-gradient">{{ t("Perfil de Usuario") }}</h2>
+<section class="fade-in py-5">
+  <div class="container col-md-8">
+    <h2 class="title-gradient text-center mb-4">{{ t("Perfil de Usuario") }}</h2>
 
-  <div class="perfil-card glass-card">
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>{{ t("Empresa") }}:</strong> {{ user.empresa }}</p>
-    <p><strong>{{ t("Rol") }}:</strong> {{ user.rol }}</p>
-    <p><strong>{{ t("Tipo") }}:</strong> {{ user.tipo }}</p>
-    <p><strong>{{ t("País") }}:</strong> {{ user.pais }}</p>
-    {% if user.direccion %}
-      <p><strong>{{ t("Dirección") }}:</strong> {{ user.direccion }}</p>
-    {% endif %}
-    {% if user.telefono %}
-      <p><strong>{{ t("Teléfono") }}:</strong> {{ user.telefono }}</p>
-    {% endif %}
-    {% if user.rut_doc %}
-      <p><strong>{{ t("Documento RUT") }}:</strong>
-        <a href="{{ url_for('static', filename=user.rut_doc) }}" target="_blank">{{ t("Ver archivo") }}</a>
-      </p>
-    {% endif %}
-  </div>
+    <div class="glass-card p-4 shadow-sm mb-4">
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>{{ t("Empresa") }}:</strong> {{ user.empresa }}</p>
+      <p><strong>{{ t("Rol") }}:</strong> {{ user.rol }}</p>
+      <p><strong>{{ t("Tipo") }}:</strong> {{ user.tipo }}</p>
+      <p><strong>{{ t("País") }}:</strong> {{ user.pais }}</p>
+      {% if user.direccion %}
+        <p><strong>{{ t("Dirección") }}:</strong> {{ user.direccion }}</p>
+      {% endif %}
+      {% if user.telefono %}
+        <p><strong>{{ t("Teléfono") }}:</strong> {{ user.telefono }}</p>
+      {% endif %}
+      {% if user.rut_doc %}
+        <p><strong>{{ t("Documento RUT") }}:</strong>
+          <a href="{{ url_for('static', filename=user.rut_doc) }}" target="_blank">{{ t("Ver archivo") }}</a>
+        </p>
+      {% endif %}
+    </div>
 
-  <div class="perfil-actions dashboard-actions">
-    <a href="{{ url_for('dashboard_ext') }}" class="btn btn-primary">🏠 {{ t("Volver al Panel") }}</a>
-    <a href="{{ url_for('publicar') }}" class="btn btn-secondary">➕ {{ t("Nueva Publicación") }}</a>
-    <!-- <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a> -->
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-primary">🏠 {{ t("Volver al Panel") }}</a>
+      <a href="{{ url_for('publicar') }}" class="btn btn-secondary">➕ {{ t("Nueva Publicación") }}</a>
+      <!-- <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a> -->
+    </div>
   </div>
 </section>
 {% endblock %}
