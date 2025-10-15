@@ -1,14 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="form-container fade-in">
-  <h2 class="title-gradient">{{ t("Selecciona el tipo de cuenta") }}</h2>
-  <p>{{ t("Elige el tipo de usuario que deseas crear") }}</p>
+<section class="fade-in py-5 text-center">
+  <div class="glass-card p-4 col-md-6 mx-auto shadow-sm">
+    <h2 class="title-gradient mb-3">{{ t("Selecciona el tipo de cuenta") }}</h2>
+    <p>{{ t("Elige el tipo de usuario que deseas crear") }}</p>
 
-  <div class="router-buttons">
-    <a href="{{ url_for('register', tipo='compras') }}" class="btn btn-secondary">🛒 {{ t("Cliente Extranjero") }}</a>
-    <a href="{{ url_for('register', tipo='servicios') }}" class="btn btn-secondary">⚙️ {{ t("Prestador de Servicios") }}</a>
-    <a href="{{ url_for('register', tipo='compraventa') }}" class="btn btn-secondary">📦 {{ t("Exportador / Productor") }}</a>
-    <a href="{{ url_for('register', tipo='mixto') }}" class="btn btn-secondary">🔄 {{ t("Mixto") }}</a>
+    <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+      <a href="{{ url_for('register', tipo='compras') }}" class="btn btn-outline-primary">
+        🛒 {{ t("Cliente Extranjero") }}
+      </a>
+      <a href="{{ url_for('register', tipo='servicios') }}" class="btn btn-outline-success">
+        ⚙️ {{ t("Prestador de Servicios") }}
+      </a>
+      <a href="{{ url_for('register', tipo='compraventa') }}" class="btn btn-outline-warning">
+        📦 {{ t("Exportador / Productor") }}
+      </a>
+      <a href="{{ url_for('register', tipo='mixto') }}" class="btn btn-outline-info">
+        🔄 {{ t("Mixto") }}
+      </a>
+    </div>
   </div>
 </section>
 {% endblock %}
