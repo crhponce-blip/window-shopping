@@ -1,22 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="clientes fade-in">
-  <h2 class="title-gradient">{{ t("Empresas Registradas") }}</h2>
+<section class="fade-in py-5">
+  <div class="container">
+    <h2 class="title-gradient text-center mb-4">{{ t("Empresas Registradas") }}</h2>
 
-  <div class="clientes-grid">
-    {% for c in clientes %}
-      <div class="card glass-card">
-        <h3>{{ c.empresa }}</h3>
-        <p><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
-        <p><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
-        <p>{{ c.descripcion }}</p>
-        <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-primary">
-          🔍 {{ t("Ver Detalle", "View Detail") }}
-        </a>
+    <div class="row g-4">
+      {% for c in clientes %}
+      <div class="col-md-4">
+        <div class="card glass-card h-100 p-3 shadow-sm">
+          <h5 class="card-title">{{ c.empresa }}</h5>
+          <p><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
+          <p><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
+          <p class="small text-muted">{{ c.descripcion }}</p>
+          <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-outline-primary mt-auto">
+            🔍 {{ t("Ver Detalle") }}
+          </a>
+        </div>
       </div>
-    {% else %}
-      <p>{{ t("No hay empresas registradas para mostrar.") }}</p>
-    {% endfor %}
+      {% else %}
+      <p class="text-center text-muted">{{ t("No hay empresas registradas para mostrar.") }}</p>
+      {% endfor %}
+    </div>
   </div>
 </section>
 {% endblock %}
