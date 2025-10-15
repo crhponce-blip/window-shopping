@@ -1,16 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="ayuda fade-in">
-  <h2 class="title-gradient">💬 {{ t("Centro de Ayuda") }}</h2>
-  <p>{{ t("Aquí encontrarás información sobre cómo usar la plataforma Window Shopping.") }}</p>
+<section class="fade-in py-5">
+  <div class="container col-lg-8">
+    <div class="glass-card p-4 shadow-sm">
+      <h2 class="title-gradient text-center mb-4">💬 {{ t("Centro de Ayuda") }}</h2>
+      <p class="text-center mb-4">
+        {{ t("Aquí encontrarás información sobre cómo usar la plataforma Window Shopping.") }}
+      </p>
 
-  <ul class="ayuda-lista glass-card">
-    <li>📦 {{ t("Para comprar, agrega productos o servicios al carrito y confirma tu pedido.") }}</li>
-    <li>🚚 {{ t("Los proveedores pueden publicar ofertas, demandas o servicios desde su panel.") }}</li>
-    <li>🌍 {{ t("Los clientes extranjeros solo pueden ver exportadores y comprar productos.") }}</li>
-    <li>💡 {{ t("El idioma se puede cambiar desde el menú superior (ES / EN / 中文).") }}</li>
-  </ul>
+      <ul class="list-group list-group-flush mb-4">
+        <li class="list-group-item">📦 {{ t("Para comprar, agrega productos o servicios al carrito y confirma tu pedido.") }}</li>
+        <li class="list-group-item">🚚 {{ t("Los proveedores pueden publicar ofertas, demandas o servicios desde su panel.") }}</li>
+        <li class="list-group-item">🌍 {{ t("Los clientes extranjeros solo pueden ver exportadores y comprar productos.") }}</li>
+        <li class="list-group-item">💡 {{ t("El idioma se puede cambiar desde el menú superior (ES / EN / 中文).") }}</li>
+      </ul>
 
-  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← {{ t("Volver al Panel") }}</a>
+      <div class="text-center">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+          ← {{ t("Volver al Panel") }}
+        </a>
+      </div>
+    </div>
+  </div>
 </section>
 {% endblock %}
