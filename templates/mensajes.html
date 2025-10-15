@@ -1,50 +1,69 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="mensajes-container fade-in">
-  <h2 class="title-gradient">{{ t("Mensajería", "Messaging", "訊息系統") }}</h2>
+<section class="fade-in py-5">
+  <div class="container">
+    <h2 class="title-gradient text-center mb-4">{{ t("Mensajería", "Messaging", "訊息系統") }}</h2>
 
-  <div class="glass-card">
-    <form method="POST">
-      <label>{{ t("Destinatario (correo)") }}</label>
-      <input type="email" name="destino" placeholder="usuario@ejemplo.com" required>
-
-      <label>{{ t("Contenido del mensaje") }}</label>
-      <textarea name="contenido" placeholder="{{ t('Escribe tu mensaje aquí...') }}" required></textarea>
-
-      <button type="submit" class="btn btn-primary">📨 {{ t("Enviar Mensaje") }}</button>
-    </form>
-  </div>
-
-  <div class="detalle-list">
-    <div class="detalle-card">
-      <h3>📥 {{ t("Recibidos") }}</h3>
-      {% if recibidos %}
-        <ul>
-          {% for m in recibidos %}
-            <li><strong>{{ m.origen }}</strong> — {{ m.contenido }}<br><small>{{ m.fecha }}</small></li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p>{{ t("No tienes mensajes recibidos.", "No messages received.") }}</p>
-      {% endif %}
+    <div class="glass-card p-4 mb-4">
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label">{{ t("Destinatario (correo)") }}</label>
+          <input type="email" name="destino" class="form-control" placeholder="usuario@ejemplo.com" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">{{ t("Contenido del mensaje") }}</label>
+          <textarea name="contenido" class="form-control" rows="3"
+                    placeholder="{{ t('Escribe tu mensaje aquí...') }}" required></textarea>
+        </div>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">📨 {{ t("Enviar Mensaje") }}</button>
+        </div>
+      </form>
     </div>
 
-    <div class="detalle-card">
-      <h3>📤 {{ t("Enviados") }}</h3>
-      {% if enviados %}
-        <ul>
-          {% for m in enviados %}
-            <li><strong>{{ m.destino }}</strong> — {{ m.contenido }}<br><small>{{ m.fecha }}</small></li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p>{{ t("No has enviado mensajes.", "No messages sent.") }}</p>
-      {% endif %}
-    </div>
-  </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="glass-card p-3 h-100">
+          <h5>📥 {{ t("Recibidos") }}</h5>
+          {% if recibidos %}
+            <ul class="list-group list-group-flush">
+              {% for m in recibidos %}
+              <li class="list-group-item">
+                <strong>{{ m.origen }}</strong><br>
+                {{ m.contenido }}<br>
+                <small class="text-muted">{{ m.fecha }}</small>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">{{ t("No tienes mensajes recibidos.") }}</p>
+          {% endif %}
+        </div>
+      </div>
 
-  <div class="center">
-    <a href="{{ url_for('dashboard_ext') }}" class="btn btn-light">← {{ t("Volver al Panel") }}</a>
+      <div class="col-md-6 mb-3">
+        <div class="glass-card p-3 h-100">
+          <h5>📤 {{ t("Enviados") }}</h5>
+          {% if enviados %}
+            <ul class="list-group list-group-flush">
+              {% for m in enviados %}
+              <li class="list-group-item">
+                <strong>{{ m.destino }}</strong><br>
+                {{ m.contenido }}<br>
+                <small class="text-muted">{{ m.fecha }}</small>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">{{ t("No has enviado mensajes.") }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-light border">← {{ t("Volver al Panel") }}</a>
+    </div>
   </div>
 </section>
 {% endblock %}
