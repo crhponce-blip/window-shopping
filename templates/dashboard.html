@@ -1,33 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="dashboard fade-in">
-  <h2 class="title-gradient">{{ t("Panel de Usuario") }}</h2>
-  <p>{{ t("Bienvenido") }} <strong>{{ user.empresa }}</strong> ({{ user.rol }} - {{ user.tipo }})</p>
+<section class="fade-in py-5">
+  <h2 class="title-gradient mb-3">{{ t("Panel de Usuario") }}</h2>
+  <p>{{ t("Bienvenido") }} <strong>{{ user.empresa }}</strong> ({{ user.rol }} – {{ user.tipo }})</p>
 
-  <div class="detalle-list">
+  <div class="row">
     {% for pub in publicaciones %}
-      <div class="detalle-card">
-        <h3>{{ pub.producto }}</h3>
-        <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
-        <p><strong>{{ t("Tipo") }}:</strong> {{ pub.tipo }}</p>
-        <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
-        <p>{{ pub.descripcion }}</p>
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card glass-card h-100 p-3">
+        <h5 class="card-title">{{ pub.producto }}</h5>
+        <p class="card-text"><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
+        <p class="card-text"><strong>{{ t("Tipo") }}:</strong> {{ pub.tipo }}</p>
+        <p class="card-text"><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
+        <p class="small text-muted">{{ pub.descripcion }}</p>
 
         <form action="{{ url_for('carrito_agregar', pub_id=pub.id) }}" method="get">
-          <button type="submit" class="btn btn-primary">🛒 {{ t("Agregar al carrito") }}</button>
+          <button type="submit" class="btn btn-primary w-100">🛒 {{ t("Agregar al carrito") }}</button>
         </form>
       </div>
+    </div>
     {% else %}
-      <p>{{ t("No hay publicaciones visibles para tu rol") }}</p>
+    <p class="text-muted">{{ t("No hay publicaciones visibles para tu rol") }}</p>
     {% endfor %}
   </div>
 
-  <div class="dashboard-actions">
-    <a href="{{ url_for('publicar') }}" class="btn btn-primary">➕ {{ t("Agregar ítem") }}</a>
-    <!-- La ruta mis_publicaciones no existe, se deja comentada -->
+  <div class="mt-4 d-flex flex-wrap gap-2">
+    <a href="{{ url_for('publicar') }}" class="btn btn-success">➕ {{ t("Agregar ítem") }}</a>
     <!-- <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a> -->
-    <form action="{{ url_for('restablecer_ocultos') }}" method="post" style="display:inline;">
-      <button type="submit" class="btn btn-light">🔁 {{ t("Restaurar ocultos") }}</button>
+    <form action="{{ url_for('restablecer_ocultos') }}" method="post">
+      <button type="submit" class="btn btn-light border">🔁 {{ t("Restaurar ocultos") }}</button>
     </form>
   </div>
 </section>
