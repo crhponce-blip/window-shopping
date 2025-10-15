@@ -392,3 +392,16 @@ nav a:hover::after {
     font-size: 2.2rem;
   }
 }
+/* --- Fix: separa el contenido de la navbar --- */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+}
+main {
+  /* ajusta si tu navbar es más alta */
+  padding-top: 80px;
+}
+.hero {
+  margin-top: 10px; /* extra por si tienes imagen de fondo */
+}
