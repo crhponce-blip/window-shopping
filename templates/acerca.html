@@ -1,31 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="about-container fade-in">
-  <h2 class="title-gradient">{{ t("Acerca de Window Shopping", "About Window Shopping", "關於 Window Shopping") }}</h2>
+<section class="fade-in py-5">
+  <div class="container col-lg-8">
+    <div class="glass-card p-4 shadow-sm">
+      <h2 class="title-gradient text-center mb-4">
+        {{ t("Acerca de Window Shopping", "About Window Shopping", "關於 Window Shopping") }}
+      </h2>
 
-  <div class="glass-card">
-    <p>{{ t(
-      "Window Shopping es una plataforma desarrollada por Christopher Ponce que conecta a productores, exportadores y compradores internacionales, permitiendo publicar, ofertar y gestionar servicios dentro del comercio exterior chileno.",
-      "Window Shopping is a platform developed by Christopher Ponce that connects producers, exporters, and international buyers, allowing posting, offering, and managing services within Chilean foreign trade.",
-      "Window Shopping 是由 Christopher Ponce 開發的平台，用於連接生產者、出口商和國際買家，實現智利對外貿易中的產品與服務交流。"
-    ) }}</p>
+      <p class="mb-4">
+        {{ t(
+          "Window Shopping es una plataforma desarrollada por Christopher Ponce que conecta a productores, exportadores y compradores internacionales, permitiendo publicar, ofertar y gestionar servicios dentro del comercio exterior chileno.",
+          "Window Shopping is a platform developed by Christopher Ponce that connects producers, exporters, and international buyers, allowing posting, offering, and managing services within Chilean foreign trade.",
+          "Window Shopping 是由 Christopher Ponce 開發的平台，用於連接生產者、出口商和國際買家，實現智利對外貿易中的產品與服務交流。"
+        ) }}
+      </p>
 
-    <h3>🌎 {{ t("Objetivos", "Objectives", "目標") }}</h3>
-    <ul>
-      <li>{{ t("Facilitar la conexión entre empresas nacionales y extranjeras.", "Facilitate connection between national and foreign companies.", "促進國內外企業之間的聯繫。") }}</li>
-      <li>{{ t("Promover la transparencia y eficiencia en la oferta y demanda de productos chilenos.", "Promote transparency and efficiency in the supply and demand of Chilean products.", "促進智利產品供需的透明與效率。") }}</li>
-      <li>{{ t("Incorporar servicios logísticos y aduaneros en un solo entorno digital.", "Integrate logistics and customs services into one digital ecosystem.", "將物流與報關服務整合於同一數位環境。") }}</li>
-    </ul>
+      <h4 class="mt-4">🌎 {{ t("Objetivos", "Objectives", "目標") }}</h4>
+      <ul class="list-group list-group-flush mb-4">
+        <li class="list-group-item">{{ t("Facilitar la conexión entre empresas nacionales y extranjeras.", "Facilitate connection between national and foreign companies.", "促進國內外企業之間的聯繫。") }}</li>
+        <li class="list-group-item">{{ t("Promover la transparencia y eficiencia en la oferta y demanda de productos chilenos.", "Promote transparency and efficiency in the supply and demand of Chilean products.", "促進智利產品供需的透明與效率。") }}</li>
+        <li class="list-group-item">{{ t("Incorporar servicios logísticos y aduaneros en un solo entorno digital.", "Integrate logistics and customs services into one digital ecosystem.", "將物流與報關服務整合於同一數位環境。") }}</li>
+      </ul>
 
-    <h3>💡 {{ t("Tecnologías utilizadas", "Technologies Used", "使用技術") }}</h3>
-    <p>Flask (Python) • HTML • CSS • Jinja • SQLite • Render Deployment</p>
+      <h4 class="mt-4">💡 {{ t("Tecnologías utilizadas", "Technologies Used", "使用技術") }}</h4>
+      <p class="mb-4">Flask (Python) • HTML • CSS • Jinja • SQLite • Render Deployment</p>
 
-    <h3>📞 {{ t("Contacto", "Contact", "聯絡方式") }}</h3>
-    <p>Email: <a href="mailto:admin@ws.com">admin@ws.com</a></p>
-  </div>
+      <h4 class="mt-4">📞 {{ t("Contacto", "Contact", "聯絡方式") }}</h4>
+      <p>Email: <a href="mailto:admin@ws.com">admin@ws.com</a></p>
 
-  <div class="center">
-    <a href="{{ url_for('home') }}" class="btn btn-primary">← {{ t("Volver al inicio", "Back to Home", "返回首頁") }}</a>
+      <div class="text-center mt-4">
+        <a href="{{ url_for('home') }}" class="btn btn-primary">
+          ← {{ t("Volver al inicio", "Back to Home", "返回首頁") }}
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}
