@@ -1,40 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="form-container fade-in">
-  <h2 class="title-gradient">{{ t("Registro de Usuario") }}</h2>
+<section class="fade-in py-5">
+  <div class="container col-md-6 glass-card p-4 shadow-sm">
+    <h2 class="title-gradient text-center mb-4">{{ t("Registro de Usuario") }}</h2>
 
-  <form method="POST" enctype="multipart/form-data">
-    <label>{{ t("Correo electrónico", "Email") }}</label>
-    <input type="email" name="email" placeholder="usuario@ejemplo.com" required>
+    <form method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label">{{ t("Correo electrónico", "Email") }}</label>
+        <input type="email" name="email" class="form-control" placeholder="usuario@ejemplo.com" required>
+      </div>
 
-    <label>{{ t("Contraseña", "Password") }}</label>
-    <input type="password" name="password" required>
+      <div class="mb-3">
+        <label class="form-label">{{ t("Contraseña", "Password") }}</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
 
-    <label>{{ t("Empresa / Organización") }}</label>
-    <input type="text" name="empresa" placeholder="Nombre de empresa" required>
+      <div class="mb-3">
+        <label class="form-label">{{ t("Empresa / Organización") }}</label>
+        <input type="text" name="empresa" class="form-control" placeholder="Nombre de empresa" required>
+      </div>
 
-    <label>{{ t("Rol") }}</label>
-    <select name="rol" required>
-      {% for r in roles %}
-        <option value="{{ r }}">{{ r }}</option>
-      {% endfor %}
-    </select>
+      <div class="mb-3">
+        <label class="form-label">{{ t("Rol") }}</label>
+        <select name="rol" class="form-select" required>
+          {% for r in roles %}
+          <option value="{{ r }}">{{ r }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-    <label>{{ t("País (Código ISO de 2 letras)") }}</label>
-    <input type="text" name="pais" maxlength="2" placeholder="CL" required>
+      <div class="mb-3">
+        <label class="form-label">{{ t("País (Código ISO de 2 letras)") }}</label>
+        <input type="text" name="pais" maxlength="2" class="form-control" placeholder="CL" required>
+      </div>
 
-    <label>{{ t("Dirección", "Address") }}</label>
-    <input type="text" name="direccion" placeholder="{{ t('Ej: Santiago, CL') }}" required>
+      <div class="mb-3">
+        <label class="form-label">{{ t("Dirección", "Address") }}</label>
+        <input type="text" name="direccion" class="form-control" placeholder="{{ t('Ej: Santiago, CL') }}" required>
+      </div>
 
-    <label>{{ t("Teléfono", "Phone") }}</label>
-    <input type="text" name="telefono" placeholder="+56 9 XXXX XXXX" required>
+      <div class="mb-3">
+        <label class="form-label">{{ t("Teléfono", "Phone") }}</label>
+        <input type="text" name="telefono" class="form-control" placeholder="+56 9 XXXX XXXX" required>
+      </div>
 
-    <label>{{ t("Subir RUT o documento") }}</label>
-    <input type="file" name="rut_doc" accept=".pdf,.jpg,.jpeg,.png">
+      <div class="mb-3">
+        <label class="form-label">{{ t("Subir RUT o documento") }}</label>
+        <input type="file" name="rut_doc" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+      </div>
 
-    <button type="submit" class="btn btn-primary">{{ t("Registrar") }}</button>
-  </form>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">{{ t("Registrar") }}</button>
+      </div>
+    </form>
 
-  <p><a href="{{ url_for('login') }}">{{ t("¿Ya tienes cuenta? Inicia sesión aquí") }}</a></p>
+    <p class="mt-3 text-center">
+      <a href="{{ url_for('login') }}">{{ t("¿Ya tienes cuenta? Inicia sesión aquí") }}</a>
+    </p>
+  </div>
 </section>
 {% endblock %}
