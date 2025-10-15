@@ -1,35 +1,55 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="form-container fade-in">
-  <h2 class="title-gradient">{{ t("Nueva Publicación") }}</h2>
+<section class="fade-in py-5">
+  <div class="container col-md-6 glass-card p-4 shadow-sm">
+    <h2 class="title-gradient text-center mb-4">{{ t("Nueva Publicación") }}</h2>
 
-  <form method="POST">
-    <label>{{ t("Tipo de Publicación") }}</label>
-    <select name="tipo_pub" required>
-      <option value="oferta">{{ t("Oferta") }}</option>
-      <option value="demanda">{{ t("Demanda") }}</option>
-      <option value="servicio">{{ t("Servicio") }}</option>
-    </select>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">{{ t("Tipo de Publicación") }}</label>
+        <select name="tipo_pub" class="form-select" required>
+          <option value="oferta">{{ t("Oferta") }}</option>
+          <option value="demanda">{{ t("Demanda") }}</option>
+          <option value="servicio">{{ t("Servicio") }}</option>
+        </select>
+      </div>
 
-    <label>{{ t("Subtipo") }}</label>
-    <select name="subtipo" required>
-      <option value="compra">{{ t("Compra") }}</option>
-      <option value="venta">{{ t("Venta") }}</option>
-      <option value="servicio">{{ t("Servicio") }}</option>
-    </select>
+      <div class="mb-3">
+        <label class="form-label">{{ t("Subtipo") }}</label>
+        <select name="subtipo" class="form-select" required>
+          <option value="compra">{{ t("Compra") }}</option>
+          <option value="venta">{{ t("Venta") }}</option>
+          <option value="servicio">{{ t("Servicio") }}</option>
+        </select>
+      </div>
 
-    <label>{{ t("Producto o Servicio") }}</label>
-    <input type="text" name="producto" placeholder="{{ t('Ej: Cereza Lapins / Embalaje flowpack') }}" required>
+      <div class="mb-3">
+        <label class="form-label">{{ t("Producto o Servicio") }}</label>
+        <input type="text" name="producto" class="form-control"
+               placeholder="{{ t('Ej: Cereza Lapins / Embalaje flowpack') }}" required>
+      </div>
 
-    <label>{{ t("Descripción Detallada") }}</label>
-    <textarea name="descripcion" placeholder="{{ t('Describe las condiciones, variedades o características...') }}" required></textarea>
+      <div class="mb-3">
+        <label class="form-label">{{ t("Descripción Detallada") }}</label>
+        <textarea name="descripcion" class="form-control" rows="4"
+                  placeholder="{{ t('Describe las condiciones, variedades o características...') }}" required></textarea>
+      </div>
 
-    <label>{{ t("Precio Referencial") }}</label>
-    <input type="text" name="precio" placeholder="USD 0.00 / unidad">
+      <div class="mb-3">
+        <label class="form-label">{{ t("Precio Referencial") }}</label>
+        <input type="text" name="precio" class="form-control" placeholder="USD 0.00 / unidad">
+      </div>
 
-    <button type="submit" class="btn btn-primary">{{ t("Publicar") }}</button>
-  </form>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">{{ t("Publicar") }}</button>
+      </div>
+    </form>
 
-  <a href="{{ url_for('dashboard_ext') }}" class="btn btn-light">← {{ t("Volver al Panel") }}</a>
+    <div class="text-center mt-3">
+      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-light border">
+        ← {{ t("Volver al Panel") }}
+      </a>
+    </div>
+  </div>
 </section>
 {% endblock %}
