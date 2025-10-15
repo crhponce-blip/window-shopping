@@ -3,13 +3,24 @@ services:
     name: ws-flask
     env: python
     plan: free
-    autoDeploy: true
+
+    # ✅ Define la versión exacta de Python que Render detectó (3.12.3)
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: SECRET_KEY
+        value: super_segura_123456
+
+    # ✅ Instala dependencias y usa el nuevo requirements.txt
     buildCommand: |
       pip install --upgrade pip
       pip install -r requirements.txt
+
+    # ✅ Arranque del servidor
     startCommand: gunicorn app:app
-    envVars:
-      - key: SECRET_KEY
-        value: super_segura_123456
-      - key: PYTHON_VERSION
-        value: 3.12.3
+
+    # ✅ Auto-deploy cuando hay push a main
+    autoDeploy: true
+
+    # ✅ Mejora de tiempo de respuesta
+    healthCheckPath: "/"
