@@ -14,25 +14,27 @@
     </div>
 
     <div class="row g-4 mt-4">
-      {% for pub in publicaciones %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card glass-card h-100 shadow-sm border-0">
-          <div class="card-body">
-            <h5 class="card-title">{{ pub.producto }}</h5>
-            <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
-            <p><strong>{{ t("Tipo de servicio") }}:</strong> {{ pub.tipo }}</p>
-            <p class="small text-muted">{{ pub.descripcion }}</p>
-          </div>
-          <div class="card-footer bg-transparent border-0">
-            <a href="{{ url_for('carrito_agregar', pub_id=pub.id) }}" class="btn btn-primary w-100">
-              ⚡ {{ t("Solicitar servicio") }}
-            </a>
+      {% if publicaciones %}
+        {% for pub in publicaciones %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card glass-card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">{{ pub.producto }}</h5>
+              <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
+              <p><strong>{{ t("Tipo de servicio") }}:</strong> {{ pub.tipo }}</p>
+              <p class="small text-muted">{{ pub.descripcion }}</p>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+              <a href="{{ url_for('carrito_agregar', pub_id=pub.id) }}" class="btn btn-primary w-100">
+                ⚡ {{ t("Solicitar servicio") }}
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+        {% endfor %}
       {% else %}
-      <p class="text-center text-muted">{{ t("No hay servicios disponibles actualmente") }}</p>
-      {% endfor %}
+        <p class="text-center text-muted">{{ t("No hay servicios disponibles actualmente.") }}</p>
+      {% endif %}
     </div>
   </div>
 </section>
