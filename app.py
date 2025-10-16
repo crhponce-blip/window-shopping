@@ -23,14 +23,12 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 app.permanent_session_lifetime = timedelta(days=14)
 
-# Directorios base
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 UPLOAD_FOLDER = os.path.join(STATIC_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Configuración de subida de archivos
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg"}
 
@@ -49,7 +47,6 @@ def t(es, en="", zh=""):
         return zh
     return es
 
-# Exponer función t() a Jinja
 app.jinja_env.globals.update(t=t)
 
 # =========================================================
@@ -268,6 +265,75 @@ def hide_item(item_id: str) -> None:
 
 def unhide_all() -> None:
     session["hidden_items"] = []
+
+# =========================================================
+# ➕ NUEVO — MATRICES DE PERMISOS Y PUBLICACIÓN
+# =========================================================
+PERMISOS = {
+    "Productor(planta)": {
+        "ver_demanda_fruta": ["Packing", "Frigorífico", "Exportador"],
+        "comprar_servicios": ["Transporte", "Packing", "Frigorífico"],
+        "vender_fruta": ["Packing", "Frigorífico", "Exportador"],
+    },
+    "Packing": {
+        "comprar_fruta": ["Productor(planta)", "Frigorífico"],
+        "vender_fruta": ["Frigorífico", "Exportador"],
+        "comprar_servicios": ["Frigorífico", "Transporte"],
+        "vender_servicios": ["Productor(planta)", "Frigorífico", "Exportador"],
+    },
+    "Frigorífico": {
+        "comprar_fruta": ["Productor(planta)", "Packing"],
+        "vender_fruta": ["Packing", "Exportador"],
+        "comprar_servicios": ["Packing", "Transporte"],
+        "vender_servicios": ["Productor(planta)", "Packing", "Exportador"],
+    },
+    "Exportador": {
+        "comprar_fruta": ["Productor(planta)", "Packing", "Frigorífico"],
+        "vender_fruta": ["Exportador", "Cliente extranjero"],
+        "comprar_servicios": ["Transporte", "Agencia de aduana", "Packing", "Frigorífico", "Extraportuario"],
+    },
+    "Cliente extranjero": {
+        "comprar_fruta": ["Exportador"],
+    },
+    "Agencia de aduana": {
+        "vender_servicios": ["Exportador"],
+    },
+    "Transporte": {
+        "vender_servicios": ["Productor(planta)", "Packing", "Frigorífico", "Exportador"],
+    },
+    "Extraportuario": {
+        "vender_servicios": ["Exportador"],
+    },
+}
+
+def puede_ver_publicacion(viewer_rol: str, pub_rol: str, pub_tipo: str) -> bool:
+    """Evalúa si un rol puede ver una publicación de otro rol."""
+    if viewer_rol not in PERMISOS:
+        return False
+    rules = PERMISOS[viewer_rol]
+    if pub_tipo in ["oferta", "demanda"]:
+        for key in ["comprar_fruta", "vender_fruta", "ver_demanda_fruta"]:
+            if pub_rol in rules.get(key, []):
+                return True
+    if pub_tipo == "servicio":
+        for key in ["comprar_servicios", "vender_servicios"]:
+            if pub_rol in rules.get(key, []):
+                return True
+    return False
+
+RESTRICCIONES_PUBLICAR = {
+    "Productor(planta)": ["oferta"],
+    "Packing": ["oferta", "demanda", "servicio"],
+    "Frigorífico": ["oferta", "demanda", "servicio"],
+    "Exportador": ["oferta", "demanda", "servicio"],
+    "Cliente extranjero": [],
+    "Agencia de aduana": ["servicio"],
+    "Transporte": ["servicio"],
+    "Extraportuario": ["servicio"],
+}
+
+def puede_publicar(rol: str, tipo_pub: str) -> bool:
+    return tipo_pub in RESTRICCIONES_PUBLICAR.get(rol, [])
 # =========================================================
 # 🌐 WINDOW SHOPPING — Flask App (v3.4 Final, Parte 2/4)
 # Autenticación, Registro, Idiomas, Errores
@@ -289,6 +355,7 @@ def login():
             session["user"] = email
             flash(t("Inicio de sesión correcto", "Login successful", "登入成功"), "success")
             return redirect(url_for("dashboard_ext"))
+
         flash(t("Credenciales inválidas", "Invalid credentials", "無效的登入資料"), "error")
 
     return render_template("login.html", titulo=t("Iniciar Sesión", "Login", "登入"))
@@ -308,7 +375,11 @@ def logout():
 @app.route("/register_router")
 def register_router():
     """Pantalla que muestra tipos de usuario disponibles."""
-    return render_template("register_router.html", roles=ROLES_POR_TIPO, titulo=t("Registro", "Register", "註冊"))
+    return render_template(
+        "register_router.html",
+        roles=ROLES_POR_TIPO,
+        titulo=t("Registro", "Register", "註冊")
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -331,6 +402,12 @@ def register():
         if tipo not in TIPOS_VALIDOS:
             tipo = "compraventa"
 
+        # ➕ NUEVO — Validación de rol según tipo
+        roles_validos = ROLES_POR_TIPO.get(tipo, [])
+        if rol not in roles_validos:
+            flash(t("Rol no permitido para este tipo de usuario.", "Role not allowed for this user type.", "角色與類型不符"), "error")
+            return redirect(url_for("register"))
+
         if get_user(email):
             flash(t("El usuario ya existe.", "User already exists.", "使用者已存在"), "warning")
             return redirect(url_for("login"))
@@ -350,7 +427,12 @@ def register():
         flash(t("Usuario registrado correctamente.", "User registered successfully.", "使用者已註冊"), "success")
         return redirect(url_for("login"))
 
-    return render_template("register.html", tipos=TIPOS_VALIDOS, roles=ROLES_POR_TIPO, titulo=t("Registro", "Register", "註冊"))
+    return render_template(
+        "register.html",
+        tipos=TIPOS_VALIDOS,
+        roles=ROLES_POR_TIPO,
+        titulo=t("Registro", "Register", "註冊")
+    )
 
 
 # =========================================================
@@ -378,7 +460,7 @@ def set_lang(lang):
 
 @app.route("/set_lang/<lang>")
 def set_lang_get(lang):
-    """Alias para cambiar idioma con /set_lang/<lang> (compatibilidad)"""
+    """Alias para cambiar idioma con /set_lang/<lang> (compatibilidad)."""
     if lang in ["es", "en", "zh"]:
         session["lang"] = lang
         flash(t("Idioma actualizado correctamente", "Language updated", "語言已更新"), "info")
@@ -421,17 +503,6 @@ with app.app_context():
 # =========================================================
 PUBLICACIONES: List[Dict[str, Any]] = []
 
-def publica_es_visible_para_rol(pub: Dict[str, Any], rol: str) -> bool:
-    """Define visibilidad según el rol del usuario."""
-    if rol == "Cliente extranjero":
-        return pub["tipo"] in ["oferta", "servicio"]
-    elif rol in ["Productor(planta)", "Packing", "Frigorífico"]:
-        return pub["tipo"] in ["demanda", "servicio"]
-    elif rol == "Exportador":
-        return pub["tipo"] in ["oferta", "servicio"]
-    return True
-
-
 @app.route("/dashboard_ext", methods=["GET", "POST"])
 def dashboard_ext():
     """Panel extendido del usuario con publicaciones y filtros."""
@@ -452,7 +523,8 @@ def dashboard_ext():
 
     visibles = [
         p for p in PUBLICACIONES
-        if p["tipo"] == filtro and publica_es_visible_para_rol(p, rol)
+        if p["tipo"] == filtro
+        and puede_ver_publicacion(rol, p["rol"], p["tipo"])  # ➕ NUEVO filtro por permisos
         and p["id"] not in get_hidden_items()
     ]
     visibles.sort(key=lambda p: p.get("fecha", ""), reverse=True)
@@ -482,7 +554,7 @@ def dashboard_filtro(tipo):
 
 # =========================================================
 # 🧾 RUTA TEMPORAL — MIS PUBLICACIONES
-# (para evitar BuildError en plantillas)
+# (para compatibilidad con botones en dashboard/perfil)
 # =========================================================
 @app.route("/mis_publicaciones")
 def mis_publicaciones():
@@ -577,6 +649,11 @@ def publicar():
             flash(t("Completa todos los campos requeridos", "Complete all required fields", "請填寫所有必填欄位"), "error")
             return redirect(url_for("publicar"))
 
+        # ➕ NUEVO — Validación de permisos para publicar
+        if not puede_publicar(user["rol"], tipo_pub):
+            flash(t("No tienes permisos para crear este tipo de publicación.", "You are not allowed to post this type.", "無權限發布此類別"), "error")
+            return redirect(url_for("dashboard_ext"))
+
         nueva_pub = {
             "id": f"pub_{uuid.uuid4().hex[:8]}",
             "usuario": user["email"],
@@ -640,6 +717,19 @@ def _session_user_dict():
 # =========================================================
 MENSAJES: List[Dict[str, Any]] = []
 
+def puede_enviar_mensaje(origen: str, destino: str) -> bool:
+    """Permite un mensaje por ítem cada 3 días entre mismos usuarios."""
+    now = datetime.now()
+    recientes = [
+        m for m in MENSAJES
+        if m["origen"] == origen and m["destino"] == destino
+    ]
+    if not recientes:
+        return True
+    ultima_fecha = datetime.strptime(recientes[-1]["fecha"], "%Y-%m-%d %H:%M")
+    return (now - ultima_fecha).days >= 3
+
+
 @app.route("/mensajes", methods=["GET", "POST"])
 def mensajes():
     """Sistema simple de mensajería interna."""
@@ -658,6 +748,15 @@ def mensajes():
 
         if destino not in USERS:
             flash(t("El destinatario no existe.", "Recipient not found.", "找不到收件人"), "error")
+            return redirect(url_for("mensajes"))
+
+        # ➕ NUEVO — Límite de envío
+        if not puede_enviar_mensaje(user["email"], destino):
+            flash(t(
+                "Ya enviaste un mensaje a este usuario hace menos de 3 días.",
+                "You already messaged this user less than 3 days ago.",
+                "3天內無法再次發送訊息"
+            ), "warning")
             return redirect(url_for("mensajes"))
 
         MENSAJES.append({
@@ -732,12 +831,35 @@ def _armar_cliente_desde_users(username: str, data: Dict[str, Any]) -> Dict[str,
         "telefono": data.get("telefono", ""),
     }
 
-
 @app.route("/clientes")
 def clientes():
-    """Lista todas las empresas (usuarios visibles)."""
-    data = [_armar_cliente_desde_users(u, info) for u, info in USERS.items()]
-    return render_template("clientes.html", clientes=data, titulo=t("Empresas", "Companies", "公司"))
+    """Lista todas las empresas visibles según el rol del usuario."""
+    user = _session_user_dict()
+    if not user:
+        flash(t("Debes iniciar sesión para ver empresas.", "You must log in to view companies.", "您必須登入以查看公司"), "error")
+        return redirect(url_for("login"))
+
+    visibles = []
+    for username, info in USERS.items():
+        if info["email"] == user["email"]:
+            continue  # no mostrarte a ti mismo
+        if puede_ver_publicacion(user["rol"], info["rol"], "oferta") or puede_ver_publicacion(user["rol"], info["rol"], "servicio"):
+            visibles.append(_armar_cliente_desde_users(username, info))
+
+    # Paginación básica: 10 por vista
+    pagina = int(request.args.get("page", 1))
+    inicio = (pagina - 1) * 10
+    fin = inicio + 10
+    total_paginas = (len(visibles) + 9) // 10
+    visibles_pagina = visibles[inicio:fin]
+
+    return render_template(
+        "clientes.html",
+        clientes=visibles_pagina,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        titulo=t("Empresas", "Companies", "公司")
+    )
 
 
 @app.route("/clientes/<username>")
@@ -746,7 +868,11 @@ def cliente_detalle(username):
     if username not in USERS:
         abort(404)
     c = _armar_cliente_desde_users(username, USERS[username])
-    return render_template("cliente_detalle.html", c=c, titulo=c["empresa"])
+    puede_mensaje = False
+    user = _session_user_dict()
+    if user and puede_enviar_mensaje(user["email"], c["email"]):
+        puede_mensaje = True
+    return render_template("cliente_detalle.html", c=c, puede_mensaje=puede_mensaje, titulo=c["empresa"])
 
 
 # =========================================================
