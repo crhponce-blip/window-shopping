@@ -1,8 +1,8 @@
 /* =========================================================
-   🌐 WINDOW SHOPPING STYLE v3.7 — "NeonGlass Bootstrap Harmony"
+   🌐 WINDOW SHOPPING STYLE v3.8 — "NeonGlass Bootstrap Harmony+"
    Autor: Christopher Ponce & GPT-5
-   Basado en v3.6 con compatibilidad Bootstrap 5.3
-   ========================================================= */
+   Basado en v3.7 con ajustes visuales, responsivos y contrastes
+   ========================================================== */
 
 /* --- RESET & BASE -------------------------------------- */
 * {
@@ -34,13 +34,18 @@ input, select, textarea {
   width: 100%;
   padding: 10px;
   border-radius: 10px;
-  border: none;
-  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.08);
   color: #e2e8f0;
   outline: none;
   backdrop-filter: blur(10px);
   font-size: 1rem;
   margin-bottom: 12px;
+  transition: all 0.25s ease;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 10px rgba(59,130,246,0.4);
 }
 input::placeholder, textarea::placeholder { color: #94a3b8; }
 
@@ -55,8 +60,13 @@ input::placeholder, textarea::placeholder { color: #94a3b8; }
   top: 0; left: 0; right: 0;
   z-index: 1030;
   backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.navbar:hover {
+  background: rgba(30, 41, 59, 0.75);
+  box-shadow: 0 5px 35px rgba(59, 130, 246, 0.35);
 }
 .logo {
   font-size: 1.8rem;
@@ -95,7 +105,10 @@ nav a:hover::after { width: 100%; }
 }
 
 /* --- MAIN SPACING FIX ---------------------------------- */
-main { padding-top: 100px; }
+main {
+  padding-top: 100px;
+  flex: 1 0 auto;
+}
 
 /* --- HERO ---------------------------------------------- */
 .hero {
@@ -112,7 +125,11 @@ main { padding-top: 100px; }
   -webkit-text-fill-color: transparent;
   font-weight: 700;
 }
-.hero p { color: #cbd5e1; font-size: 1.15rem; margin-top: 5px; }
+.hero p {
+  color: #cbd5e1;
+  font-size: 1.15rem;
+  margin-top: 5px;
+}
 .hero-buttons {
   margin-top: 45px;
   display: flex;
@@ -133,20 +150,52 @@ main { padding-top: 100px; }
 .btn-primary {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: #fff;
-  box-shadow: 0 0 10px rgba(59,130,246,0.5);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 .btn-primary:hover {
-  transform: scale(1.06);
-  box-shadow: 0 0 30px rgba(96,165,250,0.7);
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(96, 165, 250, 0.7);
 }
 .btn-secondary {
   background: linear-gradient(135deg, #0ea5e9, #38bdf8);
   color: #fff;
 }
-.btn-light { background: rgba(255,255,255,0.15); color: #e0f2fe; }
-.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
-.btn-warning { background: linear-gradient(135deg, #facc15, #eab308); color: #111; }
-.btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+.btn-outline-primary {
+  color: #93c5fd !important;
+  border: 1px solid #3b82f6 !important;
+}
+.btn-outline-primary:hover {
+  background: #3b82f6;
+  color: #fff !important;
+  box-shadow: 0 0 12px rgba(59,130,246,0.4);
+}
+.btn-light {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e0f2fe;
+}
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+}
+.btn-warning {
+  background: linear-gradient(135deg, #facc15, #eab308);
+  color: #111;
+}
+.btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+/* --- TITLES -------------------------------------------- */
+.title-gradient {
+  font-size: 1.8rem;
+  background: linear-gradient(90deg, #60a5fa, #a5b4fc, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 25px;
+}
 
 /* --- GLASS CARDS --------------------------------------- */
 .glass-card {
@@ -163,7 +212,34 @@ main { padding-top: 100px; }
 }
 .glass-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 50px rgba(59,130,246,0.35);
+  box-shadow: 0 8px 50px rgba(59, 130, 246, 0.35);
+}
+
+/* --- FLASH MESSAGES ------------------------------------ */
+.flash-container {
+  margin: 10px auto;
+  width: 90%;
+  max-width: 900px;
+}
+.flash {
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: 500;
+  animation: fade-in 0.6s ease;
+}
+.flash.info { background: rgba(96,165,250,0.25); }
+.flash.success { background: rgba(34,197,94,0.25); }
+.flash.error { background: rgba(239,68,68,0.25); }
+
+/* --- TABLES -------------------------------------------- */
+.table {
+  color: #f1f5f9;
+  border-color: rgba(255,255,255,0.15);
+}
+.table-hover tbody tr:hover {
+  background: rgba(96,165,250,0.15);
 }
 
 /* --- FOOTER -------------------------------------------- */
@@ -174,11 +250,18 @@ main { padding-top: 100px; }
   font-size: 0.9rem;
   border-top: 1px solid rgba(255,255,255,0.1);
   margin-top: auto;
+  backdrop-filter: blur(8px);
 }
 
 /* --- ANIMATIONS ---------------------------------------- */
-@keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes glow-pulse { 0% { text-shadow: 0 0 10px rgba(59,130,246,0.4); } 100% { text-shadow: 0 0 25px rgba(96,165,250,0.8); } }
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes glow-pulse {
+  0% { text-shadow: 0 0 10px rgba(59,130,246,0.4); }
+  100% { text-shadow: 0 0 25px rgba(96,165,250,0.8); }
+}
 
 /* --- SCROLLBAR ----------------------------------------- */
 ::-webkit-scrollbar { width: 8px; }
@@ -186,7 +269,9 @@ main { padding-top: 100px; }
   background: linear-gradient(180deg, #60a5fa, #3b82f6);
   border-radius: 10px;
 }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.25); }
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.25);
+}
 
 /* --- MEDIA QUERIES ------------------------------------- */
 @media (max-width: 768px) {
@@ -194,4 +279,5 @@ main { padding-top: 100px; }
   .glass-card { padding: 18px; }
   main { padding-top: 120px; }
   .hero h1 { font-size: 2.2rem; }
+  .title-gradient { font-size: 1.4rem; }
 }
