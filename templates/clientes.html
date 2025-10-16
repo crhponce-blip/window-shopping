@@ -1,74 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-
 <main class="fade-in py-5">
   <div class="container">
-    <h2 class="title-gradient text-center mb-5">{{ t("Empresas Registradas", "Registered Companies", "已註冊公司") }}</h2>
+    <h2 class="title-gradient text-center mb-5">{{ t("Empresas Registradas") }}</h2>
 
-    <!-- 🔍 Filtro de tipo -->
+    <!-- 🔍 Filtro -->
     <form method="get" action="{{ url_for('clientes') }}" class="text-center mb-4">
       <div class="d-inline-flex flex-wrap gap-2 justify-content-center">
         <select name="filtro" class="form-select bg-dark text-light border-0 shadow-sm w-auto">
-          <option value="todos" {% if filtro_tipo == 'todos' %}selected{% endif %}>{{ t("Todos", "All", "全部") }}</option>
-          <option value="oferta" {% if filtro_tipo == 'oferta' %}selected{% endif %}>{{ t("Ofertas", "Offers", "供應") }}</option>
-          <option value="demanda" {% if filtro_tipo == 'demanda' %}selected{% endif %}>{{ t("Demandas", "Demands", "需求") }}</option>
-          <option value="servicio" {% if filtro_tipo == 'servicio' %}selected{% endif %}>{{ t("Servicios", "Services", "服務") }}</option>
+          <option value="todos" {% if filtro_tipo == 'todos' %}selected{% endif %}>{{ t("Todos") }}</option>
+          <option value="oferta" {% if filtro_tipo == 'oferta' %}selected{% endif %}>{{ t("Ofertas") }}</option>
+          <option value="demanda" {% if filtro_tipo == 'demanda' %}selected{% endif %}>{{ t("Demandas") }}</option>
+          <option value="servicio" {% if filtro_tipo == 'servicio' %}selected{% endif %}>{{ t("Servicios") }}</option>
         </select>
-        <button type="submit" class="btn btn-primary shadow-sm">{{ t("Filtrar", "Filter", "篩選") }}</button>
+        <button type="submit" class="btn btn-primary shadow-sm">{{ t("Filtrar") }}</button>
       </div>
     </form>
 
-    <!-- 📋 Listado horizontal de empresas -->
     {% if clientes %}
-    <div class="list-group glass-card p-0">
-      {% for c in clientes %}
-      <div class="list-group-item bg-transparent text-light d-flex justify-content-between align-items-center flex-wrap py-3 border-bottom border-secondary">
-        <div class="flex-grow-1 px-2">
-          <h5 class="mb-1 fw-bold">{{ c.empresa }}</h5>
-          <p class="mb-0 small text-info">
-            <strong>{{ t("Rol", "Role", "角色") }}:</strong> {{ c.rol }} |
-            <strong>{{ t("Tipo", "Type", "類型") }}:</strong> {{ c.tipo }}
-          </p>
-          {% if c.descripcion %}
-          <p class="small mt-1 text-muted">{{ c.descripcion }}</p>
-          {% endif %}
-        </div>
+      <div class="list-group glass-card p-0">
+        {% for c in clientes %}
+        <div class="list-group-item bg-transparent text-light d-flex justify-content-between align-items-center flex-wrap py-3 border-bottom border-secondary">
+          <div class="flex-grow-1 px-2">
+            <h5 class="mb-1 fw-bold">{{ c.empresa }}</h5>
+            <p class="mb-0 small text-info">
+              <strong>{{ t("Rol") }}:</strong> {{ c.rol }} |
+              <strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}
+            </p>
+            {% if c.descripcion %}
+            <p class="small mt-1 text-muted">{{ c.descripcion }}</p>
+            {% endif %}
+          </div>
 
-        <div class="d-flex flex-column flex-md-row gap-2 mt-2 mt-md-0">
-          <a href="{{ url_for('cliente_detalle', username=c.username) }}"
-             class="btn btn-outline-light btn-sm shadow-sm">
-             🔍 {{ t("Ver Detalle", "View Details", "查看詳情") }}
-          </a>
-          <form method="post" action="{{ url_for('ocultar_publicacion', pub_id=c.username) }}">
-            <button type="submit" class="btn btn-outline-danger btn-sm shadow-sm">
-              ❌ {{ t("Eliminar de Vista", "Hide", "隱藏") }}
-            </button>
-          </form>
+          <div class="d-flex flex-column flex-md-row gap-2 mt-2 mt-md-0">
+            <a href="{{ url_for('cliente_detalle', username=c.username) }}"
+               class="btn btn-outline-light btn-sm shadow-sm">🔍 {{ t("Ver Detalle") }}</a>
+            <form method="post" action="{{ url_for('ocultar_publicacion', pub_id=c.username) }}">
+              <button type="submit" class="btn btn-outline-danger btn-sm shadow-sm">❌ {{ t("Eliminar de Vista") }}</button>
+            </form>
+          </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
-
-    <!-- 🔢 Paginación -->
-    <div class="text-center mt-4">
-      <nav>
-        <ul class="pagination justify-content-center">
-          {% for p in range(1, total_paginas + 1) %}
-          <li class="page-item {% if p == pagina %}active{% endif %}">
-            <a class="page-link bg-dark text-light border-secondary"
-               href="{{ url_for('clientes', page=p, filtro=filtro_tipo) }}">
-              {{ p }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-      </nav>
-    </div>
-
     {% else %}
-    <p class="text-center text-muted mt-4">{{ t("No hay empresas registradas para mostrar.", "No companies available to display.", "目前沒有可顯示的公司。") }}</p>
+      <p class="text-center text-muted mt-4">{{ t("No hay empresas registradas para mostrar.") }}</p>
     {% endif %}
   </div>
 </main>
-
 {% endblock %}
