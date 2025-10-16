@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ session.get('lang', 'es') }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,7 +18,7 @@
 </head>
 
 <body>
-  <!-- 🌍 NAVBAR (versión Bootstrap + NeonGlass) -->
+  <!-- 🌍 NAVBAR (versión Bootstrap + NeonGlass mejorada) -->
   <header class="navbar navbar-expand-lg glass-card py-3 shadow-sm fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand title-gradient fw-bold fs-3" href="{{ url_for('home') }}">WS</a>
@@ -29,21 +29,50 @@
 
       <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-          {% if session.get("user") %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">{{ t("Inicio") }}</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('clientes') }}">{{ t("Empresas") }}</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('carrito') }}">{{ t("Carrito") }}</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('perfil') }}">{{ t("Perfil") }}</a></li>
-            <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('logout') }}">{{ t("Salir") }}</a></li>
-          {% else %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">{{ t("Inicio") }}</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">{{ t("Iniciar sesión") }}</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('register_router') }}">{{ t("Registrarse") }}</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">🏠 {{ t('Inicio') }}</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('clientes') }}">🏢 {{ t('Empresas') }}</a></li>
+
+          {% if session.get('user') %}
+            {% set user = session.get('user') %}
+            {% if user.rol == 'Administrador' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_admin') }}">🧭 {{ t('Panel Admin') }}</a></li>
+            {% elif user.tipo == 'extranjero' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_ext') }}">🌍 {{ t('Panel Cliente') }}</a></li>
+            {% elif user.tipo == 'servicios' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_servicio') }}">⚙️ {{ t('Panel Servicio') }}</a></li>
+            {% elif user.tipo == 'compraventa' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_compra') }}">📦 {{ t('Panel Compraventa') }}</a></li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">📋 {{ t('Panel Principal') }}</a></li>
+            {% endif %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('carrito') }}">🛒 {{ t('Carrito') }}</a></li>
           {% endif %}
         </ul>
 
+        <!-- 🔹 Menú de usuario (dropdown) -->
+        {% if session.get('user') %}
+          <div class="dropdown text-end">
+            <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+              👤 {{ session['user'].get('empresa', 'Usuario') }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+              <li><a class="dropdown-item" href="{{ url_for('perfil') }}">👤 {{ t('Perfil') }}</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('mensajes') }}">💬 {{ t('Mensajes') }}</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('ayuda') }}">💡 {{ t('Ayuda') }}</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('acerca') }}">ℹ️ {{ t('Acerca de') }}</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">🚪 {{ t('Cerrar sesión') }}</a></li>
+            </ul>
+          </div>
+        {% else %}
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">🔑 {{ t('Iniciar sesión') }}</a>
+            <a href="{{ url_for('register_router') }}" class="btn btn-primary btn-sm">📝 {{ t('Registrarse') }}</a>
+          </div>
+        {% endif %}
+
         <!-- 🌐 Selector idioma -->
-        <form class="d-flex align-items-center">
+        <form class="d-flex align-items-center ms-3">
           <select class="form-select form-select-sm w-auto"
                   onchange="window.location.href='/set_lang/' + this.value;">
             <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>🇪🇸 ES</option>
