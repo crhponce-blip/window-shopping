@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container glass-card p-4 shadow-sm">
+  <div class="container glass-card p-4 shadow-lg">
     <h2 class="title-gradient text-center mb-4">🛒 {{ t("Carrito de Compras") }}</h2>
 
     {% if cart and cart|length > 0 %}
       <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
+        <table class="table table-hover align-middle table-borderless">
+          <thead class="table-dark">
             <tr>
               <th>#</th>
               <th>{{ t("Producto / Servicio") }}</th>
@@ -25,7 +25,7 @@
               <td>{{ item.precio }}</td>
               <td>
                 <form action="{{ url_for('carrito_eliminar', index=loop.index0) }}" method="post" class="d-inline">
-                  <button type="submit" class="btn btn-danger btn-sm">🗑️ {{ t("Eliminar") }}</button>
+                  <button type="submit" class="btn btn-danger btn-sm shadow-sm">🗑️ {{ t("Eliminar") }}</button>
                 </form>
               </td>
             </tr>
@@ -34,20 +34,22 @@
         </table>
       </div>
 
-      <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
+      <div class="d-flex justify-content-between mt-4 flex-wrap gap-3">
         <form action="{{ url_for('carrito_vaciar') }}" method="post">
-          <button type="submit" class="btn btn-outline-secondary">🧹 {{ t("Vaciar Carrito") }}</button>
+          <button type="submit" class="btn btn-outline-secondary shadow-sm">🧹 {{ t("Vaciar Carrito") }}</button>
         </form>
 
-        <form action="{{ url_for('dashboard') }}" method="get">
-          <button type="submit" class="btn btn-success">✅ {{ t("Confirmar Pedido") }}</button>
+        <form action="{{ url_for('dashboard_ext') }}" method="get">
+          <button type="submit" class="btn btn-success shadow-sm">✅ {{ t("Confirmar Pedido") }}</button>
         </form>
       </div>
 
     {% else %}
-      <p class="text-center text-muted">{{ t("Tu carrito está vacío.") }}</p>
+      <p class="text-center text-muted mt-4">{{ t("Tu carrito está vacío.") }}</p>
       <div class="text-center mt-3">
-        <a href="{{ url_for('dashboard') }}" class="btn btn-light border">← {{ t("Volver al Panel") }}</a>
+        <a href="{{ url_for('dashboard_ext') }}" class="btn btn-outline-light border shadow-sm">
+          ← {{ t("Volver al Panel") }}
+        </a>
       </div>
     {% endif %}
   </div>
