@@ -8,28 +8,35 @@
       <span class="badge bg-primary">{{ user.rol }}</span>
     </p>
 
+    <div class="text-center mb-4">
+      <a href="{{ url_for('carrito') }}" class="btn btn-success me-2">🛒 {{ t("Ver carrito") }}</a>
+      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light">🏢 {{ t("Explorar empresas") }}</a>
+    </div>
+
     <div class="row g-4 mt-4">
-      {% for pub in publicaciones %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card glass-card h-100 shadow-sm border-0">
-          <div class="card-body">
-            <h5 class="card-title">{{ pub.producto }}</h5>
-            <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
-            <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
-            <p class="small text-muted">{{ pub.descripcion }}</p>
-          </div>
-          <div class="card-footer bg-transparent border-0">
-            <form action="{{ url_for('carrito_agregar', pub_id=pub.id) }}" method="get">
-              <button type="submit" class="btn btn-primary w-100">
-                🛒 {{ t("Agregar al carrito") }}
-              </button>
-            </form>
+      {% if publicaciones %}
+        {% for pub in publicaciones %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card glass-card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">{{ pub.producto }}</h5>
+              <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
+              <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
+              <p class="small text-muted">{{ pub.descripcion }}</p>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+              <form action="{{ url_for('carrito_agregar', pub_id=pub.id) }}" method="get">
+                <button type="submit" class="btn btn-primary w-100">
+                  🛒 {{ t("Agregar al carrito") }}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
+        {% endfor %}
       {% else %}
-      <p class="text-center text-muted">{{ t("No hay ofertas disponibles por ahora") }}</p>
-      {% endfor %}
+        <p class="text-center text-muted">{{ t("No hay ofertas disponibles por ahora.") }}</p>
+      {% endif %}
     </div>
   </div>
 </section>
