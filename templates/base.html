@@ -18,39 +18,51 @@
 </head>
 
 <body>
-  <!-- 🌍 NAVBAR -->
-  <header class="navbar">
-    <div class="logo">WS</div>
-    <nav>
-      {% if session.get("user") %}
-        <a href="{{ url_for('home') }}">{{ t("Inicio") }}</a>
-        <a href="{{ url_for('clientes') }}">{{ t("Empresas") }}</a>
-        <a href="{{ url_for('carrito') }}">{{ t("Carrito") }}</a>
-        <a href="{{ url_for('perfil') }}">{{ t("Perfil") }}</a>
-        <a href="{{ url_for('logout') }}">{{ t("Salir") }}</a>
-      {% else %}
-        <a href="{{ url_for('home') }}">{{ t("Inicio") }}</a>
-        <a href="{{ url_for('login') }}">{{ t("Iniciar sesión") }}</a>
-        <a href="{{ url_for('register_router') }}">{{ t("Registrarse") }}</a>
-      {% endif %}
-    </nav>
+  <!-- 🌍 NAVBAR (versión Bootstrap + NeonGlass) -->
+  <header class="navbar navbar-expand-lg glass-card py-3 shadow-sm fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand title-gradient fw-bold fs-3" href="{{ url_for('home') }}">WS</a>
 
-    <!-- 🌐 Selector de idioma -->
-    <form class="lang-form">
-      <select onchange="window.location.href='/set_lang/' + this.value;">
-        <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>🇪🇸</option>
-        <option value="en" {% if session.get('lang') == 'en' %}selected{% endif %}>🇬🇧</option>
-        <option value="zh" {% if session.get('lang') == 'zh' %}selected{% endif %}>🇨🇳</option>
-      </select>
-    </form>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          {% if session.get("user") %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">{{ t("Inicio") }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('clientes') }}">{{ t("Empresas") }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('carrito') }}">{{ t("Carrito") }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('perfil') }}">{{ t("Perfil") }}</a></li>
+            <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('logout') }}">{{ t("Salir") }}</a></li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">{{ t("Inicio") }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">{{ t("Iniciar sesión") }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('register_router') }}">{{ t("Registrarse") }}</a></li>
+          {% endif %}
+        </ul>
+
+        <!-- 🌐 Selector idioma -->
+        <form class="d-flex align-items-center">
+          <select class="form-select form-select-sm w-auto"
+                  onchange="window.location.href='/set_lang/' + this.value;">
+            <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>🇪🇸 ES</option>
+            <option value="en" {% if session.get('lang') == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+            <option value="zh" {% if session.get('lang') == 'zh' %}selected{% endif %}>🇨🇳 中文</option>
+          </select>
+        </form>
+      </div>
+    </div>
   </header>
 
   <!-- 💡 CONTENIDO PRINCIPAL -->
-  <main>
-    <div class="flash-container">
+  <main class="container-fluid pt-5 mt-5">
+    <div class="flash-container my-3">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
+          <div class="alert alert-{{ 'warning' if category=='error' else category }} fade show text-center shadow-sm">
+            {{ message }}
+          </div>
         {% endfor %}
       {% endwith %}
     </div>
@@ -59,7 +71,7 @@
   </main>
 
   <!-- ⚙️ FOOTER -->
-  <footer class="footer">
+  <footer class="footer text-center py-3 mt-5 glass-card small">
     © 2025 Window Shopping — All Rights Reserved
   </footer>
 
