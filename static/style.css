@@ -1,15 +1,12 @@
 /* =========================================================
-   🌐 WINDOW SHOPPING STYLE v3.9 EXT — "NeonGlass Bootstrap Harmony++"
+   🌐 WINDOW SHOPPING STYLE v3.9.2 FULL — "NeonGlass Harmony++"
    Autor: Christopher Ponce & GPT-5
    ---------------------------------------------------------
-   Esta versión mantiene TODAS las reglas y efectos de v3.8,
-   con comentarios, separación por bloques y ajustes visuales
-   en flash messages, textos, botones y listados.
+   Fusión total de v3.9 EXT + FixText + contrastes + mejoras UX
    ========================================================== */
 
-
 /* =========================================================
-   🔹 RESETEO Y BASE GENERAL
+   🔹 BASE GENERAL Y RESETEO
    ========================================================== */
 * {
   margin: 0;
@@ -17,11 +14,9 @@
   box-sizing: border-box;
   font-family: "Poppins", "Segoe UI", sans-serif;
 }
-
 html, body {
   scroll-behavior: smooth;
 }
-
 body {
   background: radial-gradient(circle at top, #0a0f1c, #0a1123, #020617);
   color: #f9fafb;
@@ -32,9 +27,8 @@ body {
   transition: background 0.6s ease;
 }
 
-
 /* =========================================================
-   🔹 ENLACES GENERALES
+   🔹 ENLACES GLOBALES
    ========================================================== */
 a {
   color: inherit;
@@ -43,21 +37,18 @@ a {
 }
 a:hover {
   color: #60a5fa;
-  text-shadow: 0 0 15px rgba(96, 165, 250, 0.7);
+  text-shadow: 0 0 15px rgba(96,165,250,0.7);
 }
 
-
 /* =========================================================
-   🔹 INPUTS, SELECTS Y TEXTAREAS
+   🔹 INPUTS, SELECTS, TEXTAREAS
    ========================================================== */
-input,
-select,
-textarea {
+input, select, textarea {
   width: 100%;
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
   color: #f8fafc;
   outline: none;
   backdrop-filter: blur(10px);
@@ -65,17 +56,13 @@ textarea {
   margin-bottom: 12px;
   transition: all 0.25s ease;
 }
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
   border-color: #60a5fa;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 10px rgba(59,130,246,0.4);
 }
-input::placeholder,
-textarea::placeholder {
+input::placeholder, textarea::placeholder {
   color: #94a3b8;
 }
-
 
 /* =========================================================
    🔹 NAVBAR
@@ -84,7 +71,7 @@ textarea::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(30, 41, 59, 0.65);
+  background: rgba(30,41,59,0.65);
   padding: 15px 5%;
   position: fixed;
   top: 0;
@@ -92,25 +79,23 @@ textarea::placeholder {
   right: 0;
   z-index: 1030;
   backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 5px 25px rgba(0,0,0,0.25);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .navbar:hover {
-  background: rgba(30, 41, 59, 0.8);
-  box-shadow: 0 5px 35px rgba(59, 130, 246, 0.35);
+  background: rgba(30,41,59,0.8);
+  box-shadow: 0 5px 35px rgba(59,130,246,0.35);
 }
-
 .logo {
   font-size: 1.8rem;
   font-weight: 700;
   color: #93c5fd;
-  text-shadow: 0 0 18px rgba(59, 130, 246, 0.7);
+  text-shadow: 0 0 18px rgba(59,130,246,0.7);
   letter-spacing: 1px;
   user-select: none;
   animation: glow-pulse 3s infinite alternate;
 }
-
 nav a {
   margin: 0 12px;
   font-weight: 500;
@@ -131,7 +116,6 @@ nav a:hover::after {
   width: 100%;
 }
 
-
 /* =========================================================
    🔹 ESPACIADO PRINCIPAL
    ========================================================== */
@@ -139,17 +123,12 @@ main {
   padding-top: 110px;
   flex: 1 0 auto;
 }
-
-/* Responsive padding */
 @media (max-width: 768px) {
-  main {
-    padding-top: 130px;
-  }
+  main { padding-top: 130px; }
 }
 
-
 /* =========================================================
-   🔹 HERO / ENCABEZADO PRINCIPAL
+   🔹 HERO / ENCABEZADO
    ========================================================== */
 .hero {
   text-align: center;
@@ -176,9 +155,8 @@ main {
   flex-wrap: wrap;
 }
 
-
 /* =========================================================
-   🔹 BOTONES — ESTILOS GLOBALES
+   🔹 BOTONES
    ========================================================== */
 .btn {
   border-radius: 10px !important;
@@ -186,28 +164,22 @@ main {
   transition: all 0.3s ease;
   border: none;
 }
-
-/* Primario */
 .btn-primary {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: #fff;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 10px rgba(59,130,246,0.5);
 }
 .btn-primary:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 25px rgba(96, 165, 250, 0.7);
+  box-shadow: 0 0 25px rgba(96,165,250,0.7);
 }
-
-/* Outline Light */
 .btn-outline-light {
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  border: 1px solid rgba(255,255,255,0.4) !important;
   color: #f8fafc !important;
 }
 .btn-outline-light:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255,255,255,0.15);
 }
-
-/* Outline Éxito */
 .btn-outline-success {
   border: 1px solid #22c55e !important;
   color: #22c55e !important;
@@ -216,8 +188,6 @@ main {
   background: #22c55e;
   color: #fff !important;
 }
-
-/* Outline Peligro */
 .btn-outline-danger {
   border: 1px solid #ef4444 !important;
   color: #ef4444 !important;
@@ -227,9 +197,8 @@ main {
   color: #fff !important;
 }
 
-
 /* =========================================================
-   🔹 TÍTULOS Y ENCABEZADOS
+   🔹 TÍTULOS Y CABECERAS
    ========================================================== */
 .title-gradient {
   font-size: 1.8rem;
@@ -241,15 +210,14 @@ main {
   margin-bottom: 25px;
 }
 
-
 /* =========================================================
    🔹 TARJETAS GLASSMORPHISM
    ========================================================== */
 .glass-card {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 20px;
-  box-shadow: 0 4px 35px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 35px rgba(0,0,0,0.25);
   backdrop-filter: blur(12px);
   padding: 30px;
   margin: 40px auto;
@@ -259,12 +227,11 @@ main {
 }
 .glass-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 50px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 8px 50px rgba(59,130,246,0.35);
 }
 
-
 /* =========================================================
-   🔹 FLASH MESSAGES (Fix: no tapadas por navbar)
+   🔹 FLASH MESSAGES
    ========================================================== */
 .flash-container {
   position: fixed;
@@ -283,44 +250,41 @@ main {
   font-weight: 500;
   animation: fade-in 0.6s ease;
   backdrop-filter: blur(10px);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
 .flash.info {
-  background: rgba(96, 165, 250, 0.3);
+  background: rgba(96,165,250,0.3);
   color: #bfdbfe;
 }
 .flash.success {
-  background: rgba(34, 197, 94, 0.3);
+  background: rgba(34,197,94,0.3);
   color: #dcfce7;
 }
 .flash.error {
-  background: rgba(239, 68, 68, 0.3);
+  background: rgba(239,68,68,0.3);
   color: #fee2e2;
 }
-
 
 /* =========================================================
    🔹 TABLAS Y LISTAS
    ========================================================== */
 .table {
   color: #f1f5f9;
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255,255,255,0.15);
 }
 .table-hover tbody tr:hover {
-  background: rgba(96, 165, 250, 0.15);
+  background: rgba(96,165,250,0.15);
 }
-
 .list-group-item {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255,255,255,0.05) !important;
+  border-color: rgba(255,255,255,0.08) !important;
   color: #f8fafc !important;
   transition: all 0.25s ease;
 }
 .list-group-item:hover {
-  background: rgba(96, 165, 250, 0.1) !important;
+  background: rgba(96,165,250,0.1) !important;
   transform: scale(1.01);
 }
-
 
 /* =========================================================
    🔹 FOOTER
@@ -330,11 +294,10 @@ main {
   padding: 25px 10px;
   color: #94a3b8;
   font-size: 0.9rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255,255,255,0.1);
   margin-top: auto;
   backdrop-filter: blur(8px);
 }
-
 
 /* =========================================================
    🔹 ANIMACIONES
@@ -344,21 +307,35 @@ main {
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes glow-pulse {
-  0% { text-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
-  100% { text-shadow: 0 0 25px rgba(96, 165, 250, 0.8); }
+  0% { text-shadow: 0 0 10px rgba(59,130,246,0.4); }
+  100% { text-shadow: 0 0 25px rgba(96,165,250,0.8); }
 }
-
 
 /* =========================================================
-   🔹 SCROLLBAR PERSONALIZADO
+   🔹 SCROLLBAR
    ========================================================== */
-::-webkit-scrollbar {
-  width: 8px;
-}
+::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #60a5fa, #3b82f6);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0,0,0,0.25);
+}
+
+/* =========================================================
+   🌙 VISUAL FIX — Contraste y texto reforzado
+   ========================================================== */
+.card, .glass-card, .navbar, .form-control, .btn,
+label, p, h1, h2, h3, h4, h5, h6, strong, select, option {
+  color: #f1f5f9 !important;
+}
+.table, .list-group-item, .dropdown-menu {
+  background-color: rgba(255,255,255,0.05) !important;
+  color: #f8fafc !important;
+}
+input, select, textarea {
+  background: rgba(255,255,255,0.08) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255,255,255,0.15);
 }
