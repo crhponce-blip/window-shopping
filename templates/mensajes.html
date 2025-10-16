@@ -4,31 +4,32 @@
   <div class="container">
     <h2 class="title-gradient text-center mb-4">{{ t("Mensajería", "Messaging", "訊息系統") }}</h2>
 
-    <div class="glass-card p-4 mb-4">
+    <div class="glass-card p-4 mb-5 shadow-lg">
       <form method="POST">
-        <div class="mb-3">
-          <label class="form-label">{{ t("Destinatario (correo)") }}</label>
-          <input type="email" name="destino" class="form-control" placeholder="usuario@ejemplo.com" required>
+        <div class="form-floating mb-3">
+          <input type="email" name="destino" class="form-control" id="destinoEmail"
+                 placeholder="usuario@ejemplo.com" required>
+          <label for="destinoEmail">{{ t("Destinatario (correo)") }}</label>
         </div>
-        <div class="mb-3">
-          <label class="form-label">{{ t("Contenido del mensaje") }}</label>
-          <textarea name="contenido" class="form-control" rows="3"
+        <div class="form-floating mb-3">
+          <textarea name="contenido" class="form-control" id="mensajeContenido"
                     placeholder="{{ t('Escribe tu mensaje aquí...') }}" required></textarea>
+          <label for="mensajeContenido">{{ t("Contenido del mensaje") }}</label>
         </div>
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary">📨 {{ t("Enviar Mensaje") }}</button>
+          <button type="submit" class="btn btn-primary btn-lg shadow-sm">📨 {{ t("Enviar Mensaje") }}</button>
         </div>
       </form>
     </div>
 
     <div class="row">
       <div class="col-md-6 mb-3">
-        <div class="glass-card p-3 h-100">
+        <div class="glass-card p-3 h-100 shadow-sm">
           <h5>📥 {{ t("Recibidos") }}</h5>
           {% if recibidos %}
             <ul class="list-group list-group-flush">
               {% for m in recibidos %}
-              <li class="list-group-item">
+              <li class="list-group-item bg-transparent border-0">
                 <strong>{{ m.origen }}</strong><br>
                 {{ m.contenido }}<br>
                 <small class="text-muted">{{ m.fecha }}</small>
@@ -42,12 +43,12 @@
       </div>
 
       <div class="col-md-6 mb-3">
-        <div class="glass-card p-3 h-100">
+        <div class="glass-card p-3 h-100 shadow-sm">
           <h5>📤 {{ t("Enviados") }}</h5>
           {% if enviados %}
             <ul class="list-group list-group-flush">
               {% for m in enviados %}
-              <li class="list-group-item">
+              <li class="list-group-item bg-transparent border-0">
                 <strong>{{ m.destino }}</strong><br>
                 {{ m.contenido }}<br>
                 <small class="text-muted">{{ m.fecha }}</small>
@@ -62,7 +63,9 @@
     </div>
 
     <div class="text-center mt-4">
-      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-light border">← {{ t("Volver al Panel") }}</a>
+      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-outline-light border shadow-sm">
+        ← {{ t("Volver al Panel") }}
+      </a>
     </div>
   </div>
 </section>
