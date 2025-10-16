@@ -2,21 +2,21 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container col-lg-8">
-    <div class="glass-card p-4 shadow-sm">
+    <div class="glass-card p-4 shadow-lg text-light">
       <h2 class="title-gradient text-center mb-4">💬 {{ t("Centro de Ayuda") }}</h2>
       <p class="text-center mb-4">
         {{ t("Aquí encontrarás información sobre cómo usar la plataforma Window Shopping.") }}
       </p>
 
       <ul class="list-group list-group-flush mb-4">
-        <li class="list-group-item">📦 {{ t("Para comprar, agrega productos o servicios al carrito y confirma tu pedido.") }}</li>
-        <li class="list-group-item">🚚 {{ t("Los proveedores pueden publicar ofertas, demandas o servicios desde su panel.") }}</li>
-        <li class="list-group-item">🌍 {{ t("Los clientes extranjeros solo pueden ver exportadores y comprar productos.") }}</li>
-        <li class="list-group-item">💡 {{ t("El idioma se puede cambiar desde el menú superior (ES / EN / 中文).") }}</li>
+        <li class="list-group-item bg-transparent border-light">📦 {{ t("Para comprar, agrega productos o servicios al carrito y confirma tu pedido.") }}</li>
+        <li class="list-group-item bg-transparent border-light">🚚 {{ t("Los proveedores pueden publicar ofertas, demandas o servicios desde su panel.") }}</li>
+        <li class="list-group-item bg-transparent border-light">🌍 {{ t("Los clientes extranjeros solo pueden ver exportadores y comprar productos.") }}</li>
+        <li class="list-group-item bg-transparent border-light">💡 {{ t("El idioma se puede cambiar desde el menú superior (ES / EN / 中文).") }}</li>
       </ul>
 
       <div class="text-center">
-        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+        <a href="{{ url_for('dashboard_ext') }}" class="btn btn-outline-light shadow-sm">
           ← {{ t("Volver al Panel") }}
         </a>
       </div>
