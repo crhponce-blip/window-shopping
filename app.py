@@ -1,14 +1,14 @@
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio, FIX) — BLOQUE 1
-# Configuración · Base de Datos (memoria) · Usuarios Demo · Traducción · Auth
+# 🌐 WINDOW SHOPPING — Flask App (v3.9 CORREGIDO FINAL) — PARTE 1/4
+# Configuración · Traducción · Usuarios Demo · Login/Logout · Dashboards
 # =========================================================
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, abort
 import os
 from datetime import datetime
 from typing import Dict, Any, List
-from types import SimpleNamespace  # <- para evitar el conflicto c.items en Jinja
 from uuid import uuid4
+from types import SimpleNamespace
 
 # =========================================================
 # ⚙️ CONFIGURACIÓN BÁSICA
@@ -17,10 +17,10 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "clave_secreta_segura")
 
 # =========================================================
-# 🌎 TRADUCCIONES BÁSICAS
+# 🌎 TRADUCCIÓN GLOBAL
 # =========================================================
 def t(es: str, en: str = "", zh: str = "") -> str:
-    """Traducción simple según sesión activa."""
+    """Traducción simple según idioma actual en sesión."""
     lang = session.get("lang", "es")
     if lang == "en" and en:
         return en
@@ -28,20 +28,36 @@ def t(es: str, en: str = "", zh: str = "") -> str:
         return zh
     return es
 
-# Registrar función de traducción global para Jinja2
+# Registrar función t en Jinja global
 app.jinja_env.globals.update(t=t)
+
+@app.context_processor
+def inject_globals():
+    """Variables globales disponibles en todos los templates."""
+    return {
+        "t": t,
+        "current_lang": session.get("lang", "es"),
+        "year_now": datetime.now().year,
+        "user_session": session.get("user")
+    }
+
+@app.before_request
+def ensure_lang():
+    """Asegura idioma por defecto."""
+    if "lang" not in session:
+        session["lang"] = "es"
 
 @app.route("/set_lang/<lang>")
 def set_lang(lang):
-    """Permite cambiar idioma dinámicamente."""
+    """Cambia idioma y vuelve a la vista anterior."""
     if lang not in ["es", "en", "zh"]:
         flash("Idioma no disponible.", "error")
         return redirect(request.referrer or url_for("home"))
     session["lang"] = lang
-    flash(t("Idioma cambiado correctamente.", "Language changed.", "語言已變更"), "success")
+    flash(t("Idioma cambiado correctamente.", "Language changed successfully.", "語言已變更"), "success")
     return redirect(request.referrer or url_for("home"))
 
-# Alias de compatibilidad (algunos templates antiguos usan /lang/<lang>)
+# Alias antiguo (/lang/<lang>) por compatibilidad
 @app.route("/lang/<lang>")
 def set_lang_alias(lang):
     return set_lang(lang)
@@ -51,13 +67,14 @@ def set_lang_alias(lang):
 # =========================================================
 USERS: Dict[str, Dict[str, Any]] = {}
 PUBLICACIONES: List[Dict[str, Any]] = []
-OCULTOS: Dict[str, List[str]] = {}  # publicaciones ocultas por usuario (id de pub)
+OCULTOS: Dict[str, List[str]] = {}
+MENSAJES: List[Dict[str, Any]] = []
 
 # =========================================================
 # 🔧 FUNCIONES DE USUARIO
 # =========================================================
 def load_users_cache():
-    """Carga usuarios base (demo) si están vacíos."""
+    """Carga usuarios base de demostración."""
     global USERS
     if USERS:
         return
@@ -69,7 +86,7 @@ def load_users_cache():
             "rol": "administrador",
             "tipo": "admin",
             "empresa": "Window Shopping Admin",
-            "descripcion": "Administrador del sistema",
+            "descripcion": "Administrador del sistema.",
         },
         {
             "email": "cliente@windowshopping.cl",
@@ -138,7 +155,6 @@ def load_users_cache():
     ]
 
     for u in demo_users:
-        # asegurar campos para plantillas
         u.setdefault("items", [])
         u.setdefault("carrito", [])
         USERS[u["email"].lower()] = u
@@ -146,41 +162,22 @@ def load_users_cache():
 
     print(f"✅ USERS en caché: {len(USERS)} usuarios listos.")
 
-
-def get_user(email: str) -> Dict[str, Any]:
+def get_user(email: str) -> Dict[str, Any] | None:
     return USERS.get(email.lower())
 
-
-def create_user(email: str, password: str, rol: str, tipo: str, empresa: str, descripcion: str = ""):
-    USERS[email.lower()] = {
-        "email": email.lower(),
-        "password": password,
-        "rol": rol,
-        "tipo": tipo,
-        "empresa": empresa,
-        "descripcion": descripcion,
-        "items": [],
-        "carrito": [],
-    }
-
-
 def validate_login(email: str, password: str) -> bool:
-    u = get_user(email)
-    return bool(u and u["password"] == password)
+    user = get_user(email)
+    return bool(user and user["password"] == password)
 
 # =========================================================
-# 🏠 RUTAS BÁSICAS
+# 🏠 RUTAS PRINCIPALES
 # =========================================================
-# Importante: exponemos **dos endpoints** para evitar el BuildError en templates:
-#  - 'home' (usado por plantillas antiguas)
-#  - 'index' (por comodidad)
 @app.route("/", endpoint="home")
 @app.route("/index", endpoint="index")
 def index():
     load_users_cache()
     lang = session.get("lang", "es")
-    return render_template("index.html", lang=lang, titulo=t("Inicio", "Home", "首頁"))
-
+    return render_template("index.html", titulo=t("Inicio", "Home", "首頁"), lang=lang)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -189,12 +186,12 @@ def login():
         password = request.form.get("password", "").strip()
 
         if not email or not password:
-            flash(t("Debes completar todos los campos.", "Please fill all fields.", "請填寫所有欄位"), "error")
+            flash(t("Completa todos los campos.", "Please fill in all fields.", "請填寫所有欄位"), "error")
             return render_template("login.html", titulo=t("Iniciar Sesión", "Login", "登入"))
 
         if validate_login(email, password):
             session["user"] = email
-            flash(t("Inicio de sesión correcto.", "Login successful.", "登入成功"), "success")
+            flash(t("Inicio de sesión exitoso.", "Login successful.", "登入成功"), "success")
 
             rol = USERS[email]["rol"]
             if rol == "cliente_extranjero":
@@ -206,12 +203,11 @@ def login():
             elif rol == "administrador":
                 return redirect(url_for("dashboard_admin"))
             else:
-                return redirect(url_for("home"))
+                return redirect(url_for("dashboard"))
         else:
             flash(t("Correo o contraseña incorrectos.", "Invalid credentials.", "帳號或密碼錯誤"), "error")
 
     return render_template("login.html", titulo=t("Iniciar Sesión", "Login", "登入"))
-
 
 @app.route("/logout")
 def logout():
@@ -220,41 +216,30 @@ def logout():
     return redirect(url_for("home"))
 
 # =========================================================
-# 🌐 DASHBOARDS (vinculación inicial)
+# 🌐 DASHBOARDS SEPARADOS (por rol)
 # =========================================================
 @app.route("/dashboard_ext")
 def dashboard_ext():
     return render_template("dashboard_ext.html", titulo=t("Panel Cliente Extranjero", "Foreign Client Panel", "外國客戶面板"))
 
-
 @app.route("/dashboard_compra")
 def dashboard_compra():
     return render_template("dashboard_compra.html", titulo=t("Panel de Compraventa", "Trade Panel", "貿易面板"))
-
 
 @app.route("/dashboard_servicio")
 def dashboard_servicio():
     return render_template("dashboard_servicio.html", titulo=t("Panel de Servicios", "Service Panel", "服務面板"))
 
-
 @app.route("/dashboard_admin")
 def dashboard_admin():
     return render_template("dashboard_admin.html", titulo=t("Panel Administrador", "Admin Panel", "管理面板"))
-
 # =========================================================
-# 🚀 RUN LOCAL (solo si se ejecuta directamente este archivo)
-# =========================================================
-if __name__ == "__main__":
-    load_users_cache()
-    print("🌐 Servidor iniciado en http://127.0.0.1:5000")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
-# =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio, FIX) — BLOQUE 2
-# Registro · Roles · Validación · Traducción completa
+# 🌐 WINDOW SHOPPING — Flask App (v3.9 CORREGIDO FINAL) — PARTE 2/4
+# Registro · Roles · Validación · Enrutamiento de registro
 # =========================================================
 
 # =========================================================
-# 🧩 DEFINICIÓN DE TIPOS Y ROLES
+# 🧩 DEFINICIÓN DE TIPOS Y ROLES DISPONIBLES
 # =========================================================
 TIPOS_DISPONIBLES = {
     "cliente": ["cliente_extranjero"],
@@ -274,13 +259,12 @@ ROL_DESCRIPCIONES = {
     "servicio_extraportuario": "Servicios logísticos portuarios y externos.",
 }
 
-
 # =========================================================
 # 🧾 FORMULARIO DE REGISTRO
 # =========================================================
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Registro dinámico con roles y validaciones por tipo."""
+    """Permite crear una nueva cuenta según tipo y rol."""
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "").strip()
@@ -288,52 +272,66 @@ def register():
         tipo = request.form.get("tipo", "").strip()
         rol = request.form.get("rol", "").strip()
 
+        # Validación de campos vacíos
         if not email or not password or not empresa:
             flash(t("Completa todos los campos obligatorios.", "Please fill all required fields.", "請填寫所有必填欄位"), "error")
             return redirect(url_for("register"))
 
+        # Validación de tipo
         if tipo not in TIPOS_DISPONIBLES:
             flash(t("Tipo de usuario inválido.", "Invalid user type.", "無效的使用者類型"), "error")
             return redirect(url_for("register"))
 
+        # Validación de rol permitido
         roles_validos = TIPOS_DISPONIBLES[tipo]
         if rol not in roles_validos:
-            flash(t("Rol no permitido para este tipo.", "Role not allowed for this user type.", "角色與類型不符"), "error")
+            flash(t("Rol no permitido para este tipo de usuario.", "Role not allowed for this type.", "角色與類型不符"), "error")
             return redirect(url_for("register"))
 
+        # Verificación de duplicados
         if get_user(email):
             flash(t("El usuario ya existe.", "User already exists.", "使用者已存在"), "warning")
             return redirect(url_for("login"))
 
+        # Crear usuario
         descripcion = ROL_DESCRIPCIONES.get(rol, "")
-        create_user(email, password, rol, tipo, empresa, descripcion)
+        USERS[email] = {
+            "email": email,
+            "password": password,
+            "rol": rol,
+            "tipo": tipo,
+            "empresa": empresa,
+            "descripcion": descripcion,
+            "items": [],
+            "carrito": [],
+        }
+
         flash(t("Usuario registrado correctamente.", "User registered successfully.", "註冊成功"), "success")
         return redirect(url_for("login"))
 
+    # Render normal del formulario
     return render_template(
         "register.html",
         tipos=TIPOS_DISPONIBLES,
         titulo=t("Registro de Usuario", "User Registration", "用戶註冊"),
     )
 
-
 # =========================================================
-# 💡 DATOS AUXILIARES
+# 💡 DATOS AUXILIARES PARA FORMULARIO (AJAX)
 # =========================================================
 @app.route("/roles_por_tipo/<tipo>")
 def roles_por_tipo(tipo):
-    """Devuelve los roles disponibles según tipo (para el formulario dinámico)."""
+    """Devuelve roles válidos según el tipo (para dropdown dinámico)."""
     tipo = tipo.strip().lower()
     if tipo not in TIPOS_DISPONIBLES:
         return jsonify({"roles": []})
     return jsonify({"roles": TIPOS_DISPONIBLES[tipo]})
 
-
 # =========================================================
-# 🧠 PERMISOS BÁSICOS POR ROL
+# 🧠 PERMISOS POR ROL (QUIÉN PUEDE PUBLICAR O VER)
 # =========================================================
 def puede_publicar(rol: str, tipo_pub: str) -> bool:
-    """Define quién puede publicar cada tipo."""
+    """Determina si el usuario puede publicar cierto tipo."""
     if rol == "cliente_extranjero":
         return False
     if tipo_pub == "servicio" and rol in ["transporte_extraportuario", "agencia_aduana", "servicio_extraportuario"]:
@@ -341,7 +339,6 @@ def puede_publicar(rol: str, tipo_pub: str) -> bool:
     if tipo_pub in ["oferta", "demanda"] and rol in ["productor", "packing", "frigorifico", "exportador"]:
         return True
     return False
-
 
 def puede_ver_publicacion(rol_origen: str, rol_destino: str, tipo: str) -> bool:
     """Controla visibilidad entre roles."""
@@ -359,29 +356,28 @@ def puede_ver_publicacion(rol_origen: str, rol_destino: str, tipo: str) -> bool:
 
     return False
 
-
 # =========================================================
-# 🧩 RUTA DEMO: SELECCIÓN DE TIPO
+# 🧩 RUTA DEMO: SELECCIÓN DE TIPO DE REGISTRO
 # =========================================================
 @app.route("/register_router")
 def register_router():
-    """Pantalla inicial para elegir tipo de usuario."""
+    """Pantalla inicial para elegir tipo de registro."""
     return render_template(
         "register_router.html",
         tipos=list(TIPOS_DISPONIBLES.keys()),
         titulo=t("Seleccionar tipo de registro", "Select registration type", "選擇註冊類型"),
     )
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio, FIX) — BLOQUE 3
-# Dashboard · Publicaciones · Carrito · Ocultar/Restaurar
+# 🌐 WINDOW SHOPPING — Flask App (v3.9 CORREGIDO FINAL) — PARTE 3/4
+# Dashboard · Publicaciones · Carrito · Ocultar / Restaurar
 # =========================================================
 
 # =========================================================
-# 🧭 DASHBOARD PRINCIPAL
+# 🧭 DASHBOARD PRINCIPAL (común)
 # =========================================================
 @app.route("/dashboard")
 def dashboard():
-    """Panel principal de usuario (común a todos los roles)."""
+    """Panel principal de usuario (según su rol y publicaciones visibles)."""
     user_email = session.get("user")
     if not user_email:
         flash(t("Debes iniciar sesión.", "You must log in.", "您必須登入"), "error")
@@ -392,7 +388,7 @@ def dashboard():
         flash(t("Usuario no encontrado.", "User not found.", "找不到使用者"), "error")
         return redirect(url_for("logout"))
 
-    # Filtro por tipo de publicación
+    # Filtrado de publicaciones
     filtro = request.args.get("filtro", "oferta").lower()
     if filtro not in ["oferta", "demanda", "servicio"]:
         filtro = "oferta"
@@ -417,13 +413,12 @@ def dashboard():
         titulo=t("Panel de Usuario", "User Dashboard", "使用者主頁"),
     )
 
-
 # =========================================================
-# 🧾 PUBLICAR NUEVO
+# 🧾 CREAR NUEVA PUBLICACIÓN
 # =========================================================
 @app.route("/publicar", methods=["GET", "POST"])
 def publicar():
-    """Permite crear una publicación nueva."""
+    """Permite crear una nueva publicación según el rol."""
     user_email = session.get("user")
     if not user_email:
         flash(t("Debes iniciar sesión para publicar.", "You must log in to post.", "您必須登入以發布"), "error")
@@ -447,7 +442,7 @@ def publicar():
             return redirect(url_for("publicar"))
 
         if not puede_publicar(user["rol"], tipo_pub):
-            flash(t("No tienes permisos para este tipo de publicación.", "You are not allowed to post this type.", "無權限發布此類別"), "error")
+            flash(t("No tienes permiso para publicar este tipo.", "You cannot publish this type.", "無權限發布此類別"), "error")
             return redirect(url_for("dashboard"))
 
         nueva_pub = {
@@ -470,7 +465,6 @@ def publicar():
         "publicar.html",
         titulo=t("Nueva Publicación", "New Post", "新增發布")
     )
-
 
 # =========================================================
 # 🧹 ELIMINAR PUBLICACIÓN
@@ -498,13 +492,12 @@ def eliminar_publicacion(pub_id):
 
     return redirect(url_for("dashboard"))
 
-
 # =========================================================
 # 👁️‍🗨️ OCULTAR / RESTAURAR PUBLICACIONES
 # =========================================================
 @app.route("/ocultar/<pub_id>")
 def ocultar_publicacion(pub_id):
-    """Oculta una publicación para no volver a verla temporalmente."""
+    """Permite ocultar temporalmente una publicación visible."""
     user_email = session.get("user")
     if not user_email:
         return redirect(url_for("login"))
@@ -515,7 +508,6 @@ def ocultar_publicacion(pub_id):
         flash(t("Publicación ocultada.", "Item hidden.", "項目已隱藏"), "info")
     return redirect(url_for("dashboard"))
 
-
 @app.route("/restablecer_ocultos")
 def restablecer_ocultos():
     """Restaura todas las publicaciones ocultas."""
@@ -525,7 +517,6 @@ def restablecer_ocultos():
     OCULTOS[user_email] = []
     flash(t("Publicaciones restauradas.", "Items restored.", "項目已恢復"), "success")
     return redirect(url_for("dashboard"))
-
 
 # =========================================================
 # 🛒 CARRITO DE COMPRAS
@@ -545,10 +536,9 @@ def carrito():
 
     return render_template("carrito.html", cart=cart, titulo=t("Carrito", "Cart", "購物車"))
 
-
 @app.route("/carrito/agregar/<pub_id>")
 def carrito_agregar(pub_id):
-    """Agrega una publicación al carrito si no existe ya."""
+    """Agrega una publicación al carrito si no está ya agregada."""
     user_email = session.get("user")
     if not user_email:
         return redirect(url_for("login"))
@@ -568,7 +558,6 @@ def carrito_agregar(pub_id):
 
     return redirect(url_for("carrito"))
 
-
 @app.route("/carrito/eliminar/<pub_id>")
 def carrito_eliminar(pub_id):
     """Elimina un ítem del carrito."""
@@ -577,11 +566,9 @@ def carrito_eliminar(pub_id):
         return redirect(url_for("login"))
     user = get_user(user_email)
     cart = user.get("carrito", [])
-    nuevo = [p for p in cart if p["id"] != pub_id]
-    user["carrito"] = nuevo
+    user["carrito"] = [p for p in cart if p["id"] != pub_id]
     flash(t("Ítem eliminado del carrito.", "Item removed from cart.", "已刪除項目"), "info")
     return redirect(url_for("carrito"))
-
 
 @app.route("/carrito/vaciar")
 def carrito_vaciar():
@@ -594,8 +581,8 @@ def carrito_vaciar():
     flash(t("Carrito vaciado correctamente.", "Cart cleared.", "購物車已清空"), "success")
     return redirect(url_for("carrito"))
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio, FIX) — BLOQUE 4
-# Mensajería · Perfil · Clientes · Ayuda · Status · Run
+# 🌐 WINDOW SHOPPING — Flask App (v3.9 CORREGIDO FINAL) — PARTE 4/4
+# Mensajería · Perfil · Clientes · Ayuda · Status · Run Final
 # =========================================================
 
 # =========================================================
@@ -700,7 +687,7 @@ def perfil():
 # =========================================================
 @app.route("/clientes")
 def clientes():
-    """Lista de empresas visibles."""
+    """Lista de empresas visibles por el usuario autenticado."""
     user_email = session.get("user")
     if not user_email:
         flash(t("Debes iniciar sesión para ver empresas.", "You must log in to view companies.", "您必須登入以查看公司"), "error")
@@ -709,15 +696,16 @@ def clientes():
     user = get_user(user_email)
     visibles = []
 
-    for username, info in USERS.items():
+    for _, info in USERS.items():
         if info["email"] == user["email"]:
             continue  # no mostrarte a ti mismo
-        if puede_ver_publicacion(user["rol"], info["rol"], "oferta") or puede_ver_publicacion(user["rol"], info["rol"], "servicio"):
+        if (puede_ver_publicacion(user["rol"], info["rol"], "oferta")
+                or puede_ver_publicacion(user["rol"], info["rol"], "servicio")):
             visibles.append(info)
 
     filtro_tipo = request.args.get("filtro", "todos").lower()
-    if filtro_tipo in ["oferta", "demanda", "servicio"]:
-        visibles = [v for v in visibles if v["tipo"] == filtro_tipo]
+    if filtro_tipo in ["cliente", "compraventa", "servicio", "mixto", "admin"]:
+        visibles = [v for v in visibles if v.get("tipo") == filtro_tipo]
 
     return render_template(
         "clientes.html",
@@ -733,7 +721,7 @@ def cliente_detalle(email):
     if not c:
         abort(404)
     user_email = session.get("user")
-    puede_mensaje = user_email and puede_enviar_mensaje(user_email, c["email"])
+    puede_mensaje = bool(user_email) and puede_enviar_mensaje(user_email, c["email"])
     return render_template(
         "cliente_detalle.html",
         c=c,
@@ -773,7 +761,7 @@ def status():
 
 
 # =========================================================
-# 🚀 RUN FINAL
+# 🚀 RUN FINAL (protección por si ejecutas app.py directamente)
 # =========================================================
 if __name__ == "__main__":
     load_users_cache()
