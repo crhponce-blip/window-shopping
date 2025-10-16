@@ -28,6 +28,8 @@ def t(es: str, en: str = "", zh: str = "") -> str:
         return zh
     return es
 
+# Registrar función de traducción global para Jinja2
+app.jinja_env.globals.update(t=t)
 
 @app.route("/set_lang/<lang>")
 def set_lang(lang):
