@@ -6,14 +6,14 @@
 
     <form method="POST" action="{{ url_for('login') }}">
       <div class="form-floating mb-3">
-        <input type="email" name="email" class="form-control" id="loginEmail"
-               placeholder="correo@ejemplo.com" required>
+        <input type="email" name="email" id="loginEmail"
+               class="form-control" placeholder="correo@ejemplo.com" required>
         <label for="loginEmail">Email</label>
       </div>
 
       <div class="form-floating mb-3">
-        <input type="password" name="password" class="form-control" id="loginPassword"
-               placeholder="Password" required>
+        <input type="password" name="password" id="loginPassword"
+               class="form-control" placeholder="Password" required>
         <label for="loginPassword">{{ t("Contraseña") }}</label>
       </div>
 
