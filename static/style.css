@@ -1,13 +1,14 @@
 /* =========================================================
-   🌐 WINDOW SHOPPING STYLE v3.9.2 FULL — "NeonGlass Harmony++"
+   🌐 WINDOW SHOPPING STYLE v4.0 — “NeonGlass Harmony Ultra”
    Autor: Christopher Ponce & GPT-5
    ---------------------------------------------------------
-   Fusión total de v3.9 EXT + FixText + contrastes + mejoras UX
-   ========================================================== */
+   Mejoras: dashboards unificados, contraste dinámico, botones vivos,
+   efectos glass más suaves y coherentes con Bootstrap 5.3.
+   ========================================================= */
 
 /* =========================================================
-   🔹 BASE GENERAL Y RESETEO
-   ========================================================== */
+   🔹 BASE GENERAL
+   ========================================================= */
 * {
   margin: 0;
   padding: 0;
@@ -18,7 +19,7 @@ html, body {
   scroll-behavior: smooth;
 }
 body {
-  background: radial-gradient(circle at top, #0a0f1c, #0a1123, #020617);
+  background: radial-gradient(circle at top, #0b1220, #0a1123, #020617);
   color: #f9fafb;
   min-height: 100vh;
   display: flex;
@@ -28,8 +29,8 @@ body {
 }
 
 /* =========================================================
-   🔹 ENLACES GLOBALES
-   ========================================================== */
+   🔹 ENLACES
+   ========================================================= */
 a {
   color: inherit;
   text-decoration: none;
@@ -41,8 +42,8 @@ a:hover {
 }
 
 /* =========================================================
-   🔹 INPUTS, SELECTS, TEXTAREAS
-   ========================================================== */
+   🔹 FORMULARIOS
+   ========================================================= */
 input, select, textarea {
   width: 100%;
   padding: 10px;
@@ -66,43 +67,33 @@ input::placeholder, textarea::placeholder {
 
 /* =========================================================
    🔹 NAVBAR
-   ========================================================== */
+   ========================================================= */
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background: rgba(30,41,59,0.65);
   padding: 15px 5%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1030;
   backdrop-filter: blur(15px);
   border-bottom: 1px solid rgba(255,255,255,0.15);
   box-shadow: 0 5px 25px rgba(0,0,0,0.25);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .navbar:hover {
-  background: rgba(30,41,59,0.8);
+  background: rgba(30,41,59,0.85);
   box-shadow: 0 5px 35px rgba(59,130,246,0.35);
 }
-.logo {
-  font-size: 1.8rem;
+.navbar-brand {
+  font-size: 1.9rem;
   font-weight: 700;
   color: #93c5fd;
   text-shadow: 0 0 18px rgba(59,130,246,0.7);
   letter-spacing: 1px;
-  user-select: none;
   animation: glow-pulse 3s infinite alternate;
 }
-nav a {
-  margin: 0 12px;
+.nav-link {
   font-weight: 500;
-  position: relative;
   letter-spacing: 0.4px;
+  position: relative;
 }
-nav a::after {
+.nav-link::after {
   content: "";
   position: absolute;
   bottom: -3px;
@@ -112,13 +103,13 @@ nav a::after {
   background: linear-gradient(90deg, #60a5fa, #38bdf8, #818cf8);
   transition: width 0.3s;
 }
-nav a:hover::after {
+.nav-link:hover::after {
   width: 100%;
 }
 
 /* =========================================================
    🔹 ESPACIADO PRINCIPAL
-   ========================================================== */
+   ========================================================= */
 main {
   padding-top: 110px;
   flex: 1 0 auto;
@@ -128,36 +119,8 @@ main {
 }
 
 /* =========================================================
-   🔹 HERO / ENCABEZADO
-   ========================================================== */
-.hero {
-  text-align: center;
-  padding: 100px 20px 90px;
-  animation: fade-in 1.1s ease;
-}
-.hero h1 {
-  font-size: 3rem;
-  margin-bottom: 20px;
-  background: linear-gradient(90deg, #60a5fa, #a5b4fc, #38bdf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 700;
-}
-.hero p {
-  color: #cbd5e1;
-  font-size: 1.15rem;
-}
-.hero-buttons {
-  margin-top: 45px;
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-
-/* =========================================================
    🔹 BOTONES
-   ========================================================== */
+   ========================================================= */
 .btn {
   border-radius: 10px !important;
   font-weight: 500;
@@ -173,6 +136,22 @@ main {
   transform: scale(1.05);
   box-shadow: 0 0 25px rgba(96,165,250,0.7);
 }
+.btn-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+}
+.btn-success:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(34,197,94,0.6);
+}
+.btn-info {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  color: #fff;
+}
+.btn-info:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(6,182,212,0.6);
+}
 .btn-outline-light {
   border: 1px solid rgba(255,255,255,0.4) !important;
   color: #f8fafc !important;
@@ -180,28 +159,12 @@ main {
 .btn-outline-light:hover {
   background: rgba(255,255,255,0.15);
 }
-.btn-outline-success {
-  border: 1px solid #22c55e !important;
-  color: #22c55e !important;
-}
-.btn-outline-success:hover {
-  background: #22c55e;
-  color: #fff !important;
-}
-.btn-outline-danger {
-  border: 1px solid #ef4444 !important;
-  color: #ef4444 !important;
-}
-.btn-outline-danger:hover {
-  background: #ef4444;
-  color: #fff !important;
-}
 
 /* =========================================================
-   🔹 TÍTULOS Y CABECERAS
-   ========================================================== */
+   🔹 TÍTULOS
+   ========================================================= */
 .title-gradient {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   background: linear-gradient(90deg, #60a5fa, #a5b4fc, #818cf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -212,27 +175,35 @@ main {
 
 /* =========================================================
    🔹 TARJETAS GLASSMORPHISM
-   ========================================================== */
+   ========================================================= */
 .glass-card {
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 20px;
   box-shadow: 0 4px 35px rgba(0,0,0,0.25);
   backdrop-filter: blur(12px);
-  padding: 30px;
-  margin: 40px auto;
-  width: 90%;
-  max-width: 950px;
+  padding: 25px;
+  margin: 25px auto;
+  width: 95%;
   transition: transform 0.3s, box-shadow 0.3s;
 }
 .glass-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 50px rgba(59,130,246,0.35);
 }
+.card {
+  background: rgba(255,255,255,0.06) !important;
+  border-radius: 18px !important;
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 25px rgba(59,130,246,0.25);
+}
 
 /* =========================================================
    🔹 FLASH MESSAGES
-   ========================================================== */
+   ========================================================= */
 .flash-container {
   position: fixed;
   top: 90px;
@@ -242,32 +213,17 @@ main {
   max-width: 900px;
   z-index: 1050;
 }
-.flash {
-  padding: 14px 18px;
-  border-radius: 10px;
-  text-align: center;
-  margin-bottom: 12px;
+.alert {
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  color: #fff;
   font-weight: 500;
   animation: fade-in 0.6s ease;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-.flash.info {
-  background: rgba(96,165,250,0.3);
-  color: #bfdbfe;
-}
-.flash.success {
-  background: rgba(34,197,94,0.3);
-  color: #dcfce7;
-}
-.flash.error {
-  background: rgba(239,68,68,0.3);
-  color: #fee2e2;
 }
 
 /* =========================================================
    🔹 TABLAS Y LISTAS
-   ========================================================== */
+   ========================================================= */
 .table {
   color: #f1f5f9;
   border-color: rgba(255,255,255,0.15);
@@ -288,7 +244,7 @@ main {
 
 /* =========================================================
    🔹 FOOTER
-   ========================================================== */
+   ========================================================= */
 .footer {
   text-align: center;
   padding: 25px 10px;
@@ -301,7 +257,7 @@ main {
 
 /* =========================================================
    🔹 ANIMACIONES
-   ========================================================== */
+   ========================================================= */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -313,7 +269,7 @@ main {
 
 /* =========================================================
    🔹 SCROLLBAR
-   ========================================================== */
+   ========================================================= */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #60a5fa, #3b82f6);
@@ -324,10 +280,9 @@ main {
 }
 
 /* =========================================================
-   🌙 VISUAL FIX — Contraste y texto reforzado
-   ========================================================== */
-.card, .glass-card, .navbar, .form-control, .btn,
-label, p, h1, h2, h3, h4, h5, h6, strong, select, option {
+   🌙 VISUAL FIX — Texto y contraste adaptados
+   ========================================================= */
+.card, .glass-card, .navbar, .btn, label, p, h1, h2, h3, h4, h5, h6, strong {
   color: #f1f5f9 !important;
 }
 .table, .list-group-item, .dropdown-menu {
