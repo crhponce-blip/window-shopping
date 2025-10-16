@@ -1,52 +1,80 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="fade-in py-5">
-  <div class="container col-lg-8">
+
+<main class="fade-in py-5">
+  <div class="container col-lg-9">
+    <!-- 🏢 Datos generales de la empresa -->
     <div class="glass-card p-4 mb-4 shadow-lg text-light">
       <h2 class="title-gradient mb-3">{{ c.empresa }}</h2>
-      <p><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
-      <p><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
-      <p class="text-muted">{{ c.descripcion }}</p>
+      <p class="mb-1">
+        <strong>{{ t("Rol", "Role", "角色") }}:</strong> {{ c.rol }} |
+        <strong>{{ t("Tipo", "Type", "類型") }}:</strong> {{ c.tipo }}
+      </p>
+      {% if c.pais %}
+      <p class="mb-1"><strong>{{ t("País", "Country", "國家") }}:</strong> {{ c.pais }}</p>
+      {% endif %}
+      {% if c.direccion %}
+      <p class="mb-1"><strong>{{ t("Dirección", "Address", "地址") }}:</strong> {{ c.direccion }}</p>
+      {% endif %}
+      {% if c.telefono %}
+      <p class="mb-3"><strong>{{ t("Teléfono", "Phone", "電話") }}:</strong> {{ c.telefono }}</p>
+      {% endif %}
+      {% if c.descripcion %}
+      <p class="text-muted small">{{ c.descripcion }}</p>
+      {% else %}
+      <p class="text-muted small">{{ t("Sin descripción disponible.", "No description available.", "暫無描述") }}</p>
+      {% endif %}
     </div>
 
-    <div class="mb-4">
-      <h4 class="text-light">{{ t("Productos o Servicios") }}</h4>
-      <div class="row g-3">
+    <!-- 📦 Productos o Servicios -->
+    <div class="glass-card p-4 mb-4 shadow-lg">
+      <h4 class="text-light mb-3">🧾 {{ t("Productos o Servicios", "Products or Services", "產品或服務") }}</h4>
+
+      {% if c.items %}
+      <div class="list-group">
         {% for item in c.items %}
-        <div class="col-md-6">
-          <div class="glass-card p-3 h-100 shadow-sm">
-            <strong>{{ item.nombre }}</strong>
-            <p>{{ item.detalle }}</p>
+        <div class="list-group-item bg-transparent text-light d-flex justify-content-between align-items-start flex-wrap border-secondary border-opacity-25">
+          <div class="me-3 flex-grow-1">
+            <h6 class="fw-bold mb-1">{{ item.nombre }}</h6>
+            <p class="small mb-1 text-muted">{{ item.detalle }}</p>
+          </div>
+          <div class="text-end mt-2 mt-md-0">
             <form method="get" action="{{ url_for('carrito_agregar', pub_id='direct-' ~ c.username ~ '-' ~ loop.index) }}">
-              <button type="submit" class="btn btn-outline-success btn-sm w-100 shadow-sm">
-                🛒 {{ t("Agregar al carrito") }}
+              <button type="submit" class="btn btn-outline-success btn-sm shadow-sm">
+                🛒 {{ t("Agregar al carrito", "Add to cart", "加入購物車") }}
               </button>
             </form>
           </div>
         </div>
-        {% else %}
-        <p class="text-muted">{{ t("Esta empresa no tiene publicaciones activas.") }}</p>
         {% endfor %}
       </div>
+      {% else %}
+      <p class="text-muted">{{ t("Esta empresa no tiene publicaciones activas.", "This company has no active listings.", "該公司目前沒有上架項目。") }}</p>
+      {% endif %}
     </div>
 
-    <div class="glass-card p-4 mb-4 shadow-sm">
-      <h5 class="mb-3 text-light">{{ t("Enviar mensaje a la empresa") }}</h5>
+    <!-- 💬 Enviar mensaje -->
+    <div class="glass-card p-4 mb-4 shadow-lg">
+      <h5 class="mb-3 text-light">✉️ {{ t("Enviar mensaje a la empresa", "Send a message to this company", "發送訊息給公司") }}</h5>
       <form method="post" action="{{ url_for('mensajes') }}">
         <input type="hidden" name="destino" value="{{ c.email }}">
-        <textarea name="contenido" class="form-control mb-3"
-                  placeholder="{{ t('Escribe un mensaje...') }}" required></textarea>
+        <textarea name="contenido" class="form-control mb-3 bg-dark text-light border-secondary"
+                  placeholder="{{ t('Escribe un mensaje...', 'Write a message...', '撰寫訊息...') }}" rows="3" required></textarea>
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary btn-lg shadow-sm">✉️ {{ t("Enviar mensaje") }}</button>
+          <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+            📩 {{ t("Enviar mensaje", "Send Message", "發送") }}
+          </button>
         </div>
       </form>
     </div>
 
+    <!-- 🔙 Volver -->
     <div class="text-center">
-      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light border shadow-sm">
-        ← {{ t("Volver") }}
+      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light shadow-sm">
+        ← {{ t("Volver", "Back", "返回") }}
       </a>
     </div>
   </div>
-</section>
+</main>
+
 {% endblock %}
