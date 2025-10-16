@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container col-md-6 glass-card p-4 shadow-sm">
+  <div class="container col-md-6 glass-card p-4 shadow-lg">
     <h2 class="title-gradient text-center mb-4">{{ t("Nueva Publicación") }}</h2>
 
     <form method="POST">
@@ -23,10 +23,10 @@
         </select>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">{{ t("Producto o Servicio") }}</label>
-        <input type="text" name="producto" class="form-control"
+      <div class="form-floating mb-3">
+        <input type="text" name="producto" class="form-control" id="producto"
                placeholder="{{ t('Ej: Cereza Lapins / Embalaje flowpack') }}" required>
+        <label for="producto">{{ t("Producto o Servicio") }}</label>
       </div>
 
       <div class="mb-3">
@@ -35,18 +35,18 @@
                   placeholder="{{ t('Describe las condiciones, variedades o características...') }}" required></textarea>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">{{ t("Precio Referencial") }}</label>
-        <input type="text" name="precio" class="form-control" placeholder="USD 0.00 / unidad">
+      <div class="form-floating mb-4">
+        <input type="text" name="precio" class="form-control" id="precio" placeholder="USD 0.00 / unidad">
+        <label for="precio">{{ t("Precio Referencial") }}</label>
       </div>
 
       <div class="d-grid">
-        <button type="submit" class="btn btn-primary">{{ t("Publicar") }}</button>
+        <button type="submit" class="btn btn-primary btn-lg shadow-sm">{{ t("Publicar") }}</button>
       </div>
     </form>
 
-    <div class="text-center mt-3">
-      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-light border">
+    <div class="text-center mt-4">
+      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-outline-light border shadow-sm">
         ← {{ t("Volver al Panel") }}
       </a>
     </div>
