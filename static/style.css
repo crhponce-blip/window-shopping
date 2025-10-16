@@ -281,3 +281,21 @@ main {
   .hero h1 { font-size: 2.2rem; }
   .title-gradient { font-size: 1.4rem; }
 }
+/* =========================================================
+   🌙 VISUAL FIX — Texto y contraste mejorados
+   ========================================================== */
+.card, .glass-card, .navbar, .form-control, .btn, 
+label, p, h1, h2, h3, h4, h5, h6, strong, select, option {
+  color: #f1f5f9 !important;
+}
+
+.table, .list-group-item, .dropdown-menu {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #f8fafc !important;
+}
+
+input, select, textarea {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255,255,255,0.15);
+}
