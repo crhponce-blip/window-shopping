@@ -18,7 +18,7 @@
 </head>
 
 <body>
-  <!-- 🌍 NAVBAR (versión Bootstrap + NeonGlass mejorada) -->
+  <!-- 🌍 NAVBAR (Bootstrap + NeonGlass) -->
   <header class="navbar navbar-expand-lg glass-card py-3 shadow-sm fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand title-gradient fw-bold fs-3" href="{{ url_for('home') }}">WS</a>
@@ -34,22 +34,22 @@
 
           {% if session.get('user') %}
             {% set user = session.get('user') %}
-            {% if user.rol == 'Administrador' %}
+            {% if user.rol|lower == 'administrador' %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_admin') }}">🧭 {{ t('Panel Admin') }}</a></li>
-            {% elif user.tipo == 'extranjero' %}
+            {% elif user.rol|lower in ['cliente extranjero', 'extranjero'] %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_ext') }}">🌍 {{ t('Panel Cliente') }}</a></li>
-            {% elif user.tipo == 'servicios' %}
+            {% elif user.rol|lower in ['servicios', 'transporte extraportuario', 'agencia de aduana'] %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_servicio') }}">⚙️ {{ t('Panel Servicio') }}</a></li>
-            {% elif user.tipo == 'compraventa' %}
+            {% elif user.rol|lower in ['compraventa', 'productor', 'packing', 'frigorífico', 'exportador'] %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_compra') }}">📦 {{ t('Panel Compraventa') }}</a></li>
             {% else %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">📋 {{ t('Panel Principal') }}</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_ext') }}">📋 {{ t('Panel Principal') }}</a></li>
             {% endif %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('carrito') }}">🛒 {{ t('Carrito') }}</a></li>
           {% endif %}
         </ul>
 
-        <!-- 🔹 Menú de usuario (dropdown) -->
+        <!-- 🔹 Menú de usuario -->
         {% if session.get('user') %}
           <div class="dropdown text-end">
             <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
