@@ -4,29 +4,36 @@
   <div class="container col-md-8">
     <h2 class="title-gradient text-center mb-4">{{ t("Perfil de Usuario") }}</h2>
 
-    <div class="glass-card p-4 shadow-sm mb-4">
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>{{ t("Empresa") }}:</strong> {{ user.empresa }}</p>
-      <p><strong>{{ t("Rol") }}:</strong> {{ user.rol }}</p>
-      <p><strong>{{ t("Tipo") }}:</strong> {{ user.tipo }}</p>
-      <p><strong>{{ t("País") }}:</strong> {{ user.pais }}</p>
+    <div class="glass-card p-4 shadow-lg mb-4">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <p><strong>Email:</strong> {{ user.email }}</p>
+          <p><strong>{{ t("Empresa") }}:</strong> {{ user.empresa }}</p>
+          <p><strong>{{ t("Rol") }}:</strong> {{ user.rol }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>{{ t("Tipo") }}:</strong> {{ user.tipo }}</p>
+          <p><strong>{{ t("País") }}:</strong> {{ user.pais }}</p>
+          {% if user.telefono %}
+          <p><strong>{{ t("Teléfono") }}:</strong> {{ user.telefono }}</p>
+          {% endif %}
+        </div>
+      </div>
+
       {% if user.direccion %}
-        <p><strong>{{ t("Dirección") }}:</strong> {{ user.direccion }}</p>
-      {% endif %}
-      {% if user.telefono %}
-        <p><strong>{{ t("Teléfono") }}:</strong> {{ user.telefono }}</p>
+      <hr>
+      <p><strong>{{ t("Dirección") }}:</strong> {{ user.direccion }}</p>
       {% endif %}
       {% if user.rut_doc %}
-        <p><strong>{{ t("Documento RUT") }}:</strong>
-          <a href="{{ url_for('static', filename=user.rut_doc) }}" target="_blank">{{ t("Ver archivo") }}</a>
-        </p>
+      <p><strong>{{ t("Documento RUT") }}:</strong>
+        <a href="{{ url_for('static', filename=user.rut_doc) }}" target="_blank">{{ t("Ver archivo") }}</a>
+      </p>
       {% endif %}
     </div>
 
     <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-primary">🏠 {{ t("Volver al Panel") }}</a>
-      <a href="{{ url_for('publicar') }}" class="btn btn-secondary">➕ {{ t("Nueva Publicación") }}</a>
-      <!-- <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a> -->
+      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-primary shadow-sm">🏠 {{ t("Volver al Panel") }}</a>
+      <a href="{{ url_for('publicar') }}" class="btn btn-secondary shadow-sm">➕ {{ t("Nueva Publicación") }}</a>
     </div>
   </div>
 </section>
