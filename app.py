@@ -1,6 +1,6 @@
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.8 Base Mejorada, Parte 1/4)
-# Configuración, DB, Helpers, Caché USERS, Carrito, Visibilidad, Filtros
+# 🌐 WINDOW SHOPPING — Flask App (v3.8 Render-Ready, Parte 1/4)
+# Configuración, DB, Helpers, Traducción y Roles
 # =========================================================
 
 import os
@@ -15,6 +15,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+
 
 # =========================================================
 # 🔧 CONFIGURACIÓN BÁSICA
@@ -32,6 +33,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg"}
 
+
 def allowed_file(filename: str) -> bool:
     """Verifica si el archivo tiene una extensión permitida."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
@@ -42,8 +44,8 @@ def allowed_file(filename: str) -> bool:
 # =========================================================
 def t(es, en="", zh=""):
     """
-    Traductor universal: toma texto en español y opcionalmente versiones en inglés y chino.
-    Si no hay traducción disponible, devuelve el texto original en español.
+    Traductor universal: toma texto en español y opcionalmente versiones
+    en inglés y chino. Si no hay traducción, devuelve el texto original.
     """
     lang = session.get("lang", "es")
     if lang == "en" and en:
@@ -52,7 +54,7 @@ def t(es, en="", zh=""):
         return zh
     return es
 
-# 🔄 NUEVO: Extensión de traducciones dinámicas
+
 def translate_dynamic(text: str) -> str:
     """
     Traduce textos dinámicos (como publicaciones, items o nombres de campos)
@@ -61,6 +63,7 @@ def translate_dynamic(text: str) -> str:
     lang = session.get("lang", "es")
     if not text:
         return text
+
     if lang == "en":
         reemplazos = {
             "oferta": "offer", "demanda": "demand", "servicio": "service",
@@ -80,6 +83,7 @@ def translate_dynamic(text: str) -> str:
         text = text.replace(es_word, tr_word)
     return text
 
+
 app.jinja_env.globals.update(t=t, translate_dynamic=translate_dynamic)
 
 
@@ -90,8 +94,13 @@ TIPOS_VALIDOS = {"compras", "servicios", "mixto", "compraventa"}
 
 ROLES_POR_TIPO: Dict[str, List[str]] = {
     "compras": ["Cliente extranjero"],
-    "servicios": ["Agencia de aduana", "Transporte", "Extraportuario", "Packing", "Frigorífico"],
-    "compraventa": ["Productor(planta)", "Packing", "Frigorífico", "Exportador"],
+    "servicios": [
+        "Agencia de aduana", "Transporte", "Extraportuario",
+        "Packing", "Frigorífico"
+    ],
+    "compraventa": [
+        "Productor(planta)", "Packing", "Frigorífico", "Exportador"
+    ],
     "mixto": ["Packing", "Frigorífico"],
 }
 
@@ -100,6 +109,7 @@ ROLES_POR_TIPO: Dict[str, List[str]] = {
 # 🗄️ BASE DE DATOS (SQLite)
 # =========================================================
 DB_PATH = os.path.join(BASE_DIR, "users.db")
+
 
 def init_db():
     """Crea la tabla de usuarios si no existe."""
@@ -122,6 +132,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def migrate_add_column(colname: str):
     """Agrega una columna nueva si no existe."""
     conn = sqlite3.connect(DB_PATH)
@@ -135,12 +146,15 @@ def migrate_add_column(colname: str):
     finally:
         conn.close()
 
+
 def migrate_add_rut_doc():
     migrate_add_column("rut_doc")
+
 
 def migrate_add_contact_fields():
     migrate_add_column("direccion")
     migrate_add_column("telefono")
+
 
 def get_user(email: str):
     """Obtiene un usuario por email."""
@@ -152,6 +166,7 @@ def get_user(email: str):
     conn.close()
     return user
 
+
 def get_all_users() -> List[sqlite3.Row]:
     """Devuelve todos los usuarios existentes."""
     conn = sqlite3.connect(DB_PATH)
@@ -161,6 +176,7 @@ def get_all_users() -> List[sqlite3.Row]:
     rows = c.fetchall()
     conn.close()
     return rows
+
 
 def add_user(email, password_hashed, empresa, rol, tipo, pais,
              rut_doc=None, direccion=None, telefono=None):
@@ -179,6 +195,7 @@ def add_user(email, password_hashed, empresa, rol, tipo, pais,
     finally:
         conn.close()
 
+
 def update_user_fields(email: str, **fields):
     """Actualiza campos del usuario (empresa, rol, etc.)."""
     if not fields:
@@ -191,8 +208,236 @@ def update_user_fields(email: str, **fields):
     conn.commit()
     conn.close()
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.8 Base Mejorada, Parte 2/4)
-# Autenticación, Registro, Idiomas, Errores
+# 🌐 WINDOW SHOPPING — Flask App (v3.8 Render-Ready, Parte 2/4)
+# Administración, Caché USERS, Permisos, Carrito, Ocultos
+# =========================================================
+
+# =========================================================
+# 🧠 CACHÉ GLOBAL DE USUARIOS Y ADMIN CREATOR
+# =========================================================
+USERS: Dict[str, Dict[str, Any]] = {}
+
+
+def load_users_cache():
+    """Carga todos los usuarios en memoria para acceso rápido."""
+    global USERS
+    USERS = {}
+    for row in get_all_users():
+        USERS[row["email"]] = dict(row)
+    print(f"🔄 Cache actualizada: {len(USERS)} usuarios cargados.")
+
+
+def create_admin_if_missing():
+    """Crea un administrador por defecto si no existe."""
+    admin_email = "admin@windowshopping.cl"
+    if not get_user(admin_email):
+        add_user(
+            email=admin_email,
+            password_hashed=generate_password_hash("admin123"),
+            empresa="Admin WS",
+            rol="Exportador",
+            tipo="compraventa",
+            pais="CL",
+            rut_doc="12345678-9",
+            direccion="Av. Central 1000, Santiago, Chile",
+            telefono="+56 9 5555 1111",
+        )
+        print("🧩 Administrador creado automáticamente.")
+    else:
+        print("✅ Administrador ya existente.")
+
+
+def seed_demo_users():
+    """Carga usuarios ficticios con descripción y roles correctos."""
+    demos = [
+        {
+            "email": "productor@windowshopping.cl",
+            "empresa": "AgroFrutal Chile",
+            "rol": "Productor(planta)",
+            "tipo": "compraventa",
+            "pais": "CL",
+            "descripcion": "Productor especializado en frutas frescas y orgánicas para exportación.",
+        },
+        {
+            "email": "packing@windowshopping.cl",
+            "empresa": "Packing Andes",
+            "rol": "Packing",
+            "tipo": "mixto",
+            "pais": "CL",
+            "descripcion": "Centro de embalaje y clasificación con servicios de logística integrada.",
+        },
+        {
+            "email": "frigorifico@windowshopping.cl",
+            "empresa": "FríoMax Ltda.",
+            "rol": "Frigorífico",
+            "tipo": "mixto",
+            "pais": "CL",
+            "descripcion": "Almacenamiento y conservación de frutas en cadena de frío certificada.",
+        },
+        {
+            "email": "exportador@windowshopping.cl",
+            "empresa": "Exportadora Andes Sur",
+            "rol": "Exportador",
+            "tipo": "compraventa",
+            "pais": "CL",
+            "descripcion": "Exportadora líder en fruta fresca con presencia en Asia y Europa.",
+        },
+        {
+            "email": "transporte@windowshopping.cl",
+            "empresa": "TransLog Chile",
+            "rol": "Transporte",
+            "tipo": "servicios",
+            "pais": "CL",
+            "descripcion": "Transporte terrestre nacional e internacional de carga frutícola.",
+        },
+        {
+            "email": "aduana@windowshopping.cl",
+            "empresa": "Aduana Global Ltda.",
+            "rol": "Agencia de aduana",
+            "tipo": "servicios",
+            "pais": "CL",
+            "descripcion": "Asesoría y tramitación aduanera para exportadores e importadores.",
+        },
+        {
+            "email": "extraportuario@windowshopping.cl",
+            "empresa": "Puerto Frío",
+            "rol": "Extraportuario",
+            "tipo": "servicios",
+            "pais": "CL",
+            "descripcion": "Servicios extraportuarios y consolidación de carga para exportaciones.",
+        },
+        {
+            "email": "cliente@windowshopping.cl",
+            "empresa": "FreshMarket China",
+            "rol": "Cliente extranjero",
+            "tipo": "compras",
+            "pais": "CN",
+            "descripcion": "Importador mayorista de frutas de alta calidad desde Latinoamérica.",
+        },
+    ]
+
+    for d in demos:
+        if not get_user(d["email"]):
+            add_user(
+                email=d["email"],
+                password_hashed=generate_password_hash("demo123"),
+                empresa=d["empresa"],
+                rol=d["rol"],
+                tipo=d["tipo"],
+                pais=d["pais"],
+                rut_doc=None,
+                direccion="No especificada",
+                telefono="+56 9 4000 0000",
+            )
+            print(f"🌱 Usuario demo creado: {d['email']}")
+    print("✅ Usuarios demo cargados correctamente.")
+
+
+# =========================================================
+# ⚙️ SISTEMA DE PERMISOS POR ROL Y VISIBILIDAD
+# =========================================================
+def puede_ver_publicacion(rol_origen: str, rol_destino: str, tipo_pub: str) -> bool:
+    """Define si un rol puede ver una publicación de otro."""
+    mapa = {
+        "Productor(planta)": ["Packing", "Frigorífico", "Exportador"],
+        "Packing": ["Productor(planta)", "Frigorífico", "Exportador"],
+        "Frigorífico": ["Productor(planta)", "Packing", "Exportador"],
+        "Exportador": ["Productor(planta)", "Packing", "Frigorífico", "Cliente extranjero"],
+        "Cliente extranjero": ["Exportador"],
+        "Agencia de aduana": ["Exportador"],
+        "Transporte": ["Productor(planta)", "Packing", "Frigorífico", "Exportador"],
+        "Extraportuario": ["Exportador"],
+    }
+    visibles = mapa.get(rol_origen, [])
+    return rol_destino in visibles
+
+
+def puede_publicar(rol: str, tipo_pub: str) -> bool:
+    """Verifica si un rol puede crear una publicación de determinado tipo."""
+    permisos = {
+        "Productor(planta)": ["oferta"],
+        "Packing": ["oferta", "demanda", "servicio"],
+        "Frigorífico": ["oferta", "demanda", "servicio"],
+        "Exportador": ["demanda"],
+        "Cliente extranjero": [],
+        "Agencia de aduana": ["servicio"],
+        "Transporte": ["servicio"],
+        "Extraportuario": ["servicio"],
+    }
+    return tipo_pub in permisos.get(rol, [])
+
+
+# =========================================================
+# 🛒 CARRITO DE COMPRAS (SESSION)
+# =========================================================
+def get_cart() -> List[Dict[str, Any]]:
+    """Obtiene el carrito actual desde la sesión."""
+    return session.get("cart", [])
+
+
+def add_to_cart(item: Dict[str, Any]):
+    """Agrega un ítem al carrito, evitando duplicados."""
+    cart = session.get("cart", [])
+    if not any(c["id"] == item["id"] for c in cart):
+        cart.append(item)
+        session["cart"] = cart
+        session.modified = True
+
+
+def remove_from_cart(index: int) -> bool:
+    """Elimina ítem por índice dentro del carrito."""
+    cart = session.get("cart", [])
+    if 0 <= index < len(cart):
+        del cart[index]
+        session["cart"] = cart
+        session.modified = True
+        return True
+    return False
+
+
+def clear_cart():
+    """Vacía el carrito completo."""
+    session["cart"] = []
+    session.modified = True
+
+
+# =========================================================
+# 🚫 PUBLICACIONES OCULTAS (por usuario)
+# =========================================================
+def get_hidden_items() -> List[str]:
+    """Obtiene IDs de publicaciones ocultas."""
+    return session.get("hidden_items", [])
+
+
+def hide_item(pub_id: str):
+    """Oculta una publicación en la sesión actual."""
+    ocultos = session.get("hidden_items", [])
+    if pub_id not in ocultos:
+        ocultos.append(pub_id)
+        session["hidden_items"] = ocultos
+        session.modified = True
+
+
+def unhide_all():
+    """Restaura todas las publicaciones ocultas."""
+    session["hidden_items"] = []
+    session.modified = True
+
+
+# =========================================================
+# 🔁 INICIALIZACIÓN AUTOMÁTICA AL ARRANCAR
+# =========================================================
+with app.app_context():
+    init_db()
+    migrate_add_rut_doc()
+    migrate_add_contact_fields()
+    create_admin_if_missing()
+    seed_demo_users()
+    load_users_cache()
+    print(f"✅ USERS en caché: {len(USERS)} usuarios listos para operar.")
+# =========================================================
+# 🌐 WINDOW SHOPPING — Flask App (v3.8 Render-Ready, Parte 3/4)
+# Autenticación · Registro · Dashboard · Carrito · Publicar · Eliminar
 # =========================================================
 
 # =========================================================
@@ -200,7 +445,7 @@ def update_user_fields(email: str, **fields):
 # =========================================================
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Inicia sesión de usuario registrado."""
+    """Inicio de sesión con traducción total."""
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "").strip()
@@ -214,12 +459,11 @@ def login():
 
         flash(t("Credenciales inválidas", "Invalid credentials", "無效的登入資料"), "error")
 
-    return render_template("login.html", titulo=t("Iniciar Sesión", "Login", "登入"))
+    return render_template("login.html", titulo=t("Iniciar sesión", "Login", "登入"))
 
 
 @app.route("/logout")
 def logout():
-    """Cierra sesión y limpia variables de sesión."""
     session.clear()
     flash(t("Sesión cerrada correctamente", "Logged out successfully", "已登出"), "info")
     return redirect(url_for("home"))
@@ -230,17 +474,17 @@ def logout():
 # =========================================================
 @app.route("/register_router")
 def register_router():
-    """Pantalla que muestra tipos de usuario disponibles."""
+    """Pantalla de selección de tipo de registro."""
     return render_template(
         "register_router.html",
         roles=ROLES_POR_TIPO,
-        titulo=t("Registro", "Register", "註冊")
+        titulo=t("Registro de usuarios", "User registration", "用戶註冊"),
     )
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Registra un nuevo usuario manualmente."""
+    """Registra un nuevo usuario con validaciones por tipo y rol."""
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "").strip()
@@ -252,30 +496,23 @@ def register():
         telefono = request.form.get("telefono", "").strip()
 
         if not email or not password or not empresa:
-            flash(
-                t(
-                    "Completa todos los campos obligatorios.",
-                    "Complete all required fields.",
-                    "請填寫所有必填欄位"
-                ),
-                "error"
-            )
+            flash(t(
+                "Completa todos los campos obligatorios.",
+                "Complete all required fields.",
+                "請填寫所有必填欄位"
+            ), "error")
             return redirect(url_for("register"))
 
         if tipo not in TIPOS_VALIDOS:
             tipo = "compraventa"
 
-        # ➕ Validación de rol según tipo
         roles_validos = ROLES_POR_TIPO.get(tipo, [])
         if rol not in roles_validos:
-            flash(
-                t(
-                    "Rol no permitido para este tipo de usuario.",
-                    "Role not allowed for this user type.",
-                    "角色與類型不符"
-                ),
-                "error"
-            )
+            flash(t(
+                "Rol no permitido para este tipo de usuario.",
+                "Role not allowed for this user type.",
+                "角色與類型不符"
+            ), "error")
             return redirect(url_for("register"))
 
         if get_user(email):
@@ -301,7 +538,7 @@ def register():
         "register.html",
         tipos=TIPOS_VALIDOS,
         roles=ROLES_POR_TIPO,
-        titulo=t("Registro", "Register", "註冊")
+        titulo=t("Registro", "Register", "註冊"),
     )
 
 
@@ -315,11 +552,11 @@ def home():
 
 
 # =========================================================
-# 🌍 GESTIÓN DE IDIOMA
+# 🌍 CAMBIO DE IDIOMA
 # =========================================================
 @app.route("/lang/<lang>")
 def set_lang(lang):
-    """Cambia el idioma desde el menú (por POST/GET)."""
+    """Cambia idioma y muestra mensaje ajustado sin superponer menú."""
     if lang in ["es", "en", "zh"]:
         session["lang"] = lang
         flash(t("Idioma actualizado correctamente", "Language updated", "語言已更新"), "info")
@@ -327,60 +564,6 @@ def set_lang(lang):
         flash(t("Idioma no soportado", "Unsupported language", "不支援的語言"), "error")
     return redirect(request.referrer or url_for("home"))
 
-
-@app.route("/set_lang/<lang>")
-def set_lang_get(lang):
-    """Alias para cambiar idioma con /set_lang/<lang> (compatibilidad)."""
-    if lang in ["es", "en", "zh"]:
-        session["lang"] = lang
-        flash(t("Idioma actualizado correctamente", "Language updated", "語言已更新"), "info")
-    else:
-        flash(t("Idioma no soportado", "Unsupported language", "不支援的語言"), "error")
-    return redirect(request.referrer or url_for("home"))
-
-
-# =========================================================
-# ⚙️ RUTAS AUXILIARES / ERRORES
-# =========================================================
-@app.errorhandler(404)
-def not_found_error(e):
-    """Página 404 personalizada con traducción."""
-    return (
-        render_template(
-            "404.html",
-            titulo=t("Página no encontrada", "Page not found", "找不到頁面")
-        ),
-        404,
-    )
-
-
-@app.errorhandler(500)
-def internal_error(e):
-    """Error interno del servidor."""
-    return (
-        render_template(
-            "500.html",
-            titulo=t("Error interno", "Internal error", "內部錯誤")
-        ),
-        500,
-    )
-
-
-# =========================================================
-# 🚀 INICIALIZACIÓN AUTOMÁTICA
-# =========================================================
-with app.app_context():
-    init_db()
-    migrate_add_rut_doc()
-    migrate_add_contact_fields()
-    create_admin_if_missing()
-    seed_demo_users()
-    load_users_cache()
-    print(f"✅ USERS en caché: {len(USERS)} usuarios cargados correctamente")
-# =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.8 Base Mejorada, Parte 3/4)
-# Dashboard, Carrito, Ocultos, Publicar, Eliminar
-# =========================================================
 
 # =========================================================
 # 🧭 DASHBOARD PRINCIPAL
@@ -389,7 +572,7 @@ PUBLICACIONES: List[Dict[str, Any]] = []
 
 @app.route("/dashboard_ext", methods=["GET", "POST"])
 def dashboard_ext():
-    """Panel extendido del usuario con publicaciones y filtros por permisos."""
+    """Panel del usuario con publicaciones visibles según permisos."""
     user_email = session.get("user")
     if not user_email:
         flash(t("Debes iniciar sesión.", "You must log in.", "您必須登入"), "error")
@@ -426,34 +609,19 @@ def dashboard_ext():
     )
 
 
-@app.route("/dashboard/filtro/<tipo>")
-def dashboard_filtro(tipo):
-    """Cambia el filtro del panel (oferta, demanda o servicio)."""
-    tipo = tipo.lower()
-    if tipo not in ["oferta", "demanda", "servicio"]:
-        flash(t("Filtro inválido", "Invalid filter", "無效的篩選條件"), "error")
-        return redirect(url_for("dashboard_ext"))
-    return redirect(url_for("dashboard_ext", filtro=tipo))
-
-
 # =========================================================
-# 🧾 RUTA TEMPORAL — MIS PUBLICACIONES
-# =========================================================
-@app.route("/mis_publicaciones")
-def mis_publicaciones():
-    """Ruta temporal para compatibilidad con botones en dashboard/perfil."""
-    flash(t("Sección en construcción.", "Section under construction.", "頁面建設中"), "info")
-    return redirect(url_for("dashboard_ext"))
-
-
-# =========================================================
-# 🧺 CARRITO DE COMPRAS
+# 🧺 CARRITO
 # =========================================================
 @app.route("/carrito")
 def carrito():
+    """Muestra el carrito con textos traducidos."""
     user_email = session.get("user")
     if not user_email:
-        flash(t("Debes iniciar sesión para ver el carrito.", "You must log in to view the cart.", "您必須登入以檢視購物車"), "error")
+        flash(t(
+            "Debes iniciar sesión para ver el carrito.",
+            "You must log in to view the cart.",
+            "您必須登入以檢視購物車"
+        ), "error")
         return redirect(url_for("login"))
 
     cart = get_cart()
@@ -465,7 +633,7 @@ def carrito():
 
 @app.route("/carrito/agregar/<pub_id>", methods=["GET", "POST"])
 def carrito_agregar(pub_id):
-    """Agrega un ítem al carrito, evitando duplicados."""
+    """Agrega ítem al carrito evitando duplicados."""
     pub = next((p for p in PUBLICACIONES if p["id"] == pub_id), None)
     if not pub:
         flash(t("Publicación no encontrada", "Item not found", "找不到項目"), "error")
@@ -478,9 +646,9 @@ def carrito_agregar(pub_id):
 
 @app.route("/carrito/eliminar/<int:index>", methods=["POST", "GET"])
 def carrito_eliminar(index):
-    """Elimina ítem por índice dentro del carrito."""
+    """Elimina un ítem del carrito."""
     if remove_from_cart(index):
-        flash(t("Ítem eliminado del carrito", "Item removed from cart", "已刪除項目"), "info")
+        flash(t("Ítem eliminado del carrito", "Item removed", "已刪除項目"), "info")
     else:
         flash(t("Ítem inexistente", "Item not found", "未找到項目"), "error")
     return redirect(url_for("carrito"))
@@ -488,18 +656,17 @@ def carrito_eliminar(index):
 
 @app.route("/carrito/vaciar", methods=["POST", "GET"])
 def carrito_vaciar():
-    """Vacia el carrito completo."""
+    """Vacía el carrito."""
     clear_cart()
     flash(t("Carrito vaciado correctamente", "Cart cleared", "購物車已清空"), "info")
     return redirect(url_for("carrito"))
 
 
 # =========================================================
-# 👁️‍🗨️ OCULTAR / RESTABLECER PUBLICACIONES
+# 👁️ OCULTAR / RESTAURAR PUBLICACIONES
 # =========================================================
 @app.route("/ocultar/<pub_id>", methods=["POST", "GET"])
 def ocultar_publicacion(pub_id):
-    """Oculta temporalmente una publicación del panel."""
     hide_item(pub_id)
     flash(t("Publicación ocultada", "Item hidden", "項目已隱藏"), "info")
     return redirect(url_for("dashboard_ext"))
@@ -507,21 +674,23 @@ def ocultar_publicacion(pub_id):
 
 @app.route("/restablecer_ocultos", methods=["POST", "GET"])
 def restablecer_ocultos():
-    """Restaura todas las publicaciones ocultas."""
     unhide_all()
     flash(t("Publicaciones restauradas", "Items restored", "已恢復項目"), "success")
     return redirect(url_for("dashboard_ext"))
 
 
 # =========================================================
-# 🧾 NUEVA PUBLICACIÓN
+# 🧾 CREAR / ELIMINAR PUBLICACIONES
 # =========================================================
 @app.route("/publicar", methods=["GET", "POST"])
 def publicar():
-    """Permite a un usuario crear una publicación nueva."""
     user_email = session.get("user")
     if not user_email:
-        flash(t("Debes iniciar sesión para publicar.", "You must log in to post.", "您必須登入以發布"), "error")
+        flash(t(
+            "Debes iniciar sesión para publicar.",
+            "You must log in to post.",
+            "您必須登入以發布"
+        ), "error")
         return redirect(url_for("login"))
 
     user = get_user(user_email)
@@ -541,7 +710,6 @@ def publicar():
             flash(t("Completa todos los campos requeridos", "Complete all required fields", "請填寫所有必填欄位"), "error")
             return redirect(url_for("publicar"))
 
-        # ➕ Validación de permisos para publicar
         if not puede_publicar(user["rol"], tipo_pub):
             flash(t("No tienes permisos para crear este tipo de publicación.", "You are not allowed to post this type.", "無權限發布此類別"), "error")
             return redirect(url_for("dashboard_ext"))
@@ -567,7 +735,7 @@ def publicar():
 
 @app.route("/publicacion/eliminar/<pub_id>", methods=["POST", "GET"])
 def eliminar_publicacion(pub_id):
-    """Permite eliminar publicaciones propias."""
+    """Elimina publicaciones propias."""
     user_email = session.get("user")
     if not user_email:
         flash(t("Debes iniciar sesión.", "You must log in.", "您必須登入"), "error")
@@ -576,9 +744,7 @@ def eliminar_publicacion(pub_id):
     user = get_user(user_email)
     global PUBLICACIONES
     antes = len(PUBLICACIONES)
-    PUBLICACIONES = [
-        p for p in PUBLICACIONES if not (p["id"] == pub_id and p["usuario"] == user["email"])
-    ]
+    PUBLICACIONES = [p for p in PUBLICACIONES if not (p["id"] == pub_id and p["usuario"] == user["email"])]
     despues = len(PUBLICACIONES)
 
     if antes > despues:
@@ -588,8 +754,8 @@ def eliminar_publicacion(pub_id):
 
     return redirect(url_for("dashboard_ext"))
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.8 Base Mejorada, Parte 4/4)
-# Mensajería, Perfil, Clientes, Ayuda, Status, Run
+# 🌐 WINDOW SHOPPING — Flask App (v3.8 Render-Ready, Parte 4/4)
+# Mensajería · Perfil · Clientes · Ayuda · Status · Run
 # =========================================================
 
 # =========================================================
@@ -610,12 +776,9 @@ def _session_user_dict():
 MENSAJES: List[Dict[str, Any]] = []
 
 def puede_enviar_mensaje(origen: str, destino: str) -> bool:
-    """Permite un mensaje por ítem cada 3 días entre los mismos usuarios."""
+    """Permite un mensaje por destinatario cada 3 días."""
     now = datetime.now()
-    recientes = [
-        m for m in MENSAJES
-        if m["origen"] == origen and m["destino"] == destino
-    ]
+    recientes = [m for m in MENSAJES if m["origen"] == origen and m["destino"] == destino]
     if not recientes:
         return True
     ultima_fecha = datetime.strptime(recientes[-1]["fecha"], "%Y-%m-%d %H:%M")
@@ -642,7 +805,6 @@ def mensajes():
             flash(t("El destinatario no existe.", "Recipient not found.", "找不到收件人"), "error")
             return redirect(url_for("mensajes"))
 
-        # ➕ Control de frecuencia de envío
         if not puede_enviar_mensaje(user["email"], destino):
             flash(t(
                 "Ya enviaste un mensaje a este usuario hace menos de 3 días.",
@@ -706,7 +868,7 @@ def perfil():
 
 
 # =========================================================
-# 🏢 CLIENTES / DETALLES
+# 🏢 CLIENTES / DETALLES (con filtro por rol/tipo)
 # =========================================================
 def _armar_cliente_desde_users(username: str, data: Dict[str, Any]) -> Dict[str, Any]:
     """Arma un cliente para las vistas de /clientes."""
@@ -723,25 +885,41 @@ def _armar_cliente_desde_users(username: str, data: Dict[str, Any]) -> Dict[str,
         "telefono": data.get("telefono", ""),
     }
 
+
 @app.route("/clientes")
 def clientes():
-    """Lista todas las empresas visibles según el rol del usuario."""
+    """
+    Lista empresas visibles según permisos y filtro de vista:
+    ?vista=venta|compra|servicio|todos   (por defecto: todos)
+    """
     user = _session_user_dict()
     if not user:
         flash(t("Debes iniciar sesión para ver empresas.", "You must log in to view companies.", "您必須登入以查看公司"), "error")
         return redirect(url_for("login"))
 
+    # Vista solicitada por el usuario (mapeo a tipo de publicación)
+    vista = request.args.get("vista", "todos").lower()
+    mapa_vista_a_tipo = {
+        "venta": "oferta",
+        "compra": "demanda",
+        "servicio": "servicio",
+    }
+    tipo_filtrado = mapa_vista_a_tipo.get(vista, "todos")
+
     visibles = []
     for username, info in USERS.items():
         if info["email"] == user["email"]:
             continue  # no mostrarte a ti mismo
-        if puede_ver_publicacion(user["rol"], info["rol"], "oferta") or puede_ver_publicacion(user["rol"], info["rol"], "servicio"):
-            visibles.append(_armar_cliente_desde_users(username, info))
 
-    # Filtro interactivo antes de mostrar resultados
-    filtro_tipo = request.args.get("filtro", "todos").lower()
-    if filtro_tipo in ["oferta", "demanda", "servicio"]:
-        visibles = [v for v in visibles if v["tipo"] == filtro_tipo]
+        # Si hay filtro específico, valida permisos con ese tipo.
+        if tipo_filtrado in ["oferta", "demanda", "servicio"]:
+            if puede_ver_publicacion(user["rol"], info["rol"], tipo_filtrado):
+                visibles.append(_armar_cliente_desde_users(username, info))
+        else:
+            # "todos": muestra si hay permiso al menos para oferta o servicio
+            if (puede_ver_publicacion(user["rol"], info["rol"], "oferta")
+                    or puede_ver_publicacion(user["rol"], info["rol"], "servicio")):
+                visibles.append(_armar_cliente_desde_users(username, info))
 
     # Paginación básica: 10 por vista
     pagina = int(request.args.get("page", 1))
@@ -755,7 +933,7 @@ def clientes():
         clientes=visibles_pagina,
         pagina=pagina,
         total_paginas=total_paginas,
-        filtro_tipo=filtro_tipo,
+        filtro_tipo=vista,  # para que el template sepa la pestaña activa
         titulo=t("Empresas", "Companies", "公司")
     )
 
@@ -765,12 +943,34 @@ def cliente_detalle(username):
     """Muestra detalle individual del cliente."""
     if username not in USERS:
         abort(404)
+
     c = _armar_cliente_desde_users(username, USERS[username])
-    puede_mensaje = False
+
+    # Si no hay descripción, usa una por defecto traducida
+    if not c.get("descripcion"):
+        c["descripcion"] = t(
+            "Empresa sin descripción proporcionada.",
+            "Company has not provided a description.",
+            "此公司尚未提供描述。"
+        )
+
+    # Seguridad: normaliza items a lista
+    items = c.get("items") or []
+    if not isinstance(items, list):
+        items = []
+
+    # Permiso para mostrar formulario de mensaje
     user = _session_user_dict()
-    if user and puede_enviar_mensaje(user["email"], c["email"]):
-        puede_mensaje = True
-    return render_template("cliente_detalle.html", c=c, puede_mensaje=puede_mensaje, titulo=c["empresa"])
+    puede_mensaje = bool(user and puede_enviar_mensaje(user["email"], c["email"]))
+
+    # ⚠️ Importante: pasar items_list para evitar colisión con c.items (método dict)
+    return render_template(
+        "cliente_detalle.html",
+        c=c,
+        items_list=items,
+        puede_mensaje=puede_mensaje,
+        titulo=c["empresa"]
+    )
 
 
 # =========================================================
@@ -795,7 +995,7 @@ def status():
         "mensajes": len(MENSAJES),
         "idioma": session.get("lang", "es"),
         "estado": "OK ✅",
-        "hora_servidor": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "hora_servidor": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
     return jsonify(estado)
 
