@@ -1,35 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <h2 class="title-gradient mb-3">{{ t("Panel de Usuario") }}</h2>
-  <p>{{ t("Bienvenido") }} <strong>{{ user.empresa }}</strong> ({{ user.rol }} – {{ user.tipo }})</p>
+  <div class="container">
+    <h2 class="title-gradient mb-3 text-center">{{ t("Panel de Usuario") }}</h2>
+    <p class="text-center text-light">
+      {{ t("Bienvenido") }} <strong>{{ user.empresa }}</strong>
+      <span class="badge bg-info text-dark">{{ user.rol }}</span>
+      <span class="badge bg-secondary">{{ user.tipo }}</span>
+    </p>
 
-  <div class="row">
-    {% for pub in publicaciones %}
-    <div class="col-md-6 col-lg-4 mb-4">
-      <div class="card glass-card h-100 p-3">
-        <h5 class="card-title">{{ pub.producto }}</h5>
-        <p class="card-text"><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
-        <p class="card-text"><strong>{{ t("Tipo") }}:</strong> {{ pub.tipo }}</p>
-        <p class="card-text"><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
-        <p class="small text-muted">{{ pub.descripcion }}</p>
-
-        <form action="{{ url_for('carrito_agregar', pub_id=pub.id) }}" method="get">
-          <button type="submit" class="btn btn-primary w-100">🛒 {{ t("Agregar al carrito") }}</button>
-        </form>
+    <!-- Publicaciones visibles -->
+    <div class="row g-4 mt-4">
+      {% for pub in publicaciones %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card glass-card h-100 shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title">{{ pub.producto }}</h5>
+            <p class="card-text"><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
+            <p class="card-text"><strong>{{ t("Tipo") }}:</strong> {{ pub.tipo }}</p>
+            <p class="card-text"><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
+            <p class="small text-muted">{{ pub.descripcion }}</p>
+          </div>
+          <div class="card-footer bg-transparent border-0">
+            <form action="{{ url_for('carrito_agregar', pub_id=pub.id) }}" method="get">
+              <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                🛒 {{ t("Agregar al carrito") }}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
+      {% else %}
+      <p class="text-center text-muted">{{ t("No hay publicaciones visibles para tu rol") }}</p>
+      {% endfor %}
     </div>
-    {% else %}
-    <p class="text-muted">{{ t("No hay publicaciones visibles para tu rol") }}</p>
-    {% endfor %}
-  </div>
 
-  <div class="mt-4 d-flex flex-wrap gap-2">
-    <a href="{{ url_for('publicar') }}" class="btn btn-success">➕ {{ t("Agregar ítem") }}</a>
-    <!-- <a href="{{ url_for('mis_publicaciones') }}" class="btn btn-warning">📄 {{ t("Mis Publicaciones") }}</a> -->
-    <form action="{{ url_for('restablecer_ocultos') }}" method="post">
-      <button type="submit" class="btn btn-light border">🔁 {{ t("Restaurar ocultos") }}</button>
-    </form>
+    <div class="mt-5 d-flex flex-wrap justify-content-center gap-3">
+      <a href="{{ url_for('publicar') }}" class="btn btn-success shadow-sm">
+        ➕ {{ t("Agregar ítem") }}
+      </a>
+      <form action="{{ url_for('restablecer_ocultos') }}" method="post">
+        <button type="submit" class="btn btn-outline-light shadow-sm">
+          🔁 {{ t("Restaurar ocultos") }}
+        </button>
+      </form>
+    </div>
   </div>
 </section>
 {% endblock %}
+
