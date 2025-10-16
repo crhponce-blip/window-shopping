@@ -2,23 +2,23 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container col-lg-8">
-    <div class="glass-card p-4 mb-4 shadow-sm">
+    <div class="glass-card p-4 mb-4 shadow-lg text-light">
       <h2 class="title-gradient mb-3">{{ c.empresa }}</h2>
       <p><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
       <p><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
-      <p>{{ c.descripcion }}</p>
+      <p class="text-muted">{{ c.descripcion }}</p>
     </div>
 
     <div class="mb-4">
-      <h4>{{ t("Productos o Servicios") }}</h4>
+      <h4 class="text-light">{{ t("Productos o Servicios") }}</h4>
       <div class="row g-3">
         {% for item in c.items %}
         <div class="col-md-6">
-          <div class="glass-card p-3 h-100">
+          <div class="glass-card p-3 h-100 shadow-sm">
             <strong>{{ item.nombre }}</strong>
             <p>{{ item.detalle }}</p>
             <form method="get" action="{{ url_for('carrito_agregar', pub_id='direct-' ~ c.username ~ '-' ~ loop.index) }}">
-              <button type="submit" class="btn btn-outline-success btn-sm w-100">
+              <button type="submit" class="btn btn-outline-success btn-sm w-100 shadow-sm">
                 🛒 {{ t("Agregar al carrito") }}
               </button>
             </form>
@@ -30,20 +30,22 @@
       </div>
     </div>
 
-    <div class="glass-card p-4 mb-4">
-      <h5 class="mb-3">{{ t("Enviar mensaje a la empresa") }}</h5>
+    <div class="glass-card p-4 mb-4 shadow-sm">
+      <h5 class="mb-3 text-light">{{ t("Enviar mensaje a la empresa") }}</h5>
       <form method="post" action="{{ url_for('mensajes') }}">
         <input type="hidden" name="destino" value="{{ c.email }}">
         <textarea name="contenido" class="form-control mb-3"
                   placeholder="{{ t('Escribe un mensaje...') }}" required></textarea>
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary">✉️ {{ t("Enviar mensaje") }}</button>
+          <button type="submit" class="btn btn-primary btn-lg shadow-sm">✉️ {{ t("Enviar mensaje") }}</button>
         </div>
       </form>
     </div>
 
     <div class="text-center">
-      <a href="{{ url_for('clientes') }}" class="btn btn-light border">← {{ t("Volver") }}</a>
+      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light border shadow-sm">
+        ← {{ t("Volver") }}
+      </a>
     </div>
   </div>
 </section>
