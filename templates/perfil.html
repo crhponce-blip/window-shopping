@@ -24,6 +24,7 @@
       <hr>
       <p><strong>{{ t("Dirección") }}:</strong> {{ user.direccion }}</p>
       {% endif %}
+
       {% if user.rut_doc %}
       <p><strong>{{ t("Documento RUT") }}:</strong>
         <a href="{{ url_for('static', filename=user.rut_doc) }}" target="_blank">{{ t("Ver archivo") }}</a>
