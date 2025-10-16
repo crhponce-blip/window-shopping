@@ -1,12 +1,14 @@
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio) — BLOQUE 1
-# Configuración · Base de Datos · Usuarios Demo · Traducción
+# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio, FIX) — BLOQUE 1
+# Configuración · Base de Datos (memoria) · Usuarios Demo · Traducción · Auth
 # =========================================================
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, abort
 import os
 from datetime import datetime
 from typing import Dict, Any, List
+from types import SimpleNamespace  # <- para evitar el conflicto c.items en Jinja
+from uuid import uuid4
 
 # =========================================================
 # ⚙️ CONFIGURACIÓN BÁSICA
@@ -32,24 +34,28 @@ def set_lang(lang):
     """Permite cambiar idioma dinámicamente."""
     if lang not in ["es", "en", "zh"]:
         flash("Idioma no disponible.", "error")
-        return redirect(request.referrer or url_for("index"))
+        return redirect(request.referrer or url_for("home"))
     session["lang"] = lang
     flash(t("Idioma cambiado correctamente.", "Language changed.", "語言已變更"), "success")
-    return redirect(request.referrer or url_for("index"))
+    return redirect(request.referrer or url_for("home"))
 
+# Alias de compatibilidad (algunos templates antiguos usan /lang/<lang>)
+@app.route("/lang/<lang>")
+def set_lang_alias(lang):
+    return set_lang(lang)
 
 # =========================================================
-# 🧠 BASE DE DATOS SIMPLIFICADA (en memoria)
+# 🧠 "BASE DE DATOS" SIMPLIFICADA (en memoria)
 # =========================================================
 USERS: Dict[str, Dict[str, Any]] = {}
 PUBLICACIONES: List[Dict[str, Any]] = []
-OCULTOS: Dict[str, List[str]] = {}
+OCULTOS: Dict[str, List[str]] = {}  # publicaciones ocultas por usuario (id de pub)
 
 # =========================================================
 # 🔧 FUNCIONES DE USUARIO
 # =========================================================
 def load_users_cache():
-    """Recarga usuarios base (demo) si están vacíos."""
+    """Carga usuarios base (demo) si están vacíos."""
     global USERS
     if USERS:
         return
@@ -130,7 +136,10 @@ def load_users_cache():
     ]
 
     for u in demo_users:
-        USERS[u["email"]] = u
+        # asegurar campos para plantillas
+        u.setdefault("items", [])
+        u.setdefault("carrito", [])
+        USERS[u["email"].lower()] = u
         print(f"🆕 Usuario creado: {u['email']}")
 
     print(f"✅ USERS en caché: {len(USERS)} usuarios listos.")
@@ -157,11 +166,14 @@ def validate_login(email: str, password: str) -> bool:
     u = get_user(email)
     return bool(u and u["password"] == password)
 
-
 # =========================================================
 # 🏠 RUTAS BÁSICAS
 # =========================================================
-@app.route("/")
+# Importante: exponemos **dos endpoints** para evitar el BuildError en templates:
+#  - 'home' (usado por plantillas antiguas)
+#  - 'index' (por comodidad)
+@app.route("/", endpoint="home")
+@app.route("/index", endpoint="index")
 def index():
     load_users_cache()
     lang = session.get("lang", "es")
@@ -192,7 +204,7 @@ def login():
             elif rol == "administrador":
                 return redirect(url_for("dashboard_admin"))
             else:
-                return redirect(url_for("index"))
+                return redirect(url_for("home"))
         else:
             flash(t("Correo o contraseña incorrectos.", "Invalid credentials.", "帳號或密碼錯誤"), "error")
 
@@ -203,8 +215,7 @@ def login():
 def logout():
     session.pop("user", None)
     flash(t("Sesión cerrada correctamente.", "Logged out successfully.", "登出成功"), "success")
-    return redirect(url_for("index"))
-
+    return redirect(url_for("home"))
 
 # =========================================================
 # 🌐 DASHBOARDS (vinculación inicial)
@@ -228,20 +239,17 @@ def dashboard_servicio():
 def dashboard_admin():
     return render_template("dashboard_admin.html", titulo=t("Panel Administrador", "Admin Panel", "管理面板"))
 
-
 # =========================================================
-# 🚀 RUN LOCAL
+# 🚀 RUN LOCAL (solo si se ejecuta directamente este archivo)
 # =========================================================
 if __name__ == "__main__":
     load_users_cache()
     print("🌐 Servidor iniciado en http://127.0.0.1:5000")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio) — BLOQUE 2
+# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio, FIX) — BLOQUE 2
 # Registro · Roles · Validación · Traducción completa
 # =========================================================
-
-from uuid import uuid4
 
 # =========================================================
 # 🧩 DEFINICIÓN DE TIPOS Y ROLES
@@ -362,11 +370,9 @@ def register_router():
         titulo=t("Seleccionar tipo de registro", "Select registration type", "選擇註冊類型"),
     )
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio) — BLOQUE 3
+# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio, FIX) — BLOQUE 3
 # Dashboard · Publicaciones · Carrito · Ocultar/Restaurar
 # =========================================================
-
-from datetime import datetime
 
 # =========================================================
 # 🧭 DASHBOARD PRINCIPAL
@@ -586,7 +592,7 @@ def carrito_vaciar():
     flash(t("Carrito vaciado correctamente.", "Cart cleared.", "購物車已清空"), "success")
     return redirect(url_for("carrito"))
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio) — BLOQUE 4
+# 🌐 WINDOW SHOPPING — Flask App (v3.9 limpio, FIX) — BLOQUE 4
 # Mensajería · Perfil · Clientes · Ayuda · Status · Run
 # =========================================================
 
@@ -608,7 +614,7 @@ def puede_enviar_mensaje(origen: str, destino: str) -> bool:
 
 @app.route("/mensajes", methods=["GET", "POST"])
 def mensajes():
-    """Vista de bandeja de entrada/salida."""
+    """Vista de bandeja de entrada y envío de mensajes."""
     user_email = session.get("user")
     if not user_email:
         flash(t("Debes iniciar sesión.", "You must log in.", "您必須登入"), "error")
