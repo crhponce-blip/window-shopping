@@ -16,7 +16,7 @@
 
       <div class="mb-3">
         <label class="form-label">{{ t("Subtipo") }}</label>
-        <select name="subtipo" class="form-select" required>
+        <select name="subtipo" class="form-select">
           <option value="compra">{{ t("Compra") }}</option>
           <option value="venta">{{ t("Venta") }}</option>
           <option value="servicio">{{ t("Servicio") }}</option>
@@ -24,24 +24,27 @@
       </div>
 
       <div class="form-floating mb-3">
-        <input type="text" name="producto" class="form-control" id="producto"
-               placeholder="{{ t('Ej: Cereza Lapins / Embalaje flowpack') }}" required>
+        <input type="text" name="producto" id="producto"
+               class="form-control" placeholder="{{ t('Ej: Cereza Lapins / Embalaje flowpack') }}" required>
         <label for="producto">{{ t("Producto o Servicio") }}</label>
       </div>
 
       <div class="mb-3">
         <label class="form-label">{{ t("Descripción Detallada") }}</label>
         <textarea name="descripcion" class="form-control" rows="4"
-                  placeholder="{{ t('Describe las condiciones, variedades o características...') }}" required></textarea>
+                  placeholder="{{ t('Describe las condiciones o características…') }}" required></textarea>
       </div>
 
       <div class="form-floating mb-4">
-        <input type="text" name="precio" class="form-control" id="precio" placeholder="USD 0.00 / unidad">
+        <input type="text" name="precio" id="precio" class="form-control"
+               placeholder="USD 0.00 / unidad">
         <label for="precio">{{ t("Precio Referencial") }}</label>
       </div>
 
       <div class="d-grid">
-        <button type="submit" class="btn btn-primary btn-lg shadow-sm">{{ t("Publicar") }}</button>
+        <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+          {{ t("Publicar") }}
+        </button>
       </div>
     </form>
 
