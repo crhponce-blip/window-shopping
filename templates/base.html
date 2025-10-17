@@ -5,15 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ titulo or "Window Shopping" }}</title>
 
-  <!-- ✅ Bootstrap 5.3.3 -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-    crossorigin="anonymous"
-  >
+  <!-- ✅ Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
 
-  <!-- 🌐 Estilo personalizado WS -->
+  <!-- 🌐 CSS principal -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -35,13 +33,15 @@
           {% if session.get('user') %}
             {% set user = session.get('user') %}
             {% if user.rol|lower == 'administrador' %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_admin') }}">🧭 {{ t('Panel Admin') }}</a></li>
-            {% elif user.rol|lower in ['cliente extranjero', 'extranjero'] %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_ext') }}">🌍 {{ t('Panel Cliente') }}</a></li>
-            {% elif user.rol|lower in ['servicios', 'transporte extraportuario', 'agencia de aduana'] %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_servicio') }}">⚙️ {{ t('Panel Servicio') }}</a></li>
-            {% elif user.rol|lower in ['compraventa', 'productor', 'packing', 'frigorífico', 'exportador'] %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_compra') }}">📦 {{ t('Panel Compraventa') }}</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_admin') }}">🧭 {{ t('Admin') }}</a></li>
+            {% elif user.tipo == 'extranjero' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_extranjero') }}">🌍 {{ t('Cliente') }}</a></li>
+            {% elif user.tipo == 'servicios' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_servicio') }}">⚙️ {{ t('Servicios') }}</a></li>
+            {% elif user.tipo == 'compraventa' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_compra') }}">📦 {{ t('Compraventa') }}</a></li>
+            {% elif user.tipo == 'mixto' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_mixto') }}">🔄 {{ t('Mixto') }}</a></li>
             {% endif %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('carrito') }}">🛒 {{ t('Carrito') }}</a></li>
           {% endif %}
@@ -50,14 +50,15 @@
         <!-- 🔹 Usuario -->
         {% if session.get('user') %}
           <div class="dropdown text-end">
-            <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-              👤 {{ session['user'].get('empresa', 'Usuario') }}
+            <a href="#" class="d-block link-light text-decoration-none dropdown-toggle"
+               id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+              👤 {{ user.empresa }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-lg">
               <li><a class="dropdown-item" href="{{ url_for('perfil') }}">👤 {{ t('Perfil') }}</a></li>
               <li><a class="dropdown-item" href="{{ url_for('mensajes') }}">💬 {{ t('Mensajes') }}</a></li>
               <li><a class="dropdown-item" href="{{ url_for('ayuda') }}">💡 {{ t('Ayuda') }}</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('acerca') }}">ℹ️ {{ t('Acerca de') }}</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('acerca') }}">ℹ️ {{ t('Acerca') }}</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">🚪 {{ t('Cerrar sesión') }}</a></li>
             </ul>
@@ -82,7 +83,7 @@
     </div>
   </header>
 
-  <!-- 💡 CONTENIDO PRINCIPAL -->
+  <!-- 💡 CONTENIDO -->
   <main class="container-fluid pt-5 mt-5">
     <div class="flash-container my-3">
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -97,16 +98,12 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ⚙️ FOOTER -->
   <footer class="footer text-center py-3 mt-5 glass-card small">
     © 2025 Window Shopping — All Rights Reserved
   </footer>
 
-  <!-- ✅ Bootstrap JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous">
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+          crossorigin="anonymous"></script>
 </body>
 </html>
