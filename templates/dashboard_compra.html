@@ -10,7 +10,7 @@
 
     <div class="text-center mb-4">
       <a href="{{ url_for('publicar') }}" class="btn btn-success me-2">➕ {{ t("Publicar oferta o demanda") }}</a>
-      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light">🔄 {{ t("Actualizar panel") }}</a>
+      <a href="{{ url_for('dashboard_compra') }}" class="btn btn-outline-light">🔄 {{ t("Actualizar panel") }}</a>
     </div>
 
     <div class="row g-4 mt-4">
@@ -25,12 +25,9 @@
               <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
               <p class="small text-muted">{{ pub.descripcion }}</p>
             </div>
-            <div class="card-footer bg-transparent border-0 d-flex justify-content-between">
-              <a href="{{ url_for('carrito_agregar', pub_id=pub.id) }}" class="btn btn-primary w-100 me-2">
+            <div class="card-footer bg-transparent border-0">
+              <a href="{{ url_for('carrito_agregar', pub_id=pub.id) }}" class="btn btn-primary w-100">
                 🛒 {{ t("Agregar al carrito") }}
-              </a>
-              <a href="{{ url_for('ocultar_publicacion', pub_id=pub.id) }}" class="btn btn-outline-warning">
-                🙈 {{ t("Ocultar") }}
               </a>
             </div>
           </div>
