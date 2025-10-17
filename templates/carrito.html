@@ -2,38 +2,48 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container glass-card p-4 shadow-lg">
-    <h2 class="title-gradient text-center mb-3">{{ t("Tu Carrito") }}</h2>
+    <h2 class="title-gradient text-center mb-4">🛒 {{ t("Carrito de Compras") }}</h2>
 
-    {% if carrito and carrito|length > 0 %}
-      <table class="table table-hover align-middle text-center">
+    {% if cart and cart|length > 0 %}
+      <table class="table table-striped table-hover align-middle">
         <thead>
           <tr>
+            <th>#</th>
             <th>{{ t("Producto / Servicio") }}</th>
             <th>{{ t("Empresa") }}</th>
             <th>{{ t("Precio") }}</th>
-            <th>{{ t("Acción") }}</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          {% for item in carrito %}
+          {% for item in cart %}
           <tr>
+            <td>{{ loop.index }}</td>
             <td>{{ item.producto }}</td>
             <td>{{ item.empresa }}</td>
             <td>{{ item.precio }}</td>
             <td>
-              <a href="{{ url_for('carrito_eliminar', item_id=loop.index0) }}" class="btn btn-outline-danger btn-sm">🗑️ {{ t("Quitar") }}</a>
+              <form action="{{ url_for('carrito_eliminar', index=loop.index0) }}" method="POST">
+                <button type="submit" class="btn btn-danger btn-sm">🗑 {{ t("Eliminar") }}</button>
+              </form>
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
 
-      <div class="d-flex justify-content-between mt-4">
-        <a href="{{ url_for('carrito_vaciar') }}" class="btn btn-outline-light">🧹 {{ t("Vaciar carrito") }}</a>
-        <a href="{{ url_for('checkout') }}" class="btn btn-success">💰 {{ t("Finalizar compra") }}</a>
+      <div class="text-center mt-4 d-flex justify-content-center gap-3">
+        <form action="{{ url_for('carrito_vaciar') }}" method="POST">
+          <button type="submit" class="btn btn-outline-danger">{{ t("Vaciar carrito") }}</button>
+        </form>
+        <a href="{{ url_for('clientes') }}" class="btn btn-success">{{ t("Seguir comprando") }}</a>
       </div>
+
     {% else %}
-      <p class="text-center text-muted">{{ t("Tu carrito está vacío.") }}</p>
+      <p class="text-center text-muted fs-5 my-5">{{ t("Tu carrito está vacío") }}</p>
+      <div class="text-center">
+        <a href="{{ url_for('clientes') }}" class="btn btn-primary">{{ t("Explorar empresas") }}</a>
+      </div>
     {% endif %}
   </div>
 </section>
