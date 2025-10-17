@@ -1,68 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container">
-    <h2 class="title-gradient text-center mb-3">{{ t("Panel Mixto") }}</h2>
-    <p class="text-center text-light">
-      {{ t("Bienvenido") }} <strong>{{ user.empresa }}</strong>
-      <span class="badge bg-warning text-dark">{{ user.rol }}</span>
-    </p>
+  <div class="container glass-card p-4 shadow-lg">
+    <h2 class="title-gradient mb-3 text-center">🔁 {{ t("Panel Mixto") }}</h2>
+    <p class="text-center text-muted">{{ t("Gestiona tus operaciones de fruta y servicios simultáneamente.") }}</p>
 
-    <!-- 🔹 Controles principales -->
-    <div class="text-center mb-4">
-      <a href="{{ url_for('publicar') }}" class="btn btn-primary me-2">➕ {{ t("Nueva publicación") }}</a>
-      <a href="{{ url_for('dashboard_mixto') }}" class="btn btn-outline-light">🔄 {{ t("Actualizar panel") }}</a>
-    </div>
-
-    <!-- 🔹 Sección de fruta -->
-    <div class="glass-card mb-5 p-3">
-      <h4 class="text-info mb-3">🍎 {{ t("Publicaciones de Fruta") }}</h4>
-      <div class="row g-4">
-        {% if publicaciones %}
-          {% for pub in publicaciones if pub.tipo == "Fruta" %}
-          <div class="col-md-6 col-lg-4">
-            <div class="card glass-card h-100 border-0 shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">{{ pub.producto }}</h5>
-                <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
-                <p><strong>{{ t("Precio") }}:</strong> {{ pub.precio }}</p>
-                <p class="small text-muted">{{ pub.descripcion }}</p>
-              </div>
-              <div class="card-footer bg-transparent border-0">
-                <a href="{{ url_for('carrito_agregar', pub_id=pub.id) }}" class="btn btn-success w-100">🛒 {{ t("Agregar al carrito") }}</a>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <p class="text-muted text-center">{{ t("No hay publicaciones de fruta disponibles.") }}</p>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- 🔹 Sección de servicios -->
-    <div class="glass-card p-3">
-      <h4 class="text-info mb-3">⚙️ {{ t("Publicaciones de Servicios") }}</h4>
-      <div class="row g-4">
-        {% if publicaciones %}
-          {% for pub in publicaciones if pub.tipo == "Servicio" %}
-          <div class="col-md-6 col-lg-4">
-            <div class="card glass-card h-100 border-0 shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">{{ pub.producto }}</h5>
-                <p><strong>{{ t("Empresa") }}:</strong> {{ pub.empresa }}</p>
-                <p class="small text-muted">{{ pub.descripcion }}</p>
-              </div>
-              <div class="card-footer bg-transparent border-0">
-                <a href="{{ url_for('carrito_agregar', pub_id=pub.id) }}" class="btn btn-primary w-100">⚡ {{ t("Solicitar servicio") }}</a>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <p class="text-muted text-center">{{ t("No hay servicios disponibles actualmente.") }}</p>
-        {% endif %}
-      </div>
+    <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+      <a href="{{ url_for('publicar') }}" class="btn btn-primary shadow">{{ t("Publicar Producto / Servicio") }}</a>
+      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light shadow">{{ t("Ver Clientes / Proveedores") }}</a>
+      <a href="{{ url_for('carrito') }}" class="btn btn-info shadow">{{ t("Carrito") }}</a>
     </div>
   </div>
 </section>
