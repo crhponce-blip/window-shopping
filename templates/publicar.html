@@ -1,36 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container col-md-8 glass-card shadow-lg p-4">
-    <h2 class="title-gradient text-center mb-3">{{ t("Publicar nueva oferta o servicio") }}</h2>
-    <p class="text-center text-muted">{{ t("Crea una publicación visible según tu tipo de cuenta") }}</p>
+  <div class="container col-md-6 glass-card p-4 shadow-lg">
+    <h2 class="title-gradient text-center mb-4">📝 {{ t("Nueva Publicación") }}</h2>
 
     <form method="POST" action="{{ url_for('publicar') }}">
-      <div class="form-floating mb-3">
-        <input type="text" name="producto" class="form-control" placeholder="{{ t('Ej: Cajas de manzanas, Transporte refrigerado...') }}" required>
-        <label>{{ t("Producto o servicio") }}</label>
-      </div>
-
-      <div class="form-floating mb-3">
-        <input type="text" name="precio" class="form-control" placeholder="15000 CLP / Tonelada" required>
-        <label>{{ t("Precio estimado (moneda o unidad)") }}</label>
-      </div>
-
-      <div class="form-floating mb-3">
-        <textarea name="descripcion" class="form-control" style="height: 100px;" placeholder="{{ t('Agrega detalles relevantes') }}" required></textarea>
-        <label>{{ t("Descripción") }}</label>
-      </div>
-
-      <div class="form-floating mb-3">
-        <select name="tipo" class="form-select" required>
-          <option value="Fruta">{{ t("Fruta / Producto") }}</option>
-          <option value="Servicio">{{ t("Servicio") }}</option>
+      <div class="mb-3">
+        <label for="tipo_pub" class="form-label">{{ t("Tipo de publicación") }}</label>
+        <select class="form-select" id="tipo_pub" name="tipo_pub" required>
+          <option value="producto">{{ t("Producto / Fruta") }}</option>
+          <option value="servicio">{{ t("Servicio") }}</option>
         </select>
-        <label>{{ t("Tipo de publicación") }}</label>
       </div>
 
-      <div class="d-grid mt-4">
-        <button type="submit" class="btn btn-primary btn-lg">🚀 {{ t("Publicar") }}</button>
+      <div class="form-floating mb-3">
+        <input type="text" name="producto" id="producto"
+               class="form-control" placeholder="{{ t('Ej: Cereza Lapins 9.5') }}" required>
+        <label for="producto">{{ t("Nombre del producto o servicio") }}</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <textarea name="descripcion" id="descripcion" class="form-control"
+                  placeholder="{{ t('Describe brevemente tu oferta...') }}" style="height: 120px" required></textarea>
+        <label for="descripcion">{{ t("Descripción") }}</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="text" name="precio" id="precio" class="form-control" placeholder="USD 1.00/kg">
+        <label for="precio">{{ t("Precio (opcional)") }}</label>
+      </div>
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg">{{ t("Publicar") }}</button>
       </div>
     </form>
   </div>
