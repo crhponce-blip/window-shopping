@@ -4,39 +4,22 @@
   <div class="container col-lg-8">
     <div class="glass-card p-4 shadow-lg text-light">
       <h2 class="title-gradient text-center mb-4">💬 {{ t("Centro de Ayuda", "Help Center", "幫助中心") }}</h2>
-      <p class="text-center mb-4">
+      <p class="text-center text-muted mb-4">
         {{ t("Aquí encontrarás información sobre cómo usar la plataforma Window Shopping.",
-              "Here you'll find information on how to use the Window Shopping platform.",
-              "在此您可以了解如何使用 Window Shopping 平台。") }}
+             "Here you'll find information on how to use the Window Shopping platform.",
+             "在此您可以了解如何使用 Window Shopping 平台。") }}
       </p>
 
       <ul class="list-group list-group-flush mb-4">
-        <li class="list-group-item bg-transparent border-light">
-          📦 {{ t("Para comprar, agrega productos o servicios al carrito y confirma tu pedido.",
-                   "To buy, add products or services to the cart and confirm your order.",
-                   "要購買，請將產品或服務加入購物車並確認訂單。") }}
-        </li>
-        <li class="list-group-item bg-transparent border-light">
-          🚚 {{ t("Los proveedores pueden publicar ofertas, demandas o servicios desde su panel.",
-                   "Suppliers can post offers, demands or services from their dashboard.",
-                   "供應商可從其面板發布報價、需求或服務。") }}
-        </li>
-        <li class="list-group-item bg-transparent border-light">
-          🌍 {{ t("Los clientes extranjeros solo pueden ver exportadores y comprar productos.",
-                   "Foreign clients can only view exporters and buy products.",
-                   "國際客戶只能查看出口商並購買產品。") }}
-        </li>
-        <li class="list-group-item bg-transparent border-light">
-          💡 {{ t("El idioma se puede cambiar desde el menú superior (ES / EN / 中文).",
-                   "Language can be changed from the top menu (ES / EN / 中文).",
-                   "可從頂部選單切換語言 (ES / EN / 中文)。") }}
-        </li>
+        <li class="list-group-item bg-transparent border-light">📦 {{ t("Publica o compra productos según tu perfil de empresa.") }}</li>
+        <li class="list-group-item bg-transparent border-light">⚙️ {{ t("Los servicios logísticos se contratan desde el panel correspondiente.") }}</li>
+        <li class="list-group-item bg-transparent border-light">🌍 {{ t("Los clientes extranjeros solo pueden comprar a exportadores.") }}</li>
+        <li class="list-group-item bg-transparent border-light">💬 {{ t("Usa el centro de mensajes para comunicarte con otras empresas.") }}</li>
+        <li class="list-group-item bg-transparent border-light">💡 {{ t("Puedes cambiar el idioma desde el menú superior (ES / EN / 中文).") }}</li>
       </ul>
 
-      <div class="text-center mt-4">
-        <a href="{{ url_for('dashboard_ext') }}" class="btn btn-outline-light shadow-sm">
-          ← {{ t("Volver al Panel", "Back to Dashboard", "返回面板") }}
-        </a>
+      <div class="text-center">
+        <a href="{{ url_for('dashboard_ext') }}" class="btn btn-outline-light">← {{ t("Volver al Panel") }}</a>
       </div>
     </div>
   </div>
