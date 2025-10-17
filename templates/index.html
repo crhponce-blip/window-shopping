@@ -6,19 +6,13 @@
     <p class="lead text-light">{{ t("Conectamos productores chilenos con compradores internacionales") }}</p>
 
     <div class="mt-4">
-      <a href="{{ url_for('register_router') }}" class="btn btn-primary btn-lg m-2 shadow">
-        🚀 {{ t("Comienza ahora") }}
-      </a>
-      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light btn-lg m-2 shadow">
-        ⚙️ {{ t("Explora empresas y servicios") }}
-      </a>
+      <a href="{{ url_for('register_router') }}" class="btn btn-primary btn-lg m-2 shadow">🚀 {{ t("Comienza ahora") }}</a>
+      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light btn-lg m-2 shadow">⚙️ {{ t("Explora empresas y servicios") }}</a>
     </div>
   </div>
 
   <p class="text-muted small">
-    {{ t("Versión 3.9 — Plataforma colaborativa de comercio internacional",
-          "Version 3.9 — International trade collaborative platform",
-          "版本 3.9 — 國際貿易協作平台") }}
+    {{ t("Versión 3.9 — Plataforma colaborativa de comercio internacional") }}
   </p>
 </section>
 {% endblock %}
