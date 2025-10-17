@@ -3,47 +3,31 @@
 <section class="fade-in py-5">
   <div class="container col-lg-8">
     <div class="glass-card p-4 shadow-lg text-light">
-      <h2 class="title-gradient text-center mb-4">
+      <h2 class="title-gradient text-center mb-3">
         {{ t("Acerca de Window Shopping", "About Window Shopping", "關於 Window Shopping") }}
       </h2>
 
-      <p class="mb-4">
-        {{ t(
-          "Window Shopping es una plataforma desarrollada por Christopher Ponce que conecta a productores, exportadores y compradores internacionales, permitiendo publicar, ofertar y gestionar servicios dentro del comercio exterior chileno.",
-          "Window Shopping is a platform developed by Christopher Ponce that connects producers, exporters, and international buyers, allowing posting, offering, and managing services within Chilean foreign trade.",
-          "Window Shopping 是由 Christopher Ponce 開發的平台，用於連接生產者、出口商和國際買家，實現智利對外貿易中的產品與服務交流。"
-        ) }}
+      <p class="mb-4 text-muted">
+        {{ t("Window Shopping es una plataforma creada por Christopher Ponce que conecta productores, exportadores y clientes extranjeros, integrando servicios logísticos y aduaneros en un solo entorno digital.",
+             "Window Shopping is a platform developed by Christopher Ponce to connect producers, exporters, and international buyers, integrating logistics and customs in a single environment.",
+             "Window Shopping 是由 Christopher Ponce 開發的平台，用於連接生產商、出口商與國際買家。") }}
       </p>
 
-      <h4 class="mt-4 text-info">🌎 {{ t("Objetivos", "Objectives", "目標") }}</h4>
+      <h5 class="text-info mb-2">🌍 {{ t("Objetivos") }}</h5>
       <ul class="list-group list-group-flush mb-4">
-        <li class="list-group-item bg-transparent border-light">
-          {{ t("Facilitar la conexión entre empresas nacionales y extranjeras.",
-               "Facilitate connection between national and foreign companies.",
-               "促進本地與國際企業的聯繫。") }}
-        </li>
-        <li class="list-group-item bg-transparent border-light">
-          {{ t("Promover la transparencia y eficiencia en la oferta y demanda de productos chilenos.",
-               "Promote transparency and efficiency in Chilean product trade.",
-               "促進智利產品供需的透明與效率。") }}
-        </li>
-        <li class="list-group-item bg-transparent border-light">
-          {{ t("Incorporar servicios logísticos y aduaneros en un solo entorno digital.",
-               "Integrate logistics and customs services in one digital environment.",
-               "將物流與報關服務整合於單一數位環境中。") }}
-        </li>
+        <li class="list-group-item bg-transparent border-light">🔗 {{ t("Conectar empresas nacionales con clientes internacionales.") }}</li>
+        <li class="list-group-item bg-transparent border-light">📊 {{ t("Mejorar la transparencia del comercio exterior chileno.") }}</li>
+        <li class="list-group-item bg-transparent border-light">🚢 {{ t("Centralizar servicios logísticos y aduaneros.") }}</li>
       </ul>
 
-      <h4 class="mt-4 text-info">💡 {{ t("Tecnologías utilizadas", "Technologies Used", "使用技術") }}</h4>
-      <p>Flask (Python) • HTML • CSS • Jinja • SQLite • Render Deployment</p>
+      <h5 class="text-info mb-2">💡 {{ t("Tecnologías utilizadas") }}</h5>
+      <p>Flask (Python) • SQLite • Jinja2 • Bootstrap 5.3 • Render</p>
 
-      <h4 class="mt-4 text-info">📞 {{ t("Contacto", "Contact", "聯絡方式") }}</h4>
+      <h5 class="text-info mb-2">📞 {{ t("Contacto") }}</h5>
       <p>Email: <a href="mailto:admin@ws.com" class="link-light">admin@ws.com</a></p>
 
       <div class="text-center mt-4">
-        <a href="{{ url_for('home') }}" class="btn btn-primary shadow-sm">
-          ← {{ t("Volver al inicio", "Back to Home", "返回首頁") }}
-        </a>
+        <a href="{{ url_for('home') }}" class="btn btn-primary shadow-sm">← {{ t("Volver al inicio") }}</a>
       </div>
     </div>
   </div>
