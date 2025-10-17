@@ -1,41 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container col-md-8">
-    <h2 class="title-gradient text-center mb-4">{{ t("Perfil de Usuario") }}</h2>
+  <div class="container col-md-8 glass-card p-4 shadow-lg">
+    <h2 class="title-gradient text-center mb-3">{{ t("Perfil de Usuario") }}</h2>
 
-    <div class="glass-card p-4 shadow-lg mb-4">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <p><strong>Email:</strong> {{ user.email }}</p>
-          <p><strong>{{ t("Empresa") }}:</strong> {{ user.empresa }}</p>
-          <p><strong>{{ t("Rol") }}:</strong> {{ user.rol }}</p>
-        </div>
-        <div class="col-md-6">
-          <p><strong>{{ t("Tipo") }}:</strong> {{ user.tipo }}</p>
-          <p><strong>{{ t("País") }}:</strong> {{ user.pais }}</p>
-          {% if user.telefono %}
-          <p><strong>{{ t("Teléfono") }}:</strong> {{ user.telefono }}</p>
-          {% endif %}
-        </div>
+    <form method="POST" action="{{ url_for('perfil') }}">
+      <div class="form-floating mb-3">
+        <input type="text" name="empresa" class="form-control" value="{{ user.empresa }}" required>
+        <label>{{ t("Empresa / Organización") }}</label>
       </div>
 
-      {% if user.direccion %}
-      <hr>
-      <p><strong>{{ t("Dirección") }}:</strong> {{ user.direccion }}</p>
-      {% endif %}
+      <div class="form-floating mb-3">
+        <input type="email" name="email" class="form-control" value="{{ user.email }}" readonly>
+        <label>Email</label>
+      </div>
 
-      {% if user.rut_doc %}
-      <p><strong>{{ t("Documento RUT") }}:</strong>
-        <a href="{{ url_for('static', filename=user.rut_doc) }}" target="_blank">{{ t("Ver archivo") }}</a>
-      </p>
-      {% endif %}
-    </div>
+      <div class="form-floating mb-3">
+        <input type="text" name="pais" class="form-control" value="{{ user.pais }}">
+        <label>{{ t("País") }}</label>
+      </div>
 
-    <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-primary shadow-sm">🏠 {{ t("Volver al Panel") }}</a>
-      <a href="{{ url_for('publicar') }}" class="btn btn-secondary shadow-sm">➕ {{ t("Nueva Publicación") }}</a>
-    </div>
+      <div class="form-floating mb-3">
+        <input type="text" name="telefono" class="form-control" value="{{ user.telefono }}">
+        <label>{{ t("Teléfono") }}</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="text" name="direccion" class="form-control" value="{{ user.direccion }}">
+        <label>{{ t("Dirección") }}</label>
+      </div>
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg">💾 {{ t("Actualizar perfil") }}</button>
+      </div>
+    </form>
   </div>
 </section>
 {% endblock %}
