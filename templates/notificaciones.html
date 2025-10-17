@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="fade-in py-5">
+  <div class="container col-md-8">
+    <h2 class="title-gradient text-center mb-4">🔔 {{ t("Notificaciones del sistema") }}</h2>
+
+    {% if notificaciones %}
+      <ul class="list-group glass-card p-3">
+        {% for n in notificaciones %}
+        <li class="list-group-item bg-transparent text-light border-light">
+          <strong>{{ n.titulo }}</strong><br>
+          {{ n.mensaje }}<br>
+          <small class="text-muted">{{ n.fecha }}</small>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-center text-muted">{{ t("No tienes notificaciones recientes.") }}</p>
+    {% endif %}
+
+    <div class="text-center mt-4">
+      <a href="{{ url_for('dashboard_ext') }}" class="btn btn-outline-light">← {{ t("Volver al Panel") }}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
