@@ -6,72 +6,56 @@
 
     <form method="POST">
       <div class="form-floating mb-3">
-        <input type="email" name="email" id="regEmail"
-               class="form-control" placeholder="usuario@ejemplo.com" required>
-        <label for="regEmail">{{ t("Correo electrónico") }}</label>
+        <input type="email" name="email" class="form-control" placeholder="usuario@ejemplo.com" required>
+        <label>{{ t("Correo electrónico") }}</label>
       </div>
 
       <div class="form-floating mb-3">
-        <input type="password" name="password" id="regPass"
-               class="form-control" placeholder="Password" required>
-        <label for="regPass">{{ t("Contraseña") }}</label>
+        <input type="password" name="password" class="form-control" placeholder="Password" required>
+        <label>{{ t("Contraseña") }}</label>
       </div>
 
       <div class="form-floating mb-3">
-        <input type="text" name="empresa" id="regEmpresa"
-               class="form-control" placeholder="Empresa / Organización" required>
-        <label for="regEmpresa">{{ t("Empresa / Organización") }}</label>
+        <input type="text" name="empresa" class="form-control" placeholder="Empresa / Organización" required>
+        <label>{{ t("Empresa / Organización") }}</label>
       </div>
 
-      <!-- 🔧 FIX: manejo seguro cuando 'tipos' no se pasa desde Flask -->
       <div class="mb-3">
         <label class="form-label">{{ t("Rol") }}</label>
         <select name="rol" class="form-select" required>
-          {% if tipos %}
-            {% for tipo, roles in tipos.items() %}
-              {% for r in roles %}
-                <option value="{{ r }}">{{ r }}</option>
-              {% endfor %}
-            {% endfor %}
-          {% else %}
-            <option value="Productor">Productor</option>
-            <option value="Exportador">Exportador</option>
-            <option value="Frigorífico">Frigorífico</option>
-            <option value="Agencia de Aduana">Agencia de Aduana</option>
-            <option value="Cliente Extranjero">Cliente Extranjero</option>
-          {% endif %}
+          <option value="Productor">Productor</option>
+          <option value="Packing">Packing</option>
+          <option value="Frigorífico">Frigorífico</option>
+          <option value="Exportador">Exportador</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Agencia de Aduanas">Agencia de Aduanas</option>
+          <option value="Cliente Extranjero">Cliente Extranjero</option>
         </select>
       </div>
 
       <div class="form-floating mb-3">
-        <input type="text" name="pais" id="regPais"
-               maxlength="2" class="form-control" placeholder="CL" required>
-        <label for="regPais">{{ t("País (Código ISO)") }}</label>
+        <input type="text" name="pais" maxlength="2" class="form-control" placeholder="CL" required>
+        <label>{{ t("País (Código ISO)") }}</label>
       </div>
 
       <div class="form-floating mb-3">
-        <input type="text" name="direccion" id="regDir"
-               class="form-control" placeholder="{{ t('Ej: Santiago, CL') }}">
-        <label for="regDir">{{ t("Dirección") }}</label>
+        <input type="text" name="direccion" class="form-control" placeholder="{{ t('Ej: Santiago, CL') }}">
+        <label>{{ t("Dirección") }}</label>
       </div>
 
       <div class="form-floating mb-3">
-        <input type="text" name="telefono" id="regTel"
-               class="form-control" placeholder="+56 9 XXXX XXXX">
-        <label for="regTel">{{ t("Teléfono") }}</label>
+        <input type="text" name="telefono" class="form-control" placeholder="+56 9 XXXX XXXX">
+        <label>{{ t("Teléfono") }}</label>
       </div>
 
       <div class="d-grid">
-        <button type="submit" class="btn btn-primary btn-lg">{{ t("Registrar") }}</button>
+        <button type="submit" class="btn btn-primary btn-lg">📝 {{ t("Registrar") }}</button>
       </div>
     </form>
 
     <p class="mt-3 text-center">
-      <a href="{{ url_for('login') }}" class="fw-bold">
-        {{ t("¿Ya tienes cuenta? Inicia sesión aquí") }}
-      </a>
+      <a href="{{ url_for('login') }}" class="fw-bold">{{ t("¿Ya tienes cuenta? Inicia sesión aquí") }}</a>
     </p>
   </div>
 </section>
 {% endblock %}
-
