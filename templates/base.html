@@ -18,7 +18,7 @@
 </head>
 
 <body>
-  <!-- 🌍 NAVBAR (Bootstrap + NeonGlass) -->
+  <!-- 🌍 NAVBAR -->
   <header class="navbar navbar-expand-lg glass-card py-3 shadow-sm fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand title-gradient fw-bold fs-3" href="{{ url_for('home') }}">WS</a>
@@ -42,14 +42,12 @@
               <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_servicio') }}">⚙️ {{ t('Panel Servicio') }}</a></li>
             {% elif user.rol|lower in ['compraventa', 'productor', 'packing', 'frigorífico', 'exportador'] %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_compra') }}">📦 {{ t('Panel Compraventa') }}</a></li>
-            {% else %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard_ext') }}">📋 {{ t('Panel Principal') }}</a></li>
             {% endif %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('carrito') }}">🛒 {{ t('Carrito') }}</a></li>
           {% endif %}
         </ul>
 
-        <!-- 🔹 Menú de usuario -->
+        <!-- 🔹 Usuario -->
         {% if session.get('user') %}
           <div class="dropdown text-end">
             <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
@@ -71,7 +69,7 @@
           </div>
         {% endif %}
 
-        <!-- 🌐 Selector idioma -->
+        <!-- 🌐 Idioma -->
         <form class="d-flex align-items-center ms-3">
           <select class="form-select form-select-sm w-auto"
                   onchange="window.location.href='/set_lang/' + this.value;">
@@ -104,7 +102,7 @@
     © 2025 Window Shopping — All Rights Reserved
   </footer>
 
-  <!-- ✅ Bootstrap JS Bundle -->
+  <!-- ✅ Bootstrap JS -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
