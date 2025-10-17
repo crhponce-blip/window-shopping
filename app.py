@@ -1194,6 +1194,16 @@ def status():
         "estado": "OK ✅"
     }
     return jsonify(estado)
+# ---------------------------------------------------------
+# 💡 PÁGINAS INFORMATIVAS (Ayuda / Acerca de)
+# ---------------------------------------------------------
+@app.route("/ayuda")
+def ayuda():
+    return render_template("ayuda.html", titulo=t("Centro de Ayuda"))
+
+@app.route("/acerca")
+def acerca():
+    return render_template("acerca.html", titulo=t("Acerca de Window Shopping"))
 
 # ---------------------------------------------------------
 # 🏁 EJECUCIÓN LOCAL
