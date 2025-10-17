@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="fade-in py-5">
+  <div class="container col-md-8 glass-card shadow-lg p-4">
+    <h2 class="title-gradient text-center mb-4">✅ {{ t("Confirmación de Pedido") }}</h2>
+
+    {% if carrito %}
+      <table class="table table-hover align-middle text-center">
+        <thead>
+          <tr>
+            <th>{{ t("Producto / Servicio") }}</th>
+            <th>{{ t("Empresa") }}</th>
+            <th>{{ t("Precio") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in carrito %}
+          <tr>
+            <td>{{ item.producto }}</td>
+            <td>{{ item.empresa }}</td>
+            <td>{{ item.precio }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="text-center mt-4">
+        <form method="POST" action="{{ url_for('pedido_finalizar') }}">
+          <button type="submit" class="btn btn-success btn-lg">💼 {{ t("Finalizar pedido") }}</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="text-center text-muted">{{ t("No hay productos en el carrito para confirmar.") }}</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
