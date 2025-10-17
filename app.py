@@ -2,8 +2,8 @@
 # 🌐 WINDOW SHOPPING — Flask App (v3.9 corregida)
 # Autor: Christopher Ponce & GPT-5
 # ---------------------------------------------------------
-# Parte 1: Configuración · Traducción · Usuarios ficticios (completos)
-#           Helpers de saneo · Idioma · Home
+# Parte 1: Configuración · Traducción · Usuarios ficticios (2 por rol)
+#          Estructuras · Idioma · Home · (stub) Perfil
 # =========================================================
 
 from flask import (
@@ -35,7 +35,77 @@ OCULTOS = {}
 HIDDEN_COMPANIES = {}
 
 # ---------------------------------------------------------
-# 👥 USUARIOS FICTICIOS (completos, 2 por rol real)
+# 🌍 TRADUCCIÓN / i18n
+# ---------------------------------------------------------
+LANGS = ["es", "en", "zh"]
+
+TRANSLATIONS = {
+    "Bienvenido a Window Shopping": {"en": "Welcome to Window Shopping", "zh": "欢迎来到 Window Shopping"},
+    "Conectamos productores chilenos con compradores internacionales": {
+        "en": "We connect Chilean producers with international buyers",
+        "zh": "我们连接智利生产商与国际买家"
+    },
+    "Comienza ahora": {"en": "Start now", "zh": "立即开始"},
+    "Explora empresas y servicios": {"en": "Explore companies and services", "zh": "探索公司和服务"},
+    "Iniciar sesión": {"en": "Login", "zh": "登录"},
+    "Contraseña": {"en": "Password", "zh": "密码"},
+    "Correo electrónico": {"en": "Email", "zh": "电子邮件"},
+    "Registrar": {"en": "Register", "zh": "注册"},
+    "Registrarse": {"en": "Sign up", "zh": "注册"},
+    "Perfil": {"en": "Profile", "zh": "用户资料"},
+    "Empresas": {"en": "Companies", "zh": "企业"},
+    "Carrito": {"en": "Cart", "zh": "购物车"},
+    "Inicio": {"en": "Home", "zh": "首页"},
+    "Panel Admin": {"en": "Admin Panel", "zh": "管理员面板"},
+    "Panel Cliente": {"en": "Client Panel", "zh": "客户面板"},
+    "Panel Servicio": {"en": "Service Panel", "zh": "服务面板"},
+    "Panel Compraventa": {"en": "Trade Panel", "zh": "交易面板"},
+    "Cerrar sesión": {"en": "Log out", "zh": "退出登录"},
+    "Registro de Usuario": {"en": "User Registration", "zh": "用户注册"},
+    "Empresa / Organización": {"en": "Company / Organization", "zh": "公司 / 组织"},
+    "País (Código ISO)": {"en": "Country (ISO Code)", "zh": "国家代码 (ISO)"},
+    "Dirección": {"en": "Address", "zh": "地址"},
+    "Teléfono": {"en": "Phone", "zh": "电话"},
+    "Rol": {"en": "Role", "zh": "角色"},
+    "Versión 3.9 — Plataforma colaborativa de comercio internacional": {
+        "en": "Version 3.9 — International trade collaborative platform",
+        "zh": "版本 3.9 — 国际贸易协作平台"
+    },
+}
+
+def t(text, en=None, zh=None):
+    """Traducción automática según idioma activo en sesión."""
+    lang = session.get("lang", "es")
+    if lang == "es":
+        return text
+    # Soporta llamadas con traducciones inline
+    if en or zh:
+        if lang == "en" and en:
+            return en
+        if lang == "zh" and zh:
+            return zh
+    if text in TRANSLATIONS:
+        return TRANSLATIONS[text].get(lang, text)
+    return text
+
+app.jinja_env.globals.update(t=t)
+
+# ---------------------------------------------------------
+# 🌐 CONTROL DE IDIOMA
+# ---------------------------------------------------------
+@app.route("/set_lang/<lang>")
+def set_lang(lang):
+    session["lang"] = lang if lang in LANGS else "es"
+    return redirect(request.referrer or url_for("home"))
+
+# ---------------------------------------------------------
+# 👥 USUARIOS FICTICIOS — 2 por rol real (conforme a tus reglas)
+#    Perfiles:
+#    - Compraventa: Productor, Packing, Frigorífico, Exportador
+#    - Servicios: Transporte, Packing, Frigorífico, Extraportuarios, Agencia de Aduanas
+#    - Mixto: Packing, Frigorífico
+#    - Extranjero: Cliente Extranjero
+#    - Administrador: (interno)
 # ---------------------------------------------------------
 USERS = {
     # ===== ADMINISTRADOR =====
@@ -72,7 +142,7 @@ USERS = {
         "items": []
     },
 
-    # ===== PRODUCTORES =====
+    # ===== COMPRAVENTA: PRODUCTOR (x2) =====
     "productor1@ws.com": {
         "nombre": "Pedro Campos",
         "email": "productor1@ws.com",
@@ -111,7 +181,7 @@ USERS = {
         ]
     },
 
-    # ===== PACKING =====
+    # ===== COMPRAVENTA: PACKING (x2) =====
     "packing1@ws.com": {
         "nombre": "María Campos",
         "email": "packing1@ws.com",
@@ -135,10 +205,10 @@ USERS = {
         "nombre": "Felipe Rojas",
         "email": "packing2@ws.com",
         "password": "1234",
-        "tipo": "servicios",
+        "tipo": "compraventa",
         "rol": "Packing",
         "empresa": "AgroPacking Ltda.",
-        "descripcion": "Packing mixto con servicios adicionales.",
+        "descripcion": "Packing con capacidad de compra/venta de fruta.",
         "fecha": "2025-10-12 11:15",
         "username": "packing2",
         "pais": "CL",
@@ -150,47 +220,45 @@ USERS = {
         ]
     },
 
-    # ===== FRIGORÍFICOS =====
-    "frigorifico1@ws.com": {
+    # ===== COMPRAVENTA: FRIGORÍFICO (x2) =====
+    "frigorifico_cv1@ws.com": {
         "nombre": "Carlos Frías",
-        "email": "frigorifico1@ws.com",
+        "email": "frigorifico_cv1@ws.com",
         "password": "1234",
-        "tipo": "servicios",
+        "tipo": "compraventa",
         "rol": "Frigorífico",
-        "empresa": "Frigorífico Polar Sur",
-        "descripcion": "Almacenamiento y logística en cadena de frío.",
+        "empresa": "Frigo Andes CV",
+        "descripcion": "Frigorífico que compra y vende fruta.",
         "fecha": "2025-10-12 12:00",
-        "username": "frigorifico1",
+        "username": "frigorifico_cv1",
         "pais": "CL",
         "direccion": "Talca, Maule",
         "telefono": "+56 9 4567 8901",
         "rut_doc": "",
         "items": [
-            {"nombre": "Túnel de frío", "detalle": "Descenso rápido de temperatura", "precio": "USD 0.06/kg"},
-            {"nombre": "Monitoreo IoT", "detalle": "Control remoto de T°", "precio": "USD 25/lote"}
+            {"nombre": "Uva embalada", "detalle": "Calibre 20+ export", "precio": "USD 3.00/kg"}
         ]
     },
-    "frigorifico2@ws.com": {
+    "frigorifico_cv2@ws.com": {
         "nombre": "Andrea Vega",
-        "email": "frigorifico2@ws.com",
+        "email": "frigorifico_cv2@ws.com",
         "password": "1234",
-        "tipo": "mixto",
+        "tipo": "compraventa",
         "rol": "Frigorífico",
-        "empresa": "ColdTrade SpA",
-        "descripcion": "Opera como frigorífico mixto con venta de fruta y servicios.",
+        "empresa": "ColdTrade CV",
+        "descripcion": "Opera como frigorífico compraventa.",
         "fecha": "2025-10-12 12:30",
-        "username": "frigorifico2",
+        "username": "frigorifico_cv2",
         "pais": "CL",
         "direccion": "Los Andes, Valparaíso",
         "telefono": "+56 9 6789 4455",
         "rut_doc": "",
         "items": [
-            {"nombre": "Fruta refrigerada premium", "detalle": "Uva y arándano a exportadores", "precio": "USD 3.20/kg"},
-            {"nombre": "Servicio cámara fría", "detalle": "Rango -1°C a 5°C", "precio": "USD 0.15/kg/día"}
+            {"nombre": "Arándano a Exportador", "detalle": "12x125g", "precio": "USD 5.00/kg"}
         ]
     },
 
-    # ===== EXPORTADORES =====
+    # ===== COMPRAVENTA: EXPORTADOR (x2) =====
     "exportador1@ws.com": {
         "nombre": "Sofía Export",
         "email": "exportador1@ws.com",
@@ -206,8 +274,8 @@ USERS = {
         "telefono": "+56 9 7123 4567",
         "rut_doc": "",
         "items": [
-            {"nombre": "Cereza Lapins 9.5", "detalle": "Embalaje clamshell", "precio": "USD 6.20/kg"},
-            {"nombre": "Arándano Duke", "detalle": "Export pack 12x125g", "precio": "USD 5.10/kg"}
+            {"nombre": "Cereza Lapins 9.5", "Detalle": "Clamshell", "precio": "USD 6.20/kg"},
+            {"nombre": "Arándano Duke", "detalle": "12x125g", "precio": "USD 5.10/kg"}
         ]
     },
     "exportador2@ws.com": {
@@ -217,7 +285,7 @@ USERS = {
         "tipo": "compraventa",
         "rol": "Exportador",
         "empresa": "ChileFruits Export",
-        "descripcion": "Exporta fruta chilena a Asia y Europa.",
+        "descripcion": "Exporta fruta a Asia y Europa.",
         "fecha": "2025-10-13 08:15",
         "username": "exportador2",
         "pais": "CL",
@@ -225,86 +293,312 @@ USERS = {
         "telefono": "+56 9 7333 5566",
         "rut_doc": "",
         "items": [
-            {"nombre": "Uva Thompson", "detalle": "Calibre grande premium", "precio": "USD 4.10/kg"}
+            {"nombre": "Uva Thompson", "detalle": "Calibre grande", "precio": "USD 4.10/kg"}
         ]
     },
-}
-# =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 corregida)
-# ---------------------------------------------------------
-# Parte 2: Traducción · Helpers · Idioma · Home · Registro/Login
-# =========================================================
 
-# ---------------------------------------------------------
-# 🌍 FUNCIONES DE TRADUCCIÓN MULTI-IDIOMA
-# ---------------------------------------------------------
-LANGS = ["es", "en", "zh"]
-
-TRANSLATIONS = {
-    "Bienvenido a Window Shopping": {
-        "en": "Welcome to Window Shopping",
-        "zh": "欢迎来到 Window Shopping"
+    # ===== SERVICIOS: TRANSPORTE (x2) =====
+    "transporte1@ws.com": {
+        "nombre": "Trans Andino",
+        "email": "transporte1@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Transporte",
+        "empresa": "LogiTrans SpA",
+        "descripcion": "Transporte refrigerado nacional.",
+        "fecha": "2025-10-13 09:00",
+        "username": "transporte1",
+        "pais": "CL",
+        "direccion": "Santiago",
+        "telefono": "+56 9 8888 0001",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Flete reefer 28 pallets", "detalle": "SCL → Valpo", "precio": "USD 480/viaje"}
+        ]
     },
-    "Conectamos productores chilenos con compradores internacionales": {
-        "en": "We connect Chilean producers with international buyers",
-        "zh": "我们连接智利生产商与国际买家"
+    "transporte2@ws.com": {
+        "nombre": "Ruta Fría",
+        "email": "transporte2@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Transporte",
+        "empresa": "RutaFría Ltda.",
+        "descripcion": "Cobertura zona centro-sur.",
+        "fecha": "2025-10-13 09:10",
+        "username": "transporte2",
+        "pais": "CL",
+        "direccion": "Rancagua",
+        "telefono": "+56 9 8888 0002",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Flete full 30 pallets", "detalle": "Curicó → San Antonio", "precio": "USD 520/viaje"}
+        ]
     },
-    "Comienza ahora": {"en": "Start now", "zh": "立即开始"},
-    "Explora empresas y servicios": {"en": "Explore companies and services", "zh": "探索公司和服务"},
-    "Iniciar sesión": {"en": "Login", "zh": "登录"},
-    "Contraseña": {"en": "Password", "zh": "密码"},
-    "Correo electrónico": {"en": "Email", "zh": "电子邮件"},
-    "Registrar": {"en": "Register", "zh": "注册"},
-    "Registrarse": {"en": "Sign up", "zh": "注册"},
-    "Perfil": {"en": "Profile", "zh": "用户资料"},
-    "Salir": {"en": "Logout", "zh": "退出"},
-    "Empresas": {"en": "Companies", "zh": "企业"},
-    "Carrito": {"en": "Cart", "zh": "购物车"},
-    "Inicio": {"en": "Home", "zh": "首页"},
-    "Panel Admin": {"en": "Admin Panel", "zh": "管理员面板"},
-    "Panel Cliente": {"en": "Client Panel", "zh": "客户面板"},
-    "Panel Servicio": {"en": "Service Panel", "zh": "服务面板"},
-    "Panel Compraventa": {"en": "Trade Panel", "zh": "交易面板"},
-    "Panel Principal": {"en": "Main Panel", "zh": "主面板"},
-    "Cerrar sesión": {"en": "Log out", "zh": "退出登录"},
-    "Registro de Usuario": {"en": "User Registration", "zh": "用户注册"},
-    "Empresa / Organización": {"en": "Company / Organization", "zh": "公司 / 组织"},
-    "País (Código ISO)": {"en": "Country (ISO Code)", "zh": "国家代码 (ISO)"},
-    "Dirección": {"en": "Address", "zh": "地址"},
-    "Teléfono": {"en": "Phone", "zh": "电话"},
-    "Rol": {"en": "Role", "zh": "角色"},
-    "Versión 3.9 — Plataforma colaborativa de comercio internacional": {
-        "en": "Version 3.9 — International trade collaborative platform",
-        "zh": "版本 3.9 — 国际贸易协作平台"
-    }
+
+    # ===== SERVICIOS: PACKING (x2) =====
+    "packing_srv1@ws.com": {
+        "nombre": "PackService 1",
+        "email": "packing_srv1@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Packing",
+        "empresa": "PackService Ltda.",
+        "descripcion": "Sólo venta de servicio de packing.",
+        "fecha": "2025-10-13 09:20",
+        "username": "packing_srv1",
+        "pais": "CL",
+        "direccion": "San Felipe",
+        "telefono": "+56 9 4444 1111",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Embalaje flowpack", "detalle": "BRC", "precio": "USD 0.09/un"}
+        ]
+    },
+    "packing_srv2@ws.com": {
+        "nombre": "PackService 2",
+        "email": "packing_srv2@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Packing",
+        "empresa": "EmpaquePlus",
+        "descripcion": "Servicio de empaque por kilo.",
+        "fecha": "2025-10-13 09:25",
+        "username": "packing_srv2",
+        "pais": "CL",
+        "direccion": "Quillota",
+        "telefono": "+56 9 4444 2222",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Reembalaje express", "detalle": "Turno noche", "precio": "USD 0.14/kg"}
+        ]
+    },
+
+    # ===== SERVICIOS: FRIGORÍFICO (x2) =====
+    "frigo_srv1@ws.com": {
+        "nombre": "Frigo Service 1",
+        "email": "frigo_srv1@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Frigorífico",
+        "empresa": "PolarService",
+        "descripcion": "Solo servicio de frío.",
+        "fecha": "2025-10-13 09:30",
+        "username": "frigo_srv1",
+        "pais": "CL",
+        "direccion": "Talca",
+        "telefono": "+56 9 5555 1111",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Túnel de frío", "detalle": "Descenso rápido", "precio": "USD 0.06/kg"}
+        ]
+    },
+    "frigo_srv2@ws.com": {
+        "nombre": "Frigo Service 2",
+        "email": "frigo_srv2@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Frigorífico",
+        "empresa": "FrescoCold",
+        "descripcion": "Cámara fría y monitoreo.",
+        "fecha": "2025-10-13 09:35",
+        "username": "frigo_srv2",
+        "pais": "CL",
+        "direccion": "Los Andes",
+        "telefono": "+56 9 5555 2222",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Cámara 0–2°C", "detalle": "Monitoreo IoT", "precio": "USD 0.16/kg/día"}
+        ]
+    },
+
+    # ===== SERVICIOS: EXTRAPORTUARIOS (x2) =====
+    "extra1@ws.com": {
+        "nombre": "Depot Extra 1",
+        "email": "extra1@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Extraportuarios",
+        "empresa": "ExtraPort S.A.",
+        "descripcion": "Servicios extraportuarios para exportador.",
+        "fecha": "2025-10-13 09:40",
+        "username": "extraport1",
+        "pais": "CL",
+        "direccion": "San Antonio",
+        "telefono": "+56 9 6666 1111",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Consolidación contenedor", "detalle": "Reefer 40'", "precio": "USD 180/ctr"}
+        ]
+    },
+    "extra2@ws.com": {
+        "nombre": "Depot Extra 2",
+        "email": "extra2@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Extraportuarios",
+        "empresa": "DepotAndes",
+        "descripcion": "Sólo a exportadores.",
+        "fecha": "2025-10-13 09:45",
+        "username": "extraport2",
+        "pais": "CL",
+        "direccion": "Valparaíso",
+        "telefono": "+56 9 6666 2222",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Pre-trip contenedor", "detalle": "PTI Reefer", "precio": "USD 95/ctr"}
+        ]
+    },
+
+    # ===== SERVICIOS: AGENCIA DE ADUANAS (x2) =====
+    "aduana1@ws.com": {
+        "nombre": "Aduanas Pacífico",
+        "email": "aduana1@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Agencia de Aduanas",
+        "empresa": "Agencia Pacífico",
+        "descripcion": "Despacho de exportación.",
+        "fecha": "2025-10-13 09:50",
+        "username": "aduana1",
+        "pais": "CL",
+        "direccion": "Santiago",
+        "telefono": "+56 2 7777 1111",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Tramitación DUS", "detalle": "Servicio a exportadores", "precio": "USD 120/embarque"}
+        ]
+    },
+    "aduana2@ws.com": {
+        "nombre": "Aduanas Andes",
+        "email": "aduana2@ws.com",
+        "password": "1234",
+        "tipo": "servicios",
+        "rol": "Agencia de Aduanas",
+        "empresa": "AduAndes",
+        "descripcion": "Trámites y coordinación.",
+        "fecha": "2025-10-13 09:55",
+        "username": "aduana2",
+        "pais": "CL",
+        "direccion": "Valparaíso",
+        "telefono": "+56 2 7777 2222",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Certificados origen", "detalle": "SAG/Chamber", "precio": "USD 75/doc"}
+        ]
+    },
+
+    # ===== MIXTO: PACKING (x2) =====
+    "packing_mx1@ws.com": {
+        "nombre": "PackMix Uno",
+        "email": "packing_mx1@ws.com",
+        "password": "1234",
+        "tipo": "mixto",
+        "rol": "Packing",
+        "empresa": "MixPack Uno",
+        "descripcion": "Vende fruta y servicios de packing.",
+        "fecha": "2025-10-13 10:10",
+        "username": "packingmx1",
+        "pais": "CL",
+        "direccion": "San Felipe",
+        "telefono": "+56 9 4444 3333",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Venta Uva embalada", "detalle": "A frigorífico/exportador", "precio": "USD 3.10/kg"},
+            {"nombre": "Servicio packing", "detalle": "Flowpack BRC", "precio": "USD 0.10/un"}
+        ]
+    },
+    "packing_mx2@ws.com": {
+        "nombre": "PackMix Dos",
+        "email": "packing_mx2@ws.com",
+        "password": "1234",
+        "tipo": "mixto",
+        "rol": "Packing",
+        "empresa": "MixPack Dos",
+        "descripcion": "Compra a productor y vende servicio.",
+        "fecha": "2025-10-13 10:12",
+        "username": "packingmx2",
+        "pais": "CL",
+        "direccion": "Rancagua",
+        "telefono": "+56 9 4444 4444",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Servicio reembalaje", "detalle": "Turno noche", "precio": "USD 0.13/kg"}
+        ]
+    },
+
+    # ===== MIXTO: FRIGORÍFICO (x2) =====
+    "frigo_mx1@ws.com": {
+        "nombre": "FrigoMix Uno",
+        "email": "frigo_mx1@ws.com",
+        "password": "1234",
+        "tipo": "mixto",
+        "rol": "Frigorífico",
+        "empresa": "FrigoMix Uno",
+        "descripcion": "Vende fruta y servicio de frío.",
+        "fecha": "2025-10-13 10:20",
+        "username": "frigomx1",
+        "pais": "CL",
+        "direccion": "Talca",
+        "telefono": "+56 9 5555 3333",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Fruta refrigerada", "detalle": "Para exportación", "precio": "USD 3.25/kg"},
+            {"nombre": "Cámara 0–2°C", "detalle": "IoT", "precio": "USD 0.15/kg/día"}
+        ]
+    },
+    "frigo_mx2@ws.com": {
+        "nombre": "FrigoMix Dos",
+        "email": "frigo_mx2@ws.com",
+        "password": "1234",
+        "tipo": "mixto",
+        "rol": "Frigorífico",
+        "empresa": "FrigoMix Dos",
+        "descripcion": "Compra a productor/packing y vende servicio.",
+        "fecha": "2025-10-13 10:25",
+        "username": "frigomx2",
+        "pais": "CL",
+        "direccion": "Los Andes",
+        "telefono": "+56 9 5555 4444",
+        "rut_doc": "",
+        "items": [
+            {"nombre": "Servicio túnel de frío", "detalle": "Descenso rápido", "precio": "USD 0.07/kg"}
+        ]
+    },
+
+    # ===== EXTRANJERO: CLIENTE EXTRANJERO (x2) =====
+    "cliente_ext1@ws.com": {
+        "nombre": "Buyer Asia Ltd.",
+        "email": "cliente_ext1@ws.com",
+        "password": "1234",
+        "tipo": "extranjero",
+        "rol": "Cliente Extranjero",
+        "empresa": "Buyer Asia Ltd.",
+        "descripcion": "Cliente internacional (solo compra a Exportadores).",
+        "fecha": "2025-10-13 11:00",
+        "username": "extbuyer1",
+        "pais": "CN",
+        "direccion": "Shanghai",
+        "telefono": "+86 21 5555 0001",
+        "rut_doc": "",
+        "items": []
+    },
+    "cliente_ext2@ws.com": {
+        "nombre": "EuroFresh GmbH",
+        "email": "cliente_ext2@ws.com",
+        "password": "1234",
+        "tipo": "extranjero",
+        "rol": "Cliente Extranjero",
+        "empresa": "EuroFresh GmbH",
+        "descripcion": "Cliente internacional (solo compra a Exportadores).",
+        "fecha": "2025-10-13 11:05",
+        "username": "extbuyer2",
+        "pais": "DE",
+        "direccion": "Hamburg",
+        "telefono": "+49 40 5555 0002",
+        "rut_doc": "",
+        "items": []
+    },
 }
-
-def t(text, en=None, zh=None):
-    """Traducción automática según idioma activo en sesión"""
-    lang = session.get("lang", "es")
-    if lang == "es":
-        return text
-    if en or zh:  # Si vienen traducciones manuales
-        if lang == "en" and en:
-            return en
-        if lang == "zh" and zh:
-            return zh
-    if text in TRANSLATIONS:
-        return TRANSLATIONS[text].get(lang, text)
-    return text
-
-app.jinja_env.globals.update(t=t)
-
-# ---------------------------------------------------------
-# 🌐 CONTROL DE IDIOMA
-# ---------------------------------------------------------
-@app.route("/set_lang/<lang>")
-def set_lang(lang):
-    if lang in LANGS:
-        session["lang"] = lang
-    else:
-        session["lang"] = "es"
-    return redirect(request.referrer or url_for("home"))
 
 # ---------------------------------------------------------
 # 🏠 PÁGINA PRINCIPAL (INDEX)
@@ -315,70 +609,191 @@ def home():
     return render_template("index.html", titulo=titulo)
 
 # ---------------------------------------------------------
-# 🔐 LOGIN Y REGISTRO DE USUARIOS
+# 🧷 STUB MÍNIMO: PERFIL
+# (Evita el BuildError por url_for('perfil') en base.html)
+# ---------------------------------------------------------
+@app.route("/perfil")
+def perfil():
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+    return render_template("perfil.html", user=user, titulo=t("Perfil"))
+# =========================================================
+# 🌐 Parte 2: Login · Logout · Registro con filtros por tipo/rol
+# =========================================================
+
+from uuid import uuid4  # ya usado luego para publicaciones, no hace daño si se reusa
+
+# ---------- Catálogo de tipos -> roles permitidos ----------
+TIPOS_ROLES = {
+    "compraventa": ["Productor", "Packing", "Frigorífico", "Exportador"],
+    "servicio":    ["Transporte", "Packing", "Frigorífico", "Extraportuarios", "Agencia de Aduanas"],
+    "mixto":       ["Packing", "Frigorífico"],
+    "extranjero":  ["Cliente Extranjero"],
+}
+
+# Para mostrar títulos bonitos en UI
+TIPO_TITULO = {
+    "compraventa": "Compraventa",
+    "servicio": "Servicios",
+    "mixto": "Mixto",
+    "extranjero": "Extranjero",
+}
+
+def normaliza_tipo(t):
+    """Normaliza alias desde URL o UI a nuestras claves de TIPOS_ROLES."""
+    if not t:
+        return None
+    t = t.strip().lower()
+    # admitir alias comunes
+    if t in ["servicios", "servicio"]:
+        return "servicio"
+    if t in ["compraventa", "compra-venta", "compra_venta"]:
+        return "compraventa"
+    if t in ["mixto"]:
+        return "mixto"
+    if t in ["extranjero", "cliente", "cliente_extranjero"]:
+        return "extranjero"
+    return None
+
+def rol_valido_para_tipo(rol, tipo_norm):
+    """True si el rol (case-insensitive) pertenece al tipo elegido."""
+    if not rol or not tipo_norm:
+        return False
+    roles = TIPOS_ROLES.get(tipo_norm, [])
+    return any(rol.strip().lower() == r.lower() for r in roles)
+
+def titulo_tipo(tipo_norm):
+    return TIPO_TITULO.get(tipo_norm, tipo_norm.capitalize() if tipo_norm else "")
+
+# ---------------------------------------------------------
+# 🔐 LOGIN
 # ---------------------------------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "").strip()
+        email = (request.form.get("email") or "").strip().lower()
+        password = (request.form.get("password") or "").strip()
         user = USERS.get(email)
 
         if not user:
             flash(t("Usuario no encontrado", "User not found", "未找到用户"), "error")
-        elif user["password"] != password:
+        elif user.get("password") != password:
             flash(t("Contraseña incorrecta", "Incorrect password", "密码错误"), "error")
         else:
             session["user"] = user
             flash(t("Inicio de sesión exitoso", "Login successful", "登录成功"), "success")
-            return redirect(url_for("home"))
+            return redirect(url_for("dashboard_router"))
     return render_template("login.html", titulo=t("Iniciar sesión"))
 
+# ---------------------------------------------------------
+# 🚪 LOGOUT
+# ---------------------------------------------------------
 @app.route("/logout")
 def logout():
     session.pop("user", None)
     flash(t("Sesión cerrada correctamente", "Session closed", "已注销"), "success")
     return redirect(url_for("home"))
 
+# ---------------------------------------------------------
+# 🧭 REGISTRO: Router de selección de tipo
+#   (muestra botones → cliente, servicio, compraventa, mixto)
+# ---------------------------------------------------------
 @app.route("/register_router")
 def register_router():
-    # Lógica: redirige según tipo de perfil seleccionado
-    tipos = {
-        "Compraventa": ["Productor", "Packing", "Frigorífico", "Exportador"],
-        "Servicios": ["Transporte", "Packing", "Frigorífico", "Extraportuarios", "Agencia de Aduanas"],
-        "Mixto": ["Packing", "Frigorífico"],
-        "Extranjero": ["Cliente Extranjero"]
-    }
-    return render_template("register.html", titulo=t("Registro de Usuario"), tipos=tipos)
+    # Solo muestra la pantalla de selección (usa tu template register_router.html)
+    return render_template("register_router.html", titulo=t("Selecciona el tipo de cuenta"))
 
+# ---------------------------------------------------------
+# 📝 REGISTRO: Formulario según tipo seleccionado
+#   GET /register/<tipo>  → muestra register.html con SOLO los roles permitidos
+# ---------------------------------------------------------
+@app.route("/register/<tipo>", methods=["GET"])
+def register_form(tipo):
+    tipo_norm = normaliza_tipo(tipo)
+    if not tipo_norm:
+        flash(t("Tipo de cuenta inválido", "Invalid account type", "无效的帐户类型"), "error")
+        return redirect(url_for("register_router"))
+
+    # Guardamos el tipo elegido en sesión para validar en POST
+    session["register_tipo"] = tipo_norm
+
+    # Estructura que espera tu register.html: dict {Titulo Bonito: [roles...]}
+    tipos_ctx = {titulo_tipo(tipo_norm): TIPOS_ROLES[tipo_norm]}
+    return render_template(
+        "register.html",
+        titulo=t("Registro de Usuario"),
+        tipos=tipos_ctx
+    )
+
+# ---------------------------------------------------------
+# ✅ REGISTRO: POST con validaciones estrictas de tipo/rol
+# ---------------------------------------------------------
 @app.route("/register", methods=["POST"])
 def register():
-    email = request.form.get("email").strip().lower()
+    email = (request.form.get("email") or "").strip().lower()
+    password = (request.form.get("password") or "").strip()
+    empresa = (request.form.get("empresa") or "").strip()
+    rol = (request.form.get("rol") or "").strip()
+    pais = (request.form.get("pais") or "CL").strip().upper()
+    direccion = (request.form.get("direccion") or "").strip()
+    telefono = (request.form.get("telefono") or "").strip()
+
+    # 1) Email único
     if email in USERS:
         flash(t("El usuario ya existe", "User already exists", "用户已存在"), "error")
         return redirect(url_for("register_router"))
 
+    # 2) Tipo debe venir de la selección anterior
+    tipo_norm = session.get("register_tipo")
+    if not tipo_norm:
+        # Si no viene, forzamos a pasar por el router
+        flash(t("Debes elegir un tipo de cuenta", "You must choose an account type", "请先选择帐户类型"), "error")
+        return redirect(url_for("register_router"))
+
+    # 3) Validar que el rol pertenece al tipo seleccionado
+    if not rol_valido_para_tipo(rol, tipo_norm):
+        flash(
+            t("Rol no permitido para el tipo seleccionado",
+              "Role not allowed for the selected type",
+              "所选类型不允许该角色"),
+            "error"
+        )
+        return redirect(url_for("register_form", tipo=tipo_norm))
+
+    # 4) Reglas específicas ligeras (p. ej. Extranjero)
+    if tipo_norm == "extranjero" and rol.lower() != "cliente extranjero":
+        flash(t("Para perfil extranjero el rol debe ser 'Cliente Extranjero'",
+                "Foreign profile must be 'Foreign Client'",
+                "海外用户的角色必须为“客户（海外）”"), "error")
+        return redirect(url_for("register_form", tipo=tipo_norm))
+
+    # 5) Crear usuario
     new_user = {
+        "nombre": empresa,
         "email": email,
-        "password": request.form.get("password"),
-        "empresa": request.form.get("empresa"),
-        "rol": request.form.get("rol"),
-        "pais": request.form.get("pais", "CL").upper(),
-        "direccion": request.form.get("direccion", ""),
-        "telefono": request.form.get("telefono", ""),
+        "password": password,
+        "tipo": tipo_norm,
+        "rol": rol,
+        "empresa": empresa or email.split("@")[0],
         "descripcion": f"Cuenta nueva creada el {datetime.now().strftime('%d-%m-%Y %H:%M')}",
         "fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "tipo": "extranjero" if "extranjero" in request.form.get("rol", "").lower() else "compraventa",
-        "items": []
+        "username": (empresa or email.split("@")[0]).lower().replace(" ", ""),
+        "pais": pais,
+        "direccion": direccion,
+        "telefono": telefono,
+        "rut_doc": "",
+        "items": [],
     }
-
     USERS[email] = new_user
+
+    # Limpia el tipo elegido para no contaminar otro registro
+    session.pop("register_tipo", None)
+
     flash(t("Usuario registrado correctamente", "User registered successfully", "注册成功"), "success")
     return redirect(url_for("login"))
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 corregida)
-# ---------------------------------------------------------
-# Parte 3: Permisos, validaciones y helpers
+# 🌐 Parte 3: Permisos · Validaciones · Helpers · Middleware
 # =========================================================
 
 # ---------------------------------------------------------
@@ -389,7 +804,7 @@ PERMISOS = {
         "Productor": {
             "puede_vender_a": ["Packing", "Frigorífico", "Exportador"],
             "puede_comprar_de": [],
-            "puede_comprar_servicios": ["Transporte"]
+            "puede_comprar_servicios": ["Transporte", "Packing", "Frigorífico"]
         },
         "Packing": {
             "puede_vender_a": ["Frigorífico", "Exportador"],
@@ -404,10 +819,12 @@ PERMISOS = {
         "Exportador": {
             "puede_vender_a": ["Exportador", "Cliente Extranjero"],
             "puede_comprar_de": ["Productor", "Packing", "Frigorífico", "Exportador"],
-            "puede_comprar_servicios": ["Transporte", "Agencia de Aduanas", "Extraportuarios", "Packing", "Frigorífico"]
+            "puede_comprar_servicios": [
+                "Transporte", "Agencia de Aduanas", "Extraportuarios", "Packing", "Frigorífico"
+            ]
         }
     },
-    "servicios": {
+    "servicio": {
         "Transporte": {
             "puede_vender_a": ["Productor", "Packing", "Frigorífico", "Exportador"],
             "puede_comprar_de": []
@@ -453,11 +870,11 @@ PERMISOS = {
 # ⚙️ HELPERS DE LÓGICA
 # ---------------------------------------------------------
 def get_user():
-    """Devuelve el usuario logueado o None"""
+    """Devuelve el usuario logueado o None."""
     return session.get("user")
 
 def puede_publicar(usuario):
-    """Determina si el usuario puede publicar productos o servicios"""
+    """Determina si el usuario puede publicar productos o servicios."""
     if not usuario:
         return False
     rol = usuario.get("rol", "")
@@ -466,7 +883,7 @@ def puede_publicar(usuario):
     return tipo in ["compraventa", "mixto"] or rol in ["Exportador", "Productor"]
 
 def puede_ver_publicacion(usuario, publicacion):
-    """Valida si el usuario tiene permiso para ver una publicación según su tipo y rol"""
+    """Valida si el usuario puede ver una publicación según su tipo y rol."""
     if not usuario or not publicacion:
         return False
 
@@ -498,7 +915,7 @@ def puede_ver_publicacion(usuario, publicacion):
     return False
 
 def puede_mostrar_dashboard(usuario):
-    """Determina qué dashboard debe mostrarse según el tipo y rol"""
+    """Determina qué dashboard mostrar según el tipo y rol."""
     if not usuario:
         return "home"
 
@@ -508,8 +925,8 @@ def puede_mostrar_dashboard(usuario):
     if rol.lower() == "administrador":
         return "dashboard_admin"
     elif tipo == "extranjero":
-        return "dashboard_ext"
-    elif tipo == "servicios":
+        return "dashboard_extranjero"
+    elif tipo == "servicio":
         return "dashboard_servicio"
     elif tipo == "compraventa":
         return "dashboard_compra"
@@ -519,25 +936,26 @@ def puede_mostrar_dashboard(usuario):
         return "dashboard"
 
 # ---------------------------------------------------------
-# 🔄 MIDDLEWARE PARA VERIFICAR SESIÓN
+# 🔄 MIDDLEWARE: Verificación de sesión válida
 # ---------------------------------------------------------
 @app.before_request
 def check_session_integrity():
-    """Verifica que el usuario en sesión siga siendo válido"""
+    """Verifica que el usuario en sesión siga existiendo."""
     user = session.get("user")
     if user:
         email = user.get("email")
         if email not in USERS:
             session.pop("user", None)
-            flash(t("Sesión expirada, por favor vuelva a iniciar sesión",
-                    "Session expired, please log in again", "会话已过期，请重新登录"), "error")
+            flash(
+                t("Sesión expirada, por favor vuelva a iniciar sesión",
+                  "Session expired, please log in again",
+                  "会话已过期，请重新登录"),
+                "error"
+            )
             return redirect(url_for("login"))
 # =========================================================
-# 🌐 WINDOW SHOPPING — Flask App (v3.9 corregida)
-# ---------------------------------------------------------
-# Parte 4: Dashboards · Publicaciones · Carrito · Clientes
+# 🌐 Parte 4: Dashboards · Publicaciones · Carrito · Clientes
 # =========================================================
-
 from uuid import uuid4
 
 # ---------------------------------------------------------
@@ -552,17 +970,14 @@ def dashboard_router():
         return redirect(url_for("login"))
 
     destino = puede_mostrar_dashboard(user)
-    if destino == "dashboard_admin":
-        return redirect(url_for("dashboard_admin"))
-    elif destino == "dashboard_servicio":
-        return redirect(url_for("dashboard_servicio"))
-    elif destino == "dashboard_compra":
-        return redirect(url_for("dashboard_compra"))
-    elif destino == "dashboard_mixto":
-        return redirect(url_for("dashboard_mixto"))
-    elif destino == "dashboard_ext":
-        return redirect(url_for("dashboard_extranjero"))
-    return redirect(url_for("home"))
+    rutas = {
+        "dashboard_admin": "dashboard_admin",
+        "dashboard_compra": "dashboard_compra",
+        "dashboard_servicio": "dashboard_servicio",
+        "dashboard_mixto": "dashboard_mixto",
+        "dashboard_extranjero": "dashboard_extranjero",
+    }
+    return redirect(url_for(rutas.get(destino, "home")))
 
 # ---------------------------------------------------------
 # 📊 DASHBOARDS POR PERFIL
@@ -614,10 +1029,10 @@ def publicar():
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        tipo_pub = request.form.get("tipo_pub", "").lower()
         producto = request.form.get("producto", "").strip()
         descripcion = request.form.get("descripcion", "").strip()
-        precio = request.form.get("precio", "").strip()
+        precio = request.form.get("precio", "").strip() or "Consultar"
+        tipo_pub = user.get("tipo", "compraventa")
 
         if not producto or not descripcion:
             flash(t("Completa todos los campos requeridos",
@@ -637,7 +1052,7 @@ def publicar():
             "tipo": tipo_pub,
             "producto": producto,
             "descripcion": descripcion,
-            "precio": precio or "Consultar",
+            "precio": precio,
             "fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
         }
         PUBLICACIONES.append(nueva)
@@ -654,7 +1069,9 @@ def eliminar_publicacion(pub_id):
         return redirect(url_for("login"))
 
     antes = len(PUBLICACIONES)
-    PUBLICACIONES[:] = [p for p in PUBLICACIONES if not (p["id"] == pub_id and p["usuario"] == user["email"])]
+    PUBLICACIONES[:] = [
+        p for p in PUBLICACIONES if not (p["id"] == pub_id and p["usuario"] == user["email"])
+    ]
     if len(PUBLICACIONES) < antes:
         flash(t("Publicación eliminada", "Post deleted", "發布已刪除"), "success")
     else:
@@ -681,6 +1098,12 @@ def carrito_agregar(pub_id):
     pub = next((p for p in PUBLICACIONES if p["id"] == pub_id), None)
     if not pub:
         flash(t("Publicación no encontrada", "Item not found", "找不到項目"), "error")
+        return redirect(url_for("dashboard_router"))
+
+    # validación permiso de compra
+    if not puede_ver_publicacion(user, {"rol": pub["rol"], "tipo": pub["tipo"]}):
+        flash(t("No tienes permiso para comprar este ítem",
+                "You are not allowed to buy this item", "無權購買此項目"), "error")
         return redirect(url_for("dashboard_router"))
 
     carrito = user.setdefault("carrito", [])
@@ -718,7 +1141,7 @@ def carrito_vaciar():
     return redirect(url_for("carrito"))
 
 # ---------------------------------------------------------
-# 🧾 CLIENTES / EMPRESAS
+# 🧾 CLIENTES / EMPRESAS VISIBLES SEGÚN PERMISOS
 # ---------------------------------------------------------
 @app.route("/clientes")
 def clientes():
@@ -730,13 +1153,16 @@ def clientes():
     for _, info in USERS.items():
         if info["email"] == user["email"]:
             continue
-        if puede_ver_publicacion(user, {"rol": info["rol"], "tipo": "oferta"}):
+        # Verificación: solo mostrar empresas que puede comprar/ver
+        if puede_ver_publicacion(user, {"rol": info["rol"], "tipo": info["tipo"]}):
             visibles.append(info)
 
-    return render_template("clientes.html",
-                           user=user,
-                           clientes=visibles,
-                           titulo=t("Empresas Registradas"))
+    return render_template(
+        "clientes.html",
+        user=user,
+        clientes=visibles,
+        titulo=t("Empresas Registradas")
+    )
 
 @app.route("/clientes/<username>")
 def cliente_detalle(username):
@@ -748,13 +1174,15 @@ def cliente_detalle(username):
 
     c = USERS[email]
     user = get_user()
-    return render_template("cliente_detalle.html",
-                           user=user,
-                           c=c,
-                           titulo=c.get("empresa", username))
+    return render_template(
+        "cliente_detalle.html",
+        user=user,
+        c=c,
+        titulo=c.get("empresa", username)
+    )
 
 # ---------------------------------------------------------
-# ⚙️ STATUS JSON
+# ⚙️ STATUS JSON (debug / salud del servidor)
 # ---------------------------------------------------------
 @app.route("/status")
 def status():
@@ -771,5 +1199,5 @@ def status():
 # 🏁 EJECUCIÓN LOCAL
 # ---------------------------------------------------------
 if __name__ == "__main__":
-    print("🌐 Servidor Flask en http://127.0.0.1:5000")
+    print("🌐 Servidor Flask corriendo en http://127.0.0.1:5000")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
