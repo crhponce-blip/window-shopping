@@ -1,25 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container">
-    <h2 class="title-gradient text-center mb-3">{{ t("Empresas registradas") }}</h2>
-    <p class="text-center text-muted">{{ t("Explora las empresas y servicios disponibles según tu perfil") }}</p>
+  <div class="container glass-card p-4 shadow-lg">
+    <h2 class="title-gradient text-center mb-4">🏢 {{ t("Empresas Registradas") }}</h2>
 
-    <div class="row g-4 mt-4">
-      {% for c in clientes %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card glass-card shadow-sm h-100 border-0">
-          <div class="card-body">
-            <h5 class="card-title">{{ c.empresa }}</h5>
-            <p class="small mb-2"><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</p>
-            <p class="small mb-2"><strong>{{ t("Tipo") }}:</strong> {{ c.tipo }}</p>
-            <p class="text-muted small mb-3">{{ c.pais }}</p>
-            <a href="{{ url_for('cliente_detalle', cliente_id=c.id) }}" class="btn btn-outline-primary w-100">👁️ {{ t("Ver detalles") }}</a>
+    {% if clientes and clientes|length > 0 %}
+      <div class="row g-3">
+        {% for c in clientes %}
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ c.empresa }}</h5>
+              <p class="card-text small">{{ c.descripcion }}</p>
+              <p class="card-text"><strong>Rol:</strong> {{ c.rol }}</p>
+              <p class="card-text"><strong>Ubicación:</strong> {{ c.direccion }}</p>
+              <a href="{{ url_for('cliente_detalle', username=c.username) }}" class="btn btn-outline-primary btn-sm">
+                {{ t("Ver detalles") }}
+              </a>
+            </div>
           </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
+    {% else %}
+      <p class="text-center text-muted fs-5 my-5">{{ t("No hay empresas visibles según tu rol") }}</p>
+    {% endif %}
   </div>
 </section>
 {% endblock %}
