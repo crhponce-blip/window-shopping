@@ -1,39 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container">
-    <h2 class="title-gradient mb-3 text-center">{{ t("Panel Administrador") }}</h2>
-    <p class="text-center text-light">👑 {{ t("Bienvenido") }} <strong>{{ user.empresa }}</strong></p>
+  <div class="container glass-card p-4 shadow-lg">
+    <h2 class="title-gradient mb-4 text-center">🧭 {{ t("Panel de Administración") }}</h2>
+    <p class="text-center text-muted">{{ t("Gestión completa de usuarios, publicaciones y configuración general") }}</p>
 
-    <div class="row text-center mb-4">
-      <div class="col-md-3"><a href="{{ url_for('clientes') }}" class="btn btn-outline-light w-100">🏢 {{ t("Ver empresas") }}</a></div>
-      <div class="col-md-3"><a href="{{ url_for('publicar') }}" class="btn btn-success w-100">📝 {{ t("Nueva publicación") }}</a></div>
-      <div class="col-md-3"><a href="{{ url_for('status') }}" class="btn btn-primary w-100">📊 {{ t("Estado del servidor") }}</a></div>
-      <div class="col-md-3"><a href="{{ url_for('mensajes') }}" class="btn btn-info w-100">💬 {{ t("Mensajes") }}</a></div>
-    </div>
-
-    <div class="table-responsive glass-card p-3">
-      <table class="table table-hover table-striped align-middle mb-0">
-        <thead>
-          <tr>
-            <th>{{ t("Usuario") }}</th>
-            <th>{{ t("Rol") }}</th>
-            <th>{{ t("Tipo") }}</th>
-            <th>{{ t("Empresa") }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for u in USERS.values() %}
-          <tr>
-            <td>{{ u.email }}</td>
-            <td>{{ u.rol }}</td>
-            <td>{{ u.tipo }}</td>
-            <td>{{ u.empresa }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="row mt-4 g-3">
+      <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+          <h5>👥 {{ t("Usuarios registrados") }}</h5>
+          <p class="small">{{ t("Gestiona los usuarios activos en la plataforma.") }}</p>
+          <a href="{{ url_for('clientes') }}" class="btn btn-outline-light btn-sm mt-2">{{ t("Ver usuarios") }}</a>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+          <h5>📢 {{ t("Publicaciones activas") }}</h5>
+          <p class="small">{{ t("Revisa y administra las publicaciones visibles.") }}</p>
+          <a href="{{ url_for('publicar') }}" class="btn btn-outline-light btn-sm mt-2">{{ t("Nueva publicación") }}</a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 {% endblock %}
+
