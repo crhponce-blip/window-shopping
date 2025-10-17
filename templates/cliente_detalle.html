@@ -1,21 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container col-md-8 glass-card shadow-lg p-4">
-    <h2 class="title-gradient text-center">{{ cliente.empresa }}</h2>
-    <p class="text-center text-muted mb-4">{{ t("Información de la empresa") }}</p>
-
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item"><strong>{{ t("Rol") }}:</strong> {{ cliente.rol }}</li>
-      <li class="list-group-item"><strong>{{ t("Tipo") }}:</strong> {{ cliente.tipo }}</li>
-      <li class="list-group-item"><strong>{{ t("País") }}:</strong> {{ cliente.pais }}</li>
-      <li class="list-group-item"><strong>{{ t("Dirección") }}:</strong> {{ cliente.direccion or t("No especificada") }}</li>
-      <li class="list-group-item"><strong>{{ t("Teléfono") }}:</strong> {{ cliente.telefono or "-" }}</li>
-    </ul>
+  <div class="container col-md-8 glass-card p-4 shadow-lg">
+    <h2 class="title-gradient text-center mb-4">🏢 {{ c.empresa }}</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><strong>{{ t("Contacto") }}:</strong> {{ c.nombre }}</li>
+          <li class="list-group-item"><strong>{{ t("Correo") }}:</strong> {{ c.email }}</li>
+          <li class="list-group-item"><strong>{{ t("Teléfono") }}:</strong> {{ c.telefono or '—' }}</li>
+          <li class="list-group-item"><strong>{{ t("Dirección") }}:</strong> {{ c.direccion }}</li>
+          <li class="list-group-item"><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</li>
+          <li class="list-group-item"><strong>{{ t("Tipo de cuenta") }}:</strong> {{ c.tipo }}</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h5 class="mb-3">{{ t("Ofertas disponibles") }}</h5>
+        {% if c.items and c.items|length > 0 %}
+          <ul class="list-group list-group-numbered">
+            {% for item in c.items %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ item.nombre }}</strong><br>
+                  <small>{{ item.detalle }}</small>
+                </div>
+                <span class="badge bg-primary">{{ item.precio }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">{{ t("Este usuario aún no ha publicado productos o servicios.") }}</p>
+        {% endif %}
+      </div>
+    </div>
 
     <div class="text-center mt-4">
-      <a href="{{ url_for('carrito_agregar', pub_id=cliente.id) }}" class="btn btn-primary">🛒 {{ t("Agregar al carrito") }}</a>
-      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light ms-2">↩️ {{ t("Volver") }}</a>
+      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light">{{ t("Volver a Empresas") }}</a>
     </div>
   </div>
 </section>
