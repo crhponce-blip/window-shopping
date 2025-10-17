@@ -23,14 +23,23 @@
         <label for="regEmpresa">{{ t("Empresa / Organización") }}</label>
       </div>
 
+      <!-- 🔧 FIX: manejo seguro cuando 'tipos' no se pasa desde Flask -->
       <div class="mb-3">
         <label class="form-label">{{ t("Rol") }}</label>
         <select name="rol" class="form-select" required>
-          {% for tipo, roles in tipos.items() %}
-            {% for r in roles %}
-              <option value="{{ r }}">{{ r }}</option>
+          {% if tipos %}
+            {% for tipo, roles in tipos.items() %}
+              {% for r in roles %}
+                <option value="{{ r }}">{{ r }}</option>
+              {% endfor %}
             {% endfor %}
-          {% endfor %}
+          {% else %}
+            <option value="Productor">Productor</option>
+            <option value="Exportador">Exportador</option>
+            <option value="Frigorífico">Frigorífico</option>
+            <option value="Agencia de Aduana">Agencia de Aduana</option>
+            <option value="Cliente Extranjero">Cliente Extranjero</option>
+          {% endif %}
         </select>
       </div>
 
@@ -65,3 +74,4 @@
   </div>
 </section>
 {% endblock %}
+
