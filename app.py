@@ -612,12 +612,25 @@ def home():
 # 🧷 STUB MÍNIMO: PERFIL
 # (Evita el BuildError por url_for('perfil') en base.html)
 # ---------------------------------------------------------
-@app.route("/perfil")
+@app.route("/perfil", methods=["GET", "POST"])
 def perfil():
-    user = session.get("user")
+    user = get_user()
     if not user:
+        flash(t("Debes iniciar sesión primero",
+                "You must log in first", "您必須先登入"), "error")
         return redirect(url_for("login"))
-    return render_template("perfil.html", user=user, titulo=t("Perfil"))
+
+    if request.method == "POST":
+        # Solo actualizamos campos de texto simples
+        for campo in ["empresa", "pais", "direccion", "telefono", "descripcion"]:
+            if campo in request.form:
+                user[campo] = request.form.get(campo).strip()
+        session["user"] = user
+        flash(t("Perfil actualizado correctamente",
+                "Profile updated successfully", "個人資料已更新"), "success")
+        return redirect(url_for("perfil"))
+
+    return render_template("perfil.html", user=user, titulo=t("Perfil de Usuario"))
 # =========================================================
 # 🌐 Parte 2: Login · Logout · Registro con filtros por tipo/rol
 # =========================================================
@@ -698,7 +711,8 @@ def logout():
 # ---------------------------------------------------------
 # 🧭 REGISTRO: Router de selección de tipo
 #   (muestra botones → cliente, servicio, compraventa, mixto)
-# ---------------------------------------------------------
+# 
+---------------------------------------------------------
 @app.route("/register_router")
 def register_router():
     # Solo muestra la pantalla de selección (usa tu template register_router.html)
@@ -1213,27 +1227,6 @@ def ayuda():
 @app.route("/acerca")
 def acerca():
     return render_template("acerca.html", titulo=t("Acerca de Window Shopping"))
-
-# ——— Perfil (GET muestra, POST actualiza campos básicos)
-@app.route("/perfil", methods=["GET", "POST"])
-def perfil():
-    user = get_user()
-    if not user:
-        flash(t("Debes iniciar sesión primero",
-                "You must log in first", "您必須先登入"), "error")
-        return redirect(url_for("login"))
-
-    if request.method == "POST":
-        # Solo actualizamos campos de texto simples
-        for campo in ["empresa", "pais", "direccion", "telefono", "descripcion"]:
-            if campo in request.form:
-                user[campo] = request.form.get(campo).strip()
-        session["user"] = user
-        flash(t("Perfil actualizado correctamente",
-                "Profile updated successfully", "個人資料已更新"), "success")
-        return redirect(url_for("perfil"))
-
-    return render_template("perfil.html", user=user, titulo=t("Perfil de Usuario"))
 
 # ——— Mensajes (coincide con mensajes.html)
 @app.route("/mensajes", methods=["GET", "POST"])
