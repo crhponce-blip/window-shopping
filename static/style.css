@@ -237,3 +237,21 @@ p, h1, h2, h3, h4, h5, h6, label, strong {
 ::-webkit-scrollbar-track {
   background: rgba(0,0,0,0.25);
 }
+
+/* ====== CONTRASTE GLOBAL RÁPIDO ====== */
+.table, .list-group-item {
+  color: #f1f5f9 !important;
+  background: transparent !important;
+}
+
+.table thead, .table-dark {
+  color: #ffffff !important;
+}
+
+.bg-white, .card.bg-white, .glass-card.bg-white, .dropdown-menu.bg-white {
+  color: #0b1220 !important;
+}
+
+/* Utilidades por si las necesitas en algún bloque concreto */
+.text-on-dark { color: #ffffff !important; }
+.text-on-light { color: #0b1220 !important; }
