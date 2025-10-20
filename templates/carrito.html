@@ -2,47 +2,96 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container glass-card p-4 shadow-lg">
-    <h2 class="title-gradient text-center mb-4">🛒 {{ t("Carrito de Compras") }}</h2>
+    <h2 class="title-gradient text-center mb-4">💬 {{ t("Mensajes") }}</h2>
 
-    {% if cart and cart|length > 0 %}
-      <table class="table table-striped table-hover align-middle">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>{{ t("Producto / Servicio") }}</th>
-            <th>{{ t("Empresa") }}</th>
-            <th>{{ t("Precio") }}</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in cart %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ item.producto }}</td>
-            <td>{{ item.empresa }}</td>
-            <td>{{ item.precio }}</td>
-            <td>
-              <form action="{{ url_for('carrito_eliminar', index=loop.index0) }}" method="POST">
-                <button type="submit" class="btn btn-danger btn-sm">🗑 {{ t("Eliminar") }}</button>
+    {% if user %}
+    <div class="row">
+      <!-- 📥 Bandeja de Entrada -->
+      <div class="col-md-6 mb-4">
+        <h4 class="mb-3 text-primary">📥 {{ t("Bandeja de Entrada") }}</h4>
+        {% if mensajes and mensajes|selectattr("destino", "equalto", user.email)|list %}
+          <div class="list-group">
+            {% for m in mensajes if m.destino == user.email %}
+            <div class="list-group-item glass-card mb-2 p-3">
+              <p class="mb-1">
+                <strong>{{ t("De:") }}</strong> {{ m.remitente }}
+              </p>
+              <p class="small text-muted mb-1">
+                {{ t("Fecha:") }} {{ m.fecha }}
+              </p>
+              <p class="mb-2">{{ m.contenido }}</p>
+              <form method="POST" action="{{ url_for('eliminar_mensaje', msg_id=m.id) }}" class="text-end">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                  ❌ {{ t("Eliminar") }}
+                </button>
               </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-      <div class="text-center mt-4 d-flex justify-content-center gap-3">
-        <form action="{{ url_for('carrito_vaciar') }}" method="POST">
-          <button type="submit" class="btn btn-outline-danger">{{ t("Vaciar carrito") }}</button>
-        </form>
-        <a href="{{ url_for('clientes') }}" class="btn btn-success">{{ t("Seguir comprando") }}</a>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">{{ t("No tienes mensajes recibidos.") }}</p>
+        {% endif %}
       </div>
 
+      <!-- 📤 Bandeja de Salida -->
+      <div class="col-md-6 mb-4">
+        <h4 class="mb-3 text-success">📤 {{ t("Enviados") }}</h4>
+        {% if mensajes and mensajes|selectattr("remitente", "equalto", user.email)|list %}
+          <div class="list-group">
+            {% for m in mensajes if m.remitente == user.email %}
+            <div class="list-group-item glass-card mb-2 p-3">
+              <p class="mb-1">
+                <strong>{{ t("Para:") }}</strong> {{ m.destino }}
+              </p>
+              <p class="small text-muted mb-1">
+                {{ t("Fecha:") }} {{ m.fecha }}
+              </p>
+              <p class="mb-2">{{ m.contenido }}</p>
+              <form method="POST" action="{{ url_for('eliminar_mensaje', msg_id=m.id) }}" class="text-end">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                  ❌ {{ t("Eliminar") }}
+                </button>
+              </form>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">{{ t("No has enviado mensajes aún.") }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ✉️ Nuevo Mensaje -->
+    <div class="mt-5">
+      <h4 class="text-center mb-3">📝 {{ t("Enviar un nuevo mensaje") }}</h4>
+      <form method="POST" action="{{ url_for('mensajes') }}" class="row g-3 justify-content-center">
+        <div class="col-md-6">
+          <label class="form-label fw-bold">{{ t("Destinatario (correo)") }}</label>
+          <input type="email" name="destino" class="form-control" placeholder="usuario@ws.com" required>
+        </div>
+
+        <div class="col-md-8">
+          <label class="form-label fw-bold">{{ t("Mensaje") }}</label>
+          <textarea name="contenido" class="form-control" rows="3" 
+                    placeholder="{{ t('Escribe tu mensaje aquí...') }}" required></textarea>
+        </div>
+
+        <div class="col-12 text-center mt-2">
+          <button type="submit" class="btn btn-primary px-5">
+            🚀 {{ t("Enviar mensaje") }}
+          </button>
+        </div>
+      </form>
+    </div>
+
     {% else %}
-      <p class="text-center text-muted fs-5 my-5">{{ t("Tu carrito está vacío") }}</p>
-      <div class="text-center">
-        <a href="{{ url_for('clientes') }}" class="btn btn-primary">{{ t("Explorar empresas") }}</a>
+      <p class="text-center text-muted fs-5">
+        {{ t("Debes iniciar sesión para ver o enviar mensajes.") }}
+      </p>
+      <div class="text-center mt-3">
+        <a href="{{ url_for('login') }}" class="btn btn-primary">
+          🔑 {{ t("Iniciar sesión") }}
+        </a>
       </div>
     {% endif %}
   </div>
