@@ -1,39 +1,81 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container col-md-8 glass-card p-4 shadow-lg">
-    <h2 class="title-gradient text-center mb-3">{{ t("Perfil de Usuario") }}</h2>
+  <div class="container glass-card p-4 shadow-lg">
+    <h2 class="title-gradient text-center mb-4">👤 {{ t("Perfil de Usuario") }}</h2>
 
-    <form method="POST" action="{{ url_for('perfil') }}">
-      <div class="form-floating mb-3">
-        <input type="text" name="empresa" class="form-control" value="{{ user.empresa }}" required>
-        <label>{{ t("Empresa / Organización") }}</label>
+    {% if user %}
+    <form method="POST" action="{{ url_for('perfil') }}" class="row g-3">
+      <!-- 🔹 Empresa -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{{ t("Nombre de la Empresa") }}</label>
+        <input type="text" name="empresa" class="form-control" 
+               value="{{ user.empresa }}" required>
       </div>
 
-      <div class="form-floating mb-3">
-        <input type="email" name="email" class="form-control" value="{{ user.email }}" readonly>
-        <label>Email</label>
+      <!-- 🔹 Rol -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{{ t("Rol / Cargo") }}</label>
+        <input type="text" name="rol" class="form-control" 
+               value="{{ user.rol }}" readonly>
       </div>
 
-      <div class="form-floating mb-3">
-        <input type="text" name="pais" class="form-control" value="{{ user.pais }}">
-        <label>{{ t("País") }}</label>
+      <!-- 🔹 País -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{{ t("País") }}</label>
+        <input type="text" name="pais" class="form-control" 
+               value="{{ user.pais }}" required>
       </div>
 
-      <div class="form-floating mb-3">
-        <input type="text" name="telefono" class="form-control" value="{{ user.telefono }}">
-        <label>{{ t("Teléfono") }}</label>
+      <!-- 🔹 Dirección -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{{ t("Dirección") }}</label>
+        <input type="text" name="direccion" class="form-control" 
+               value="{{ user.direccion or '' }}">
       </div>
 
-      <div class="form-floating mb-3">
-        <input type="text" name="direccion" class="form-control" value="{{ user.direccion }}">
-        <label>{{ t("Dirección") }}</label>
+      <!-- 🔹 Teléfono -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{{ t("Teléfono de Contacto") }}</label>
+        <input type="text" name="telefono" class="form-control" 
+               value="{{ user.telefono or '' }}">
       </div>
 
-      <div class="d-grid">
-        <button type="submit" class="btn btn-primary btn-lg">💾 {{ t("Actualizar perfil") }}</button>
+      <!-- 🔹 Tipo de Cuenta -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{{ t("Tipo de Cuenta") }}</label>
+        <input type="text" class="form-control" 
+               value="{{ user.tipo|capitalize }}" readonly>
+      </div>
+
+      <!-- 🔹 Descripción -->
+      <div class="col-12">
+        <label class="form-label fw-bold">{{ t("Descripción / Información Adicional") }}</label>
+        <textarea name="descripcion" class="form-control" rows="4"
+                  placeholder="{{ t('Describe brevemente tu empresa o servicios...') }}">{{ user.descripcion }}</textarea>
+      </div>
+
+      <!-- 🔹 Botones -->
+      <div class="col-12 text-center mt-3">
+        <button type="submit" class="btn btn-primary px-5">
+          💾 {{ t("Guardar cambios") }}
+        </button>
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary ms-2">
+          🔙 {{ t("Volver al inicio") }}
+        </a>
       </div>
     </form>
+
+    {% else %}
+    <p class="text-center text-muted fs-5">
+      {{ t("No se encontró información de usuario. Inicia sesión nuevamente.") }}
+    </p>
+    <div class="text-center mt-3">
+      <a href="{{ url_for('login') }}" class="btn btn-primary">
+        🔑 {{ t("Iniciar sesión") }}
+      </a>
+    </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %}
