@@ -1194,6 +1194,322 @@ def status():
         "estado": "OK ✅"
     }
     return jsonify(estado)
+# =========================================================
+# 🔧 FIXES: rutas faltantes, registro por tipo, alias, perfiles, mensajes,
+#           perfil editable, ocultar empresas, carrito directo
+# =========================================================
+from flask import abort  # (si no estaba importado arriba)
+
+# ——— Alias para que base.html no rompa si usa 'dashboard_ext'
+@app.route("/dashboard_ext")
+def dashboard_ext_alias():
+    return redirect(url_for("dashboard_extranjero"))
+
+# ——— Ayuda / Acerca (evita BuildError en base.html)
+@app.route("/ayuda")
+def ayuda():
+    return render_template("ayuda.html", titulo=t("Centro de Ayuda"))
+
+@app.route("/acerca")
+def acerca():
+    return render_template("acerca.html", titulo=t("Acerca de Window Shopping"))
+
+# ——— Perfil (GET muestra, POST actualiza campos básicos)
+@app.route("/perfil", methods=["GET", "POST"])
+def perfil():
+    user = get_user()
+    if not user:
+        flash(t("Debes iniciar sesión primero",
+                "You must log in first", "您必須先登入"), "error")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        # Solo actualizamos campos de texto simples
+        for campo in ["empresa", "pais", "direccion", "telefono", "descripcion"]:
+            if campo in request.form:
+                user[campo] = request.form.get(campo).strip()
+        session["user"] = user
+        flash(t("Perfil actualizado correctamente",
+                "Profile updated successfully", "個人資料已更新"), "success")
+        return redirect(url_for("perfil"))
+
+    return render_template("perfil.html", user=user, titulo=t("Perfil de Usuario"))
+
+# ——— Mensajes (coincide con mensajes.html)
+@app.route("/mensajes", methods=["GET", "POST"])
+def mensajes():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        destino = (request.form.get("destino") or "").strip().lower()
+        contenido = (request.form.get("contenido") or "").strip()
+        if not destino or not contenido:
+            flash(t("Completa destinatario y contenido",
+                    "Fill recipient and content", "請填寫收件人與內容"), "error")
+        elif destino not in USERS:
+            flash(t("El destinatario no existe",
+                    "Recipient does not exist", "收件人不存在"), "error")
+        else:
+            MENSAJES.append({
+                "origen": user["email"],
+                "destino": destino,
+                "contenido": contenido,
+                "fecha": datetime.now().strftime("%Y-%m-%d %H:%M")
+            })
+            flash(t("Mensaje enviado",
+                    "Message sent", "訊息已送出"), "success")
+        return redirect(url_for("mensajes"))
+
+    # bandejas básicas
+    recibidos = [m for m in MENSAJES if m["destino"] == user["email"]]
+    enviados = [m for m in MENSAJES if m["origen"] == user["email"]]
+    return render_template("mensajes.html",
+                           user=user,
+                           recibidos=recibidos,
+                           enviados=enviados,
+                           titulo=t("Mensajería"))
+
+# ——— Hiding (Eliminar de Vista) para clientes.html
+@app.route("/ocultar/<username>", methods=["POST", "GET"])
+def ocultar_publicacion(username):
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+    if not username:
+        return redirect(url_for("clientes"))
+
+    # guardamos por email de usuario logueado
+    key = user["email"]
+    HIDDEN_COMPANIES.setdefault(key, set()).add(username.lower())
+    flash(t("Elemento ocultado de la vista",
+            "Item hidden from view", "已從視圖隱藏"), "info")
+    return redirect(url_for("clientes"))
+
+# ——— Ajuste: agregar ítems directos desde cliente_detalle (pub_id = direct-<username>-<n>)
+@app.route("/carrito/agregar/<pub_id>")
+def carrito_agregar(pub_id):
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    # Caso 1: publicación real ya creada
+    pub = next((p for p in PUBLICACIONES if p["id"] == pub_id), None)
+
+    # Caso 2: ítem directo desde perfil de empresa (sin PUBLICACIONES)
+    if not pub and pub_id.startswith("direct-"):
+        # formato: direct-<username>-<index1>
+        try:
+            _, uname, idx_str = pub_id.split("-", 2)
+            idx = int(idx_str) - 1
+        except Exception:
+            flash(t("Formato inválido", "Invalid format", "格式無效"), "error")
+            return redirect(url_for("carrito"))
+
+        email_map = {u["username"]: e for e, u in USERS.items()}
+        email = email_map.get(uname)
+        if not email or email not in USERS:
+            flash(t("Empresa no encontrada", "Company not found", "找不到公司"), "error")
+            return redirect(url_for("carrito"))
+
+        c = USERS[email]
+        if not c.get("items") or not (0 <= idx < len(c["items"])):
+            flash(t("Ítem no disponible", "Item not available", "項目不可用"), "error")
+            return redirect(url_for("carrito"))
+
+        item = c["items"][idx]
+        pub = {
+            "id": pub_id,
+            "usuario": email,
+            "empresa": c.get("empresa"),
+            "rol": c.get("rol"),
+            "tipo": "oferta" if c.get("tipo") in ("compraventa", "mixto") else "servicio",
+            "producto": item.get("nombre"),
+            "descripcion": item.get("detalle"),
+            "precio": item.get("precio", "Consultar"),
+            "fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        }
+
+    if not pub:
+        flash(t("Publicación no encontrada", "Item not found", "找不到項目"), "error")
+        return redirect(url_for("dashboard_router"))
+
+    carrito = user.setdefault("carrito", [])
+    if any(item["id"] == pub["id"] for item in carrito):
+        flash(t("El ítem ya está en el carrito",
+                "Item already in cart", "項目已在購物車中"), "warning")
+    else:
+        carrito.append(pub)
+        flash(t("Agregado al carrito", "Added to cart", "已加入購物車"), "success")
+    session["user"] = user
+    return redirect(url_for("carrito"))
+
+# ——— Ajuste de dashboards: pasar publicaciones visibles
+def _publicaciones_visibles_para(user):
+    ocultos = HIDDEN_COMPANIES.get(user["email"], set())
+    visibles = []
+    for p in PUBLICACIONES:
+        # filtro por permisos
+        if not puede_ver_publicacion(user, p):
+            continue
+        # filtro por ocultos (empresa -> username)
+        pub_user = USERS.get(p["usuario"])
+        if not pub_user:
+            continue
+        if pub_user.get("username", "").lower() in ocultos:
+            continue
+        visibles.append(p)
+    return visibles
+
+@app.route("/dashboard_compra")
+def dashboard_compra():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+    pubs = _publicaciones_visibles_para(user)
+    return render_template("dashboard_compra.html",
+                           user=user,
+                           publicaciones=pubs,
+                           titulo=t("Panel de Compraventa"))
+
+@app.route("/dashboard_servicio")
+def dashboard_servicio():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+    pubs = [p for p in _publicaciones_visibles_para(user) if p.get("tipo") == "servicio"]
+    return render_template("dashboard_servicio.html",
+                           user=user,
+                           publicaciones=pubs,
+                           titulo=t("Panel de Servicios"))
+
+@app.route("/dashboard_mixto")
+def dashboard_mixto():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+    pubs = _publicaciones_visibles_para(user)
+    return render_template("dashboard_mixto.html",
+                           user=user,
+                           publicaciones=pubs,
+                           titulo=t("Panel Mixto"))
+
+@app.route("/dashboard_extranjero")
+def dashboard_extranjero():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+    # para extranjeros, solo lo que pueden ver (por reglas) + permitir agregar
+    pubs = _publicaciones_visibles_para(user)
+    return render_template("dashboard_ext.html",
+                           user=user,
+                           publicaciones=pubs,
+                           titulo=t("Panel Cliente Extranjero"))
+
+# ——— Clientes/Empresas: respeta ocultos y mantiene filtro simple
+@app.route("/clientes")
+def clientes():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    filtro_tipo = request.args.get("filtro", "todos").lower()
+    ocultos = HIDDEN_COMPANIES.get(user["email"], set())
+    visibles = []
+
+    for email, info in USERS.items():
+        if info["email"] == user["email"]:
+            continue
+        username = info.get("username", "").lower()
+        if username in ocultos:
+            continue
+        # aplica permisos (puede "ver/comprar" según su perfil/rol)
+        if puede_ver_publicacion(user, {"rol": info["rol"], "tipo": "oferta"}):
+            # filtro (no vacía si no hay PUBLICACIONES; priorizamos mostrar empresas)
+            if filtro_tipo == "servicio":
+                if info.get("tipo") in ("servicios", "mixto"):
+                    visibles.append(info)
+            else:
+                visibles.append(info)
+
+    return render_template("clientes.html",
+                           user=user,
+                           clientes=visibles,
+                           filtro_tipo=filtro_tipo,
+                           titulo=t("Empresas Registradas"))
+
+# ——— Registro UNIFICADO (GET muestra roles según tipo, POST valida rol↔tipo)
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    # mapa oficial de tipos y roles (corrige texto: "Compraventa")
+    tipos_map = {
+        "compraventa": ["Productor", "Packing", "Frigorífico", "Exportador"],
+        "servicio": ["Transporte", "Packing", "Frigorífico", "Extraportuarios", "Agencia de Aduanas"],
+        "mixto": ["Packing", "Frigorífico"],
+        "cliente": ["Cliente Extranjero"],
+        "extranjero": ["Cliente Extranjero"],  # alias
+    }
+
+    if request.method == "GET":
+        tipo = (request.args.get("tipo") or "").lower()
+        # normaliza alias del router (cliente -> extranjero)
+        if tipo == "cliente":
+            tipo = "extranjero"
+        tipos = {
+            "Compraventa": tipos_map["compraventa"],
+            "Servicios": tipos_map["servicio"],
+            "Mixto": tipos_map["mixto"],
+            "Extranjero": tipos_map["extranjero"],
+        }
+        return render_template("register.html",
+                               titulo=t("Registro de Usuario"),
+                               tipos=tipos)
+
+    # POST
+    email = (request.form.get("email") or "").strip().lower()
+    if not email:
+        flash(t("Correo inválido", "Invalid email", "電子郵件無效"), "error")
+        return redirect(url_for("register_router"))
+
+    if email in USERS:
+        flash(t("El usuario ya existe", "User already exists", "用户已存在"), "error")
+        return redirect(url_for("register_router"))
+
+    rol = (request.form.get("rol") or "").strip()
+    # inferimos tipo desde el rol recibido
+    tipo_detectado = None
+    for tipo_key, roles in tipos_map.items():
+        if rol in roles:
+            tipo_detectado = (
+                "extranjero" if tipo_key in ("cliente", "extranjero") else
+                ("servicios" if tipo_key == "servicio" else tipo_key)
+            )
+            break
+    if not tipo_detectado:
+        flash(t("Rol inválido", "Invalid role", "角色無效"), "error")
+        return redirect(url_for("register_router"))
+
+    new_user = {
+        "email": email,
+        "password": (request.form.get("password") or "").strip(),
+        "empresa": (request.form.get("empresa") or "").strip(),
+        "rol": rol,
+        "pais": (request.form.get("pais") or "CL").upper(),
+        "direccion": (request.form.get("direccion") or "").strip(),
+        "telefono": (request.form.get("telefono") or "").strip(),
+        "descripcion": f"Cuenta nueva creada el {datetime.now().strftime('%d-%m-%Y %H:%M')}",
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "tipo": tipo_detectado,
+        "username": (email.split("@")[0]),
+        "items": []
+    }
+
+    USERS[email] = new_user
+    flash(t("Usuario registrado correctamente",
+            "User registered successfully", "注册成功"), "success")
+    return redirect(url_for("login"))
+
 # ---------------------------------------------------------
 # 💡 PÁGINAS INFORMATIVAS (Ayuda / Acerca de)
 # ---------------------------------------------------------
