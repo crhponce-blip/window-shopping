@@ -1,42 +1,78 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="fade-in py-5">
-  <div class="container col-md-8 glass-card p-4 shadow-lg">
-    <h2 class="title-gradient text-center mb-4">🏢 {{ c.empresa }}</h2>
-    <div class="row">
-      <div class="col-md-6">
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item"><strong>{{ t("Contacto") }}:</strong> {{ c.nombre }}</li>
-          <li class="list-group-item"><strong>{{ t("Correo") }}:</strong> {{ c.email }}</li>
-          <li class="list-group-item"><strong>{{ t("Teléfono") }}:</strong> {{ c.telefono or '—' }}</li>
-          <li class="list-group-item"><strong>{{ t("Dirección") }}:</strong> {{ c.direccion }}</li>
-          <li class="list-group-item"><strong>{{ t("Rol") }}:</strong> {{ c.rol }}</li>
-          <li class="list-group-item"><strong>{{ t("Tipo de cuenta") }}:</strong> {{ c.tipo }}</li>
-        </ul>
-      </div>
-      <div class="col-md-6">
-        <h5 class="mb-3">{{ t("Ofertas disponibles") }}</h5>
-        {% if c.items and c.items|length > 0 %}
-          <ul class="list-group list-group-numbered">
-            {% for item in c.items %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>{{ item.nombre }}</strong><br>
-                  <small>{{ item.detalle }}</small>
-                </div>
-                <span class="badge bg-primary">{{ item.precio }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-muted">{{ t("Este usuario aún no ha publicado productos o servicios.") }}</p>
-        {% endif %}
-      </div>
-    </div>
+  <div class="container glass-card p-4 shadow-lg">
+    {% if cliente %}
+      <div class="row align-items-start">
+        <div class="col-md-8">
+          <h2 class="title-gradient fw-bold">{{ cliente.empresa }}</h2>
+          <p class="text-muted mb-2"><strong>Rol:</strong> {{ cliente.rol }}</p>
+          <p class="text-muted mb-2"><strong>Tipo de cuenta:</strong> {{ cliente.tipo|capitalize }}</p>
+          <p class="mb-3"><strong>Ubicación:</strong> {{ cliente.direccion or t("Sin dirección registrada") }}</p>
+          <p class="mb-4">{{ cliente.descripcion or t("Esta empresa no ha agregado descripción aún.") }}</p>
 
-    <div class="text-center mt-4">
-      <a href="{{ url_for('clientes') }}" class="btn btn-outline-light">{{ t("Volver a Empresas") }}</a>
-    </div>
+          <!-- 🏷️ Items o publicaciones del cliente -->
+          {% if cliente.items and cliente.items|length > 0 %}
+          <h5 class="mt-4 mb-3">{{ t("Productos o Servicios disponibles") }}</h5>
+          <div class="list-group mb-4">
+            {% for item in cliente.items %}
+            <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+              <div>
+                <h6 class="mb-1">{{ item.nombre }}</h6>
+                <small class="text-muted">{{ item.detalle }}</small><br>
+                <small class="text-muted">{{ t("Precio:") }} {{ item.precio or t("Consultar") }}</small>
+              </div>
+
+              <!-- 🛒 Agregar al carrito -->
+              {% if session.get('user') and session.get('user').tipo in ['extranjero', 'compraventa'] %}
+              <a href="{{ url_for('carrito_agregar', pub_id='direct-' + cliente.username + '-' + loop.index|string) }}"
+                 class="btn btn-success btn-sm mt-2 mt-md-0">
+                🛒 {{ t("Agregar al carrito") }}
+              </a>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-muted">{{ t("No hay productos o servicios publicados por esta empresa.") }}</p>
+          {% endif %}
+        </div>
+
+        <!-- 💬 Columna lateral -->
+        <div class="col-md-4 mt-4 mt-md-0">
+          <div class="card glass-card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title text-center">💬 {{ t("Contacto") }}</h5>
+              <p class="text-center small text-muted mb-3">
+                {{ t("Envia un mensaje directo o agrégalo al carrito para negociar") }}
+              </p>
+              {% if session.get('user') %}
+                <form method="post" action="{{ url_for('mensajes') }}">
+                  <input type="hidden" name="destino" value="{{ cliente.email }}">
+                  <div class="mb-2">
+                    <textarea class="form-control form-control-sm" name="contenido"
+                              placeholder="{{ t('Escribe tu mensaje...') }}" required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-outline-primary w-100 btn-sm">
+                    📩 {{ t("Enviar mensaje") }}
+                  </button>
+                </form>
+              {% else %}
+                <p class="text-center">
+                  <a href="{{ url_for('login') }}" class="btn btn-sm btn-primary">
+                    🔑 {{ t("Inicia sesión para contactar") }}
+                  </a>
+                </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-center text-muted fs-5">
+        {{ t("No se encontró la empresa solicitada o fue eliminada de tu vista.") }}
+      </p>
+    {% endif %}
   </div>
 </section>
 {% endblock %}
