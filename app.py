@@ -720,6 +720,53 @@ def dashboard_admin():
         return redirect(url_for("login"))
     return render_template("dashboard_admin.html", user=user, titulo=t("Panel Administrador"))
 
+# =========================================================
+# 📦 Lógica de visibilidad de publicaciones por tipo de usuario
+# =========================================================
+def _publicaciones_visibles_para(user):
+    """Filtra las publicaciones visibles según tipo y permisos del usuario."""
+    tipo = user.get("tipo")
+    rol = user.get("rol")
+    visibles = []
+
+    for p in PUBLICACIONES:
+        autor_tipo = p.get("tipo")
+        autor_rol = p.get("rol")
+
+        # --- Productor ---
+        if rol == "Productor" and tipo in ["compraventa"]:
+            if p["categoria"] in ["servicio", "compra"]:
+                visibles.append(p)
+
+        # --- Exportador ---
+        elif rol == "Exportador":
+            if p["categoria"] in ["venta", "servicio", "compra"]:
+                visibles.append(p)
+
+        # --- Packing / Frigorífico ---
+        elif rol in ["Packing", "Frigorífico"]:
+            if p["categoria"] in ["servicio", "venta", "compra"]:
+                visibles.append(p)
+
+        # --- Mixto ---
+        elif tipo == "mixto":
+            visibles.append(p)
+
+        # --- Servicio (transporte, aduana, etc.) ---
+        elif tipo == "servicio":
+            if p["categoria"] == "servicio":
+                visibles.append(p)
+
+        # --- Cliente extranjero: sólo ve exportadores con venta ---
+        elif tipo == "extranjero":
+            if autor_rol == "Exportador" and p["categoria"] == "venta":
+                visibles.append(p)
+
+    return visibles
+
+# ---------------------------------------------------------
+# 📊 DASHBOARDS POR PERFIL (corregidos)
+# ---------------------------------------------------------
 @app.route("/dashboard_compra")
 def dashboard_compra():
     user = get_user()
@@ -730,6 +777,39 @@ def dashboard_compra():
                            user=user,
                            publicaciones=pubs,
                            titulo=t("Panel de Compraventa"))
+
+@app.route("/dashboard_servicio")
+def dashboard_servicio():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+    pubs = [p for p in _publicaciones_visibles_para(user) if p.get("categoria") == "servicio"]
+    return render_template("dashboard_servicio.html",
+                           user=user,
+                           publicaciones=pubs,
+                           titulo=t("Panel de Servicios"))
+
+@app.route("/dashboard_mixto")
+def dashboard_mixto():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+    pubs = _publicaciones_visibles_para(user)
+    return render_template("dashboard_mixto.html",
+                           user=user,
+                           publicaciones=pubs,
+                           titulo=t("Panel Mixto"))
+
+@app.route("/dashboard_extranjero")
+def dashboard_extranjero():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+    pubs = _publicaciones_visibles_para(user)
+    return render_template("dashboard_ext.html",
+                           user=user,
+                           publicaciones=pubs,
+                           titulo=t("Panel Cliente Extranjero"))
 
 @app.route("/dashboard_servicio")
 def dashboard_servicio():
@@ -775,7 +855,7 @@ def publicar():
                 "You must log in first", "您必須先登入"), "error")
         return redirect(url_for("login"))
 
-    # 🚫 Validación general
+    # 🚫 Validación general de permisos
     if not puede_publicar(user):
         flash(t("No tienes permisos para publicar.",
                 "You do not have permission to publish.",
@@ -783,38 +863,56 @@ def publicar():
         return redirect(url_for("dashboard_router"))
 
     if request.method == "POST":
-        subtipo = (request.form.get("subtipo") or "").strip().lower()
-        tipo_publicacion = (request.form.get("tipo_publicacion") or "").strip().lower()
+        subtipo = (request.form.get("subtipo") or "").strip().lower()      # oferta o demanda
+        categoria = (request.form.get("tipo_publicacion") or "").strip().lower()  # compra, venta o servicio
         producto = (request.form.get("producto") or "").strip()
         descripcion = (request.form.get("descripcion") or "").strip()
         precio = (request.form.get("precio") or "").strip() or "Consultar"
 
-        # Validación básica
-        if not subtipo or not tipo_publicacion or not producto or not descripcion:
+        if not subtipo or not categoria or not producto or not descripcion:
             flash(t("Completa todos los campos requeridos",
                     "Complete all required fields", "請填寫所有必填欄位"), "error")
             return redirect(url_for("publicar"))
 
-        # 🔎 Validación según tipo/rol
         rol = user.get("rol", "")
         tipo = user.get("tipo", "")
 
-        # Lógica de restricciones según subtipo
-        perm_valido = False
-        if subtipo == "oferta":
-            if tipo in ["compraventa", "mixto"] and rol in ["Productor", "Packing", "Frigorífico", "Exportador"]:
-                perm_valido = tipo_publicacion in ["venta", "servicio"]
-        elif subtipo == "demanda":
-            if tipo in ["compraventa", "mixto"]:
-                perm_valido = tipo_publicacion in ["compra", "servicio"]
+        # 🔒 Validaciones según tipo y rol
+        valido = False
 
-        if not perm_valido:
-            flash(t("Tu rol no permite publicar este tipo de oferta o demanda.",
-                    "Your role does not allow this type of offer or request.",
-                    "您的角色無法發布此類型的供應或需求。"), "error")
+        # --- Productor ---
+        if rol == "Productor" and tipo == "compraventa":
+            if subtipo == "oferta" and categoria == "venta":
+                valido = True
+            elif subtipo == "demanda" and categoria == "servicio":
+                valido = True
+
+        # --- Packing / Frigorífico ---
+        elif rol in ["Packing", "Frigorífico"]:
+            if tipo in ["compraventa", "mixto"]:
+                if subtipo == "oferta" and categoria in ["venta", "servicio"]:
+                    valido = True
+                elif subtipo == "demanda" and categoria in ["compra", "servicio"]:
+                    valido = True
+
+        # --- Exportador ---
+        elif rol == "Exportador":
+            if subtipo == "oferta" and categoria == "venta":
+                valido = True
+            elif subtipo == "demanda" and categoria == "servicio":
+                valido = True
+
+        # --- Mixtos: todo lo anterior permitido ---
+        elif tipo == "mixto":
+            valido = True
+
+        if not valido:
+            flash(t("Tu rol no permite publicar este tipo de anuncio.",
+                    "Your role does not allow this publication type.",
+                    "您的角色無法發布此類型的公告。"), "error")
             return redirect(url_for("dashboard_router"))
 
-        # ✅ Crear nueva publicación
+        # ✅ Crear publicación
         nueva = {
             "id": f"pub_{uuid4().hex[:8]}",
             "usuario": user["email"],
@@ -822,18 +920,22 @@ def publicar():
             "rol": rol,
             "tipo": tipo,
             "subtipo": subtipo,
-            "categoria": tipo_publicacion,
+            "categoria": categoria,
             "producto": producto,
             "descripcion": descripcion,
             "precio": precio,
             "fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
         }
         PUBLICACIONES.append(nueva)
+
         flash(t("Publicación creada correctamente",
                 "Post created successfully", "發布成功"), "success")
         return redirect(url_for("dashboard_router"))
 
-    return render_template("publicar.html", user=user, titulo=t("Nueva Publicación"))
+    # Si es GET: renderizar el formulario
+    return render_template("publicar.html",
+                           user=user,
+                           titulo=t("Nueva Publicación"))
 
 @app.route("/publicacion/eliminar/<pub_id>")
 def eliminar_publicacion(pub_id):
