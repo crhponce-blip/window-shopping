@@ -85,7 +85,9 @@ def t(text, en=None, zh=None):
         return TRANSLATIONS[text].get(lang, text)
     return text
 
+# Permitir que todos los textos se traduzcan dentro de plantillas
 app.jinja_env.globals.update(t=t)
+app.jinja_env.filters['t'] = t
 
 # ---------------------------------------------------------
 # 🌐 CONTROL DE IDIOMA
@@ -471,6 +473,15 @@ def register():
     direccion = (request.form.get("direccion") or "").strip()
     telefono = (request.form.get("telefono") or "").strip()
 
+    # 📎 Nuevo: archivo de documento adjunto (RUT, USCI, etc.)
+    rut_doc_path = ""
+    if "rut_doc" in request.files:
+        file = request.files["rut_doc"]
+        if file and os.path.splitext(file.filename)[1].lower() in ALLOWED_DOC_EXTS:
+            filename = secure_filename(f"{uuid4().hex}_{file.filename}")
+            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            rut_doc_path = f"uploads/{filename}"
+
     # 1️⃣ Validar email único
     if email in USERS:
         flash(t("El usuario ya existe", "User already exists", "用户已存在"), "error")
@@ -760,30 +771,58 @@ def dashboard_extranjero():
 def publicar():
     user = get_user()
     if not user:
+        flash(t("Debes iniciar sesión primero",
+                "You must log in first", "您必須先登入"), "error")
         return redirect(url_for("login"))
 
-    if request.method == "POST":
-        producto = request.form.get("producto", "").strip()
-        descripcion = request.form.get("descripcion", "").strip()
-        precio = request.form.get("precio", "").strip() or "Consultar"
-        tipo_pub = user.get("tipo", "compraventa")
+    # 🚫 Validación general
+    if not puede_publicar(user):
+        flash(t("No tienes permisos para publicar.",
+                "You do not have permission to publish.",
+                "無權限發布"), "error")
+        return redirect(url_for("dashboard_router"))
 
-        if not producto or not descripcion:
+    if request.method == "POST":
+        subtipo = (request.form.get("subtipo") or "").strip().lower()
+        tipo_publicacion = (request.form.get("tipo_publicacion") or "").strip().lower()
+        producto = (request.form.get("producto") or "").strip()
+        descripcion = (request.form.get("descripcion") or "").strip()
+        precio = (request.form.get("precio") or "").strip() or "Consultar"
+
+        # Validación básica
+        if not subtipo or not tipo_publicacion or not producto or not descripcion:
             flash(t("Completa todos los campos requeridos",
                     "Complete all required fields", "請填寫所有必填欄位"), "error")
             return redirect(url_for("publicar"))
 
-        if not puede_publicar(user):
-            flash(t("No tienes permiso para publicar",
-                    "You are not allowed to post", "無權限發布"), "error")
+        # 🔎 Validación según tipo/rol
+        rol = user.get("rol", "")
+        tipo = user.get("tipo", "")
+
+        # Lógica de restricciones según subtipo
+        perm_valido = False
+        if subtipo == "oferta":
+            if tipo in ["compraventa", "mixto"] and rol in ["Productor", "Packing", "Frigorífico", "Exportador"]:
+                perm_valido = tipo_publicacion in ["venta", "servicio"]
+        elif subtipo == "demanda":
+            if tipo in ["compraventa", "mixto"]:
+                perm_valido = tipo_publicacion in ["compra", "servicio"]
+
+        if not perm_valido:
+            flash(t("Tu rol no permite publicar este tipo de oferta o demanda.",
+                    "Your role does not allow this type of offer or request.",
+                    "您的角色無法發布此類型的供應或需求。"), "error")
             return redirect(url_for("dashboard_router"))
 
+        # ✅ Crear nueva publicación
         nueva = {
             "id": f"pub_{uuid4().hex[:8]}",
             "usuario": user["email"],
-            "empresa": user["empresa"],
-            "rol": user["rol"],
-            "tipo": tipo_pub,
+            "empresa": user.get("empresa"),
+            "rol": rol,
+            "tipo": tipo,
+            "subtipo": subtipo,
+            "categoria": tipo_publicacion,
             "producto": producto,
             "descripcion": descripcion,
             "precio": precio,
