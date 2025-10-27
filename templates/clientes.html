@@ -2,8 +2,33 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container glass-card p-4 shadow-lg">
-    <h2 class="title-gradient text-center mb-4">🏢 {{ t("Empresas Registradas") }}</h2>
 
+    <!-- 🏢 Título principal -->
+    <h2 class="title-gradient text-center mb-4" style="text-shadow: 0 0 5px rgba(255,255,255,0.4);">
+      🏢 {{ t("Empresas Registradas") }}
+    </h2>
+
+    <!-- 🔽 FILTRO DE EMPRESAS -->
+    <form method="get" action="{{ url_for('clientes') }}" class="text-center mb-4">
+      <label class="me-2 fw-bold">{{ t("Filtrar por tipo") }}:</label>
+      <select name="filtro" onchange="this.form.submit()" class="form-select d-inline-block w-auto text-center">
+        <option value="" {% if not filtro %}selected{% endif %}>{{ t("Todos") }}</option>
+        <option value="venta" {% if filtro == 'venta' %}selected{% endif %}>{{ t("Empresas que venden") }}</option>
+        <option value="compra" {% if filtro == 'compra' %}selected{% endif %}>{{ t("Empresas que compran") }}</option>
+        <option value="servicio" {% if filtro == 'servicio' %}selected{% endif %}>{{ t("Servicios logísticos") }}</option>
+      </select>
+    </form>
+
+    <!-- 🔁 MOSTRAR TODO NUEVAMENTE -->
+    <div class="text-center mb-4">
+      <form method="post" action="{{ url_for('mostrar_todo') }}">
+        <button type="submit" class="btn btn-outline-light btn-sm px-4">
+          🔄 {{ t("Mostrar todo nuevamente") }}
+        </button>
+      </form>
+    </div>
+
+    <!-- 📋 LISTADO DE EMPRESAS -->
     {% if clientes and clientes|length > 0 %}
       <div class="row g-3">
         {% for c in clientes %}
@@ -21,14 +46,14 @@
 
               <div class="d-flex flex-column gap-2 mt-auto">
                 <!-- Ver Detalles -->
-                <a href="{{ url_for('cliente_detalle', username=c.username) }}" 
+                <a href="{{ url_for('cliente_detalle', username=c.username) }}"
                    class="btn btn-outline-primary btn-sm">
-                  {{ t("Ver detalles") }}
+                  🔍 {{ t("Ver detalles") }}
                 </a>
 
                 <!-- Agregar al carrito -->
                 {% if session.get('user') and session.get('user').tipo in ['extranjero', 'compraventa'] %}
-                <a href="{{ url_for('carrito_agregar', pub_id='direct-' + c.username + '-1') }}" 
+                <a href="{{ url_for('carrito_agregar', pub_id='direct-' + c.username + '-1') }}"
                    class="btn btn-success btn-sm">
                   🛒 {{ t("Agregar al carrito") }}
                 </a>
