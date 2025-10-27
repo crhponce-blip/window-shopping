@@ -95,10 +95,11 @@ def set_lang(lang):
     session["lang"] = lang if lang in LANGS else "es"
     return redirect(request.referrer or url_for("home"))
 
-# ---------------------------------------------------------
-# 👥 USUARIOS FICTICIOS — 2 por rol (según reglas)
-# ---------------------------------------------------------
+# 👥 USUARIOS FICTICIOS — alineados a TIPOS_ROLES y PERMISOS
 USERS = {
+    # ======================================================
+    # 🔹 ADMINISTRACIÓN (pueden crear usuarios)
+    # ======================================================
     "admin@ws.com": {
         "nombre": "Administrador General",
         "email": "admin@ws.com",
@@ -116,13 +117,13 @@ USERS = {
         "items": []
     },
     "soporte@ws.com": {
-        "nombre": "Soporte WS",
+        "nombre": "Centro de Soporte WS",
         "email": "soporte@ws.com",
         "password": "1234",
         "tipo": "nacional",
         "rol": "Administrador",
         "empresa": "WS Support Center",
-        "descripcion": "Gestión de soporte técnico y cuentas.",
+        "descripcion": "Gestión de soporte técnico y validaciones de usuario.",
         "fecha": "2025-10-10 09:15",
         "username": "soporte",
         "pais": "CL",
@@ -131,7 +132,190 @@ USERS = {
         "rut_doc": "",
         "items": []
     },
-    # … (aquí siguen todos los demás usuarios tal como en tu archivo original)
+
+    # ======================================================
+    # 🟢 COMPRAVENTA
+    # ======================================================
+    "productor@ws.com": {
+        "nombre": "Campo Verde",
+        "email": "productor@ws.com",
+        "password": "1234",
+        "tipo": "compraventa",
+        "rol": "Productor",
+        "empresa": "Campo Verde Ltda.",
+        "descripcion": "Producción de fruta de exportación.",
+        "fecha": "2025-10-12 08:00",
+        "username": "productor",
+        "pais": "CL",
+        "direccion": "Curicó, Maule",
+        "telefono": "+56 9 7000 1111",
+        "items": [
+            {"nombre": "Cereza Lapins 9.5", "detalle": "Caja 5kg, calibre 28-30", "precio": "USD 8.20/kg"}
+        ]
+    },
+    "packingcv@ws.com": {
+        "nombre": "Packing del Sur",
+        "email": "packingcv@ws.com",
+        "password": "1234",
+        "tipo": "compraventa",
+        "rol": "Packing",
+        "empresa": "Packing del Sur SpA",
+        "descripcion": "Empaque y calibrado de fruta exportable.",
+        "fecha": "2025-10-12 09:00",
+        "username": "packingcv",
+        "pais": "CL",
+        "direccion": "Rancagua, O'Higgins",
+        "telefono": "+56 9 7100 1111",
+        "items": [
+            {"nombre": "Servicio de embalaje", "detalle": "Por kg procesado", "precio": "USD 0.35/kg"}
+        ]
+    },
+    "frigorificocv@ws.com": {
+        "nombre": "FríoAndes",
+        "email": "frigorificocv@ws.com",
+        "password": "1234",
+        "tipo": "compraventa",
+        "rol": "Frigorífico",
+        "empresa": "FríoAndes SpA",
+        "descripcion": "Cámaras de frío y prefrío para fruta.",
+        "fecha": "2025-10-12 10:00",
+        "username": "frioandes",
+        "pais": "CL",
+        "direccion": "Talca, Maule",
+        "telefono": "+56 9 7200 1111",
+        "items": [
+            {"nombre": "Almacenaje 7 días", "detalle": "Por pallet estándar", "precio": "USD 14.00"}
+        ]
+    },
+    "exportador@ws.com": {
+        "nombre": "Exportadora Andina",
+        "email": "exportador@ws.com",
+        "password": "1234",
+        "tipo": "compraventa",
+        "rol": "Exportador",
+        "empresa": "Exportadora Andina Ltda.",
+        "descripcion": "Exportación de fruta fresca a Asia y EE.UU.",
+        "fecha": "2025-10-12 11:00",
+        "username": "exportadora",
+        "pais": "CL",
+        "direccion": "Valparaíso",
+        "telefono": "+56 9 7300 1111",
+        "items": [
+            {"nombre": "Cerezas Premium", "detalle": "Caja 5kg", "precio": "USD 85.00/caja"}
+        ]
+    },
+
+    # ======================================================
+    # 🟣 SERVICIOS
+    # ======================================================
+    "transporte@ws.com": {
+        "nombre": "RutaExpress",
+        "email": "transporte@ws.com",
+        "password": "1234",
+        "tipo": "servicio",
+        "rol": "Transporte",
+        "empresa": "RutaExpress Ltda.",
+        "descripcion": "Camiones refrigerados a nivel nacional.",
+        "fecha": "2025-10-13 08:00",
+        "username": "transporte",
+        "pais": "CL",
+        "direccion": "Talagante, RM",
+        "telefono": "+56 9 7400 1111",
+        "items": [
+            {"nombre": "Flete RM–Valpo", "detalle": "Camión 28 pallets", "precio": "USD 420"}
+        ]
+    },
+    "aduana@ws.com": {
+        "nombre": "Agencia Portuaria Chile",
+        "email": "aduana@ws.com",
+        "password": "1234",
+        "tipo": "servicio",
+        "rol": "Agencia de Aduanas",
+        "empresa": "Agencia Portuaria Chile Ltda.",
+        "descripcion": "Gestión documental y despacho aduanero.",
+        "fecha": "2025-10-13 09:30",
+        "username": "aduana",
+        "pais": "CL",
+        "direccion": "San Antonio",
+        "telefono": "+56 9 4444 4444",
+        "items": [
+            {"nombre": "Certificado de origen", "detalle": "Servicio por documento", "precio": "USD 8.00"}
+        ]
+    },
+    "extraportuarios@ws.com": {
+        "nombre": "Servicios Extraportuarios Chile",
+        "email": "extraportuarios@ws.com",
+        "password": "1234",
+        "tipo": "servicio",
+        "rol": "Extraportuarios",
+        "empresa": "Servicios Extraportuarios SpA",
+        "descripcion": "Custodia y consolidación post puerto.",
+        "fecha": "2025-10-13 10:00",
+        "username": "extraportuarios",
+        "pais": "CL",
+        "direccion": "Valparaíso",
+        "telefono": "+56 9 8888 3333",
+        "items": [
+            {"nombre": "Consolidación pallet", "detalle": "Por unidad", "precio": "USD 25"}
+        ]
+    },
+
+    # ======================================================
+    # 🟠 MIXTO
+    # ======================================================
+    "mixtopacking@ws.com": {
+        "nombre": "PackFrío",
+        "email": "mixtopacking@ws.com",
+        "password": "1234",
+        "tipo": "mixto",
+        "rol": "Packing",
+        "empresa": "PackFrío Ltda.",
+        "descripcion": "Packing con servicios logísticos integrados.",
+        "fecha": "2025-10-14 08:00",
+        "username": "mixtopacking",
+        "pais": "CL",
+        "direccion": "Requinoa, O'Higgins",
+        "telefono": "+56 9 7777 1111",
+        "items": [
+            {"nombre": "Servicio integral packing", "detalle": "Embalaje + Frío + Paletizado", "precio": "USD 0.80/kg"}
+        ]
+    },
+    "mixtofrigo@ws.com": {
+        "nombre": "FrigoMix",
+        "email": "mixtofrigo@ws.com",
+        "password": "1234",
+        "tipo": "mixto",
+        "rol": "Frigorífico",
+        "empresa": "FrigoMix SpA",
+        "descripcion": "Frigorífico con operaciones de packing mixto.",
+        "fecha": "2025-10-14 08:15",
+        "username": "mixtofrigo",
+        "pais": "CL",
+        "direccion": "San Fernando, O'Higgins",
+        "telefono": "+56 9 7777 2222",
+        "items": [
+            {"nombre": "Frío + selección", "detalle": "Servicio mixto integral", "precio": "USD 18/pallet"}
+        ]
+    },
+
+    # ======================================================
+    # 🌍 EXTRANJERO
+    # ======================================================
+    "cliente@ws.com": {
+        "nombre": "Fruit Global HK",
+        "email": "cliente@ws.com",
+        "password": "1234",
+        "tipo": "extranjero",
+        "rol": "Cliente Extranjero",
+        "empresa": "Fruit Global Hong Kong",
+        "descripcion": "Importadora de frutas latinoamericanas.",
+        "fecha": "2025-10-14 11:00",
+        "username": "cliente",
+        "pais": "HK",
+        "direccion": "Hong Kong Central",
+        "telefono": "+852 555 888 777",
+        "items": []
+    }
 }
 
 # ---------------------------------------------------------
@@ -262,12 +446,16 @@ def register_form(tipo):
         flash(t("Tipo de cuenta inválido", "Invalid account type", "无效的帐户类型"), "error")
         return redirect(url_for("register_router"))
 
+    # 🔧 Solución: fijar tipo de cuenta en sesión de forma persistente
     session["register_tipo"] = tipo_norm
+    session.modified = True  # obliga a guardar en cookie
+    
     tipos_ctx = {titulo_tipo(tipo_norm): TIPOS_ROLES[tipo_norm]}
     return render_template(
         "register.html",
         titulo=t("Registro de Usuario"),
-        tipos=tipos_ctx
+        tipos=tipos_ctx,
+        tipo_actual=tipo_norm
     )
 
 # ---------------------------------------------------------
