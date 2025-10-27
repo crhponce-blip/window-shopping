@@ -2,19 +2,20 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container glass-card p-4 shadow-lg">
-    <h2 class="title-gradient mb-4 text-center">🧭 {{ t("Panel de Administración") }}</h2>
+    <h2 class="title-gradient mb-4 text-center">⏰ {{ t("Panel de Administración") }}</h2>
     <p class="text-center text-muted">{{ t("Gestión completa de usuarios, publicaciones y configuración general") }}</p>
 
     <div class="row mt-4 g-3">
       <div class="col-md-6">
-        <div class="card p-3 shadow-sm">
+        <div class="card p-3 shadow-sm glass-card">
           <h5>👥 {{ t("Usuarios registrados") }}</h5>
           <p class="small">{{ t("Gestiona los usuarios activos en la plataforma.") }}</p>
           <a href="{{ url_for('clientes') }}" class="btn btn-outline-light btn-sm mt-2">{{ t("Ver usuarios") }}</a>
         </div>
       </div>
+
       <div class="col-md-6">
-        <div class="card p-3 shadow-sm">
+        <div class="card p-3 shadow-sm glass-card">
           <h5>📢 {{ t("Publicaciones activas") }}</h5>
           <p class="small">{{ t("Revisa y administra las publicaciones visibles.") }}</p>
           <a href="{{ url_for('publicar') }}" class="btn btn-outline-light btn-sm mt-2">{{ t("Nueva publicación") }}</a>
@@ -24,4 +25,3 @@
   </div>
 </section>
 {% endblock %}
-
