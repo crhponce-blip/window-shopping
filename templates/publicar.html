@@ -6,9 +6,10 @@
 
     <form method="POST" action="{{ url_for('publicar') }}">
       <div class="mb-3">
-        <label for="tipo_pub" class="form-label">{{ t("Tipo de publicación") }}</label>
-        <select class="form-select" id="tipo_pub" name="tipo_pub" required>
-          <option value="producto">{{ t("Producto / Fruta") }}</option>
+        <label for="tipo_publicacion" class="form-label">{{ t("Tipo de publicación") }}</label>
+        <select class="form-select" id="tipo_publicacion" name="tipo_publicacion" required>
+          <option value="compra">{{ t("Compra") }}</option>
+          <option value="venta">{{ t("Venta") }}</option>
           <option value="servicio">{{ t("Servicio") }}</option>
         </select>
       </div>
