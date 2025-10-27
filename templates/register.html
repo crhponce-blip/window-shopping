@@ -4,7 +4,7 @@
   <div class="container col-md-6 glass-card p-4 shadow-lg">
     <h2 class="title-gradient text-center mb-4">📝 {{ t("Registro de Usuario") }}</h2>
 
-    <form method="POST" action="{{ url_for('register') }}">
+    <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data">
       <div class="form-floating mb-3">
         <input type="email" name="email" id="regEmail" class="form-control"
                placeholder="usuario@ejemplo.com" required>
@@ -19,7 +19,7 @@
 
       <div class="form-floating mb-3">
         <input type="text" name="empresa" id="regEmpresa"
-               class="form-control" placeholder="Empresa / Organización" required>
+               class="form-control" placeholder="{{ t('Empresa / Organización') }}" required>
         <label for="regEmpresa">{{ t("Empresa / Organización") }}</label>
       </div>
 
@@ -53,6 +53,21 @@
                class="form-control" placeholder="+56 9 XXXX XXXX">
         <label for="regTel">{{ t("Teléfono") }}</label>
       </div>
+
+      <!-- 📎 Campo condicional según tipo de cuenta -->
+      {% if tipo_actual in ["mixto", "servicio", "compraventa"] %}
+      <div class="mb-3">
+        <label for="rut_doc" class="form-label">{{ t("Documento identificativo (RUT / USCI / TAC ID)") }}</label>
+        <input type="file" name="rut_doc" id="rut_doc" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+        <small class="text-muted">{{ t("Adjunta tu documento de identificación o registro comercial.") }}</small>
+      </div>
+      {% elif tipo_actual == "extranjero" %}
+      <div class="mb-3">
+        <label for="rut_doc" class="form-label">{{ t("Documento de importador (USCI / EORI / TAC ID)") }}</label>
+        <input type="file" name="rut_doc" id="rut_doc" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+        <small class="text-muted">{{ t("Adjunta tu identificación de importador internacional.") }}</small>
+      </div>
+      {% endif %}
 
       <div class="d-grid">
         <button type="submit" class="btn btn-primary btn-lg">✅ {{ t("Registrar") }}</button>
