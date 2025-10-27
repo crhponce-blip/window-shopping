@@ -5,36 +5,85 @@
     <h2 class="title-gradient text-center mb-4">📝 {{ t("Nueva Publicación") }}</h2>
 
     <form method="POST" action="{{ url_for('publicar') }}">
+      <!-- Subtipo: Oferta o Demanda -->
+      <div class="mb-3">
+        <label for="subtipo" class="form-label">{{ t("Selecciona el subtipo") }}</label>
+        <select class="form-select" id="subtipo" name="subtipo" required>
+          <option value="oferta">📦 {{ t("Oferta") }}</option>
+          <option value="demanda">📥 {{ t("Demanda") }}</option>
+        </select>
+        <small class="text-muted">
+          {{ t("Define si estás ofreciendo o solicitando un producto o servicio") }}
+        </small>
+      </div>
+
+      <!-- Tipo de publicación: controlado según rol -->
       <div class="mb-3">
         <label for="tipo_publicacion" class="form-label">{{ t("Tipo de publicación") }}</label>
         <select class="form-select" id="tipo_publicacion" name="tipo_publicacion" required>
-          <option value="compra">🛍️ {{ t("Compra") }}</option>
           <option value="venta">💰 {{ t("Venta") }}</option>
+          <option value="compra">🛍️ {{ t("Compra") }}</option>
           <option value="servicio">⚙️ {{ t("Servicio") }}</option>
         </select>
+        <small class="text-muted">
+          {{ t("Solo se mostrarán opciones válidas según tu rol") }}
+        </small>
       </div>
 
+      <!-- Nombre -->
       <div class="form-floating mb-3">
         <input type="text" name="producto" id="producto"
-               class="form-control" placeholder="{{ t('Ej: Cereza Lapins 9.5') }}" required>
+               class="form-control"
+               placeholder="{{ t('Ej: Cereza Lapins 9.5') }}" required>
         <label for="producto">{{ t("Nombre del producto o servicio") }}</label>
       </div>
 
+      <!-- Descripción -->
       <div class="form-floating mb-3">
         <textarea name="descripcion" id="descripcion" class="form-control"
-                  placeholder="{{ t('Describe brevemente tu oferta...') }}" style="height: 120px" required></textarea>
+                  placeholder="{{ t('Describe brevemente tu oferta o solicitud...') }}"
+                  style="height: 120px" required></textarea>
         <label for="descripcion">{{ t("Descripción") }}</label>
       </div>
 
+      <!-- Precio -->
       <div class="form-floating mb-3">
-        <input type="text" name="precio" id="precio" class="form-control" placeholder="USD 1.00/kg">
+        <input type="text" name="precio" id="precio"
+               class="form-control" placeholder="USD 1.00/kg">
         <label for="precio">{{ t("Precio (opcional)") }}</label>
       </div>
 
+      <!-- Botón -->
       <div class="d-grid">
-        <button type="submit" class="btn btn-primary btn-lg">🚀 {{ t("Publicar") }}</button>
+        <button type="submit" class="btn btn-primary btn-lg">
+          🚀 {{ t("Publicar") }}
+        </button>
       </div>
     </form>
   </div>
 </section>
+
+<script>
+  // ⚙️ Control dinámico según subtipo y tipo de cuenta (cliente, productor, etc.)
+  document.addEventListener("DOMContentLoaded", function() {
+    const subtipo = document.getElementById("subtipo");
+    const tipoSelect = document.getElementById("tipo_publicacion");
+
+    function actualizarOpciones() {
+      const s = subtipo.value;
+      tipoSelect.innerHTML = "";
+
+      if (s === "oferta") {
+        tipoSelect.innerHTML += `<option value="venta">💰 {{ t("Venta") }}</option>`;
+        tipoSelect.innerHTML += `<option value="servicio">⚙️ {{ t("Servicio") }}</option>`;
+      } else {
+        tipoSelect.innerHTML += `<option value="compra">🛍️ {{ t("Compra") }}</option>`;
+        tipoSelect.innerHTML += `<option value="servicio">⚙️ {{ t("Servicio") }}</option>`;
+      }
+    }
+
+    subtipo.addEventListener("change", actualizarOpciones);
+    actualizarOpciones();
+  });
+</script>
 {% endblock %}
