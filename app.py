@@ -728,14 +728,27 @@ def clientes():
     if not user:
         return redirect(url_for("login"))
 
+    # 🔽 Nuevo: filtro por tipo de empresa
+    filtro = request.args.get("filtro", "").strip().lower()
     ocultos = HIDDEN_COMPANIES.get(user["email"], set())
     visibles = []
+
     for _, info in USERS.items():
         if info["email"] == user["email"]:
             continue
         username = info.get("username", "").lower()
         if username in ocultos:
             continue
+
+        # Aplica filtro si está seleccionado
+        if filtro:
+            if filtro == "venta" and info["tipo"] not in ["compraventa", "mixto"]:
+                continue
+            if filtro == "compra" and info["rol"].lower() not in ["productor", "frigorífico", "packing"]:
+                continue
+            if filtro == "servicio" and info["tipo"] != "servicio":
+                continue
+
         if puede_ver_publicacion(user, {"rol": info["rol"], "tipo": info["tipo"]}):
             visibles.append(info)
 
@@ -743,7 +756,8 @@ def clientes():
         "clientes.html",
         user=user,
         clientes=visibles,
-        titulo=t("Empresas Registradas")
+        titulo=t("Empresas Registradas"),
+        filtro=filtro
     )
 
 @app.route("/clientes/<username>")
@@ -814,6 +828,25 @@ def ocultar_publicacion(username):
     HIDDEN_COMPANIES.setdefault(key, set()).add(username.lower())
     flash(t("Elemento ocultado temporalmente de tu vista",
             "Item temporarily hidden from your view", "已暫時隱藏項目"), "info")
+    return redirect(url_for("clientes"))
+
+
+# 🔁 NUEVO: Mostrar nuevamente todas las empresas ocultas
+@app.route("/mostrar_todo", methods=["POST"])
+def mostrar_todo():
+    user = get_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    key = user["email"]
+    if key in HIDDEN_COMPANIES:
+        HIDDEN_COMPANIES[key].clear()
+        flash(t("Se han restaurado todas las empresas visibles",
+                "All companies are now visible again", "所有公司已再次可見"), "success")
+    else:
+        flash(t("No había elementos ocultos",
+                "There were no hidden items", "沒有隱藏的項目"), "info")
+
     return redirect(url_for("clientes"))
 
 # ---------------------------------------------------------
