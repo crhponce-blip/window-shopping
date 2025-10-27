@@ -6,74 +6,51 @@
 
     {% if user %}
     <form method="POST" action="{{ url_for('perfil') }}" class="row g-3">
-      <!-- 🔹 Empresa -->
       <div class="col-md-6">
         <label class="form-label fw-bold">{{ t("Nombre de la Empresa") }}</label>
-        <input type="text" name="empresa" class="form-control" 
-               value="{{ user.empresa }}" required>
+        <input type="text" name="empresa" class="form-control" value="{{ user.empresa }}" required>
       </div>
 
-      <!-- 🔹 Rol -->
       <div class="col-md-6">
         <label class="form-label fw-bold">{{ t("Rol / Cargo") }}</label>
-        <input type="text" name="rol" class="form-control" 
-               value="{{ user.rol }}" readonly>
+        <input type="text" name="rol" class="form-control" value="{{ user.rol }}" readonly>
       </div>
 
-      <!-- 🔹 País -->
       <div class="col-md-6">
         <label class="form-label fw-bold">{{ t("País") }}</label>
-        <input type="text" name="pais" class="form-control" 
-               value="{{ user.pais }}" required>
+        <input type="text" name="pais" class="form-control" value="{{ user.pais }}" required>
       </div>
 
-      <!-- 🔹 Dirección -->
       <div class="col-md-6">
         <label class="form-label fw-bold">{{ t("Dirección") }}</label>
-        <input type="text" name="direccion" class="form-control" 
-               value="{{ user.direccion or '' }}">
+        <input type="text" name="direccion" class="form-control" value="{{ user.direccion or '' }}">
       </div>
 
-      <!-- 🔹 Teléfono -->
       <div class="col-md-6">
         <label class="form-label fw-bold">{{ t("Teléfono de Contacto") }}</label>
-        <input type="text" name="telefono" class="form-control" 
-               value="{{ user.telefono or '' }}">
+        <input type="text" name="telefono" class="form-control" value="{{ user.telefono or '' }}">
       </div>
 
-      <!-- 🔹 Tipo de Cuenta -->
       <div class="col-md-6">
         <label class="form-label fw-bold">{{ t("Tipo de Cuenta") }}</label>
-        <input type="text" class="form-control" 
-               value="{{ user.tipo|capitalize }}" readonly>
+        <input type="text" class="form-control" value="{{ user.tipo|capitalize }}" readonly>
       </div>
 
-      <!-- 🔹 Descripción -->
       <div class="col-12">
         <label class="form-label fw-bold">{{ t("Descripción / Información Adicional") }}</label>
         <textarea name="descripcion" class="form-control" rows="4"
                   placeholder="{{ t('Describe brevemente tu empresa o servicios...') }}">{{ user.descripcion }}</textarea>
       </div>
 
-      <!-- 🔹 Botones -->
       <div class="col-12 text-center mt-3">
-        <button type="submit" class="btn btn-primary px-5">
-          💾 {{ t("Guardar cambios") }}
-        </button>
-        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary ms-2">
-          🔙 {{ t("Volver al inicio") }}
-        </a>
+        <button type="submit" class="btn btn-primary px-5">💾 {{ t("Guardar cambios") }}</button>
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary ms-2">🔙 {{ t("Volver al inicio") }}</a>
       </div>
     </form>
-
     {% else %}
-    <p class="text-center text-muted fs-5">
-      {{ t("No se encontró información de usuario. Inicia sesión nuevamente.") }}
-    </p>
+    <p class="text-center text-muted fs-5">{{ t("No se encontró información de usuario. Inicia sesión nuevamente.") }}</p>
     <div class="text-center mt-3">
-      <a href="{{ url_for('login') }}" class="btn btn-primary">
-        🔑 {{ t("Iniciar sesión") }}
-      </a>
+      <a href="{{ url_for('login') }}" class="btn btn-primary">🔑 {{ t("Iniciar sesión") }}</a>
     </div>
     {% endif %}
   </div>
