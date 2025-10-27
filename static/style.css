@@ -1,15 +1,13 @@
 /* =========================================================
-   🌐 WINDOW SHOPPING STYLE v4.1 — “NeonGlass Harmony Ultra”
+   🌐 WINDOW SHOPPING STYLE v4.2 — “NeonGlass Harmony Ultra”
    Autor: Christopher Ponce & GPT-5
    ---------------------------------------------------------
-   - Contraste visual mejorado en navbar y botones.
-   - Ajustes responsive.
-   - Corrección de textos invisibles y dropdowns.
-   ========================================================= */
+   - Contraste mejorado en tarjetas y texto.
+   - Íconos visibles sobre fondo oscuro.
+   - Efectos Glass y transiciones sutiles.
+   ========================================================== */
 
-/* =========================================================
-   🔹 BASE GENERAL
-   ========================================================= */
+/* BASE GENERAL */
 * {
   margin: 0;
   padding: 0;
@@ -29,9 +27,7 @@ body {
   transition: background 0.6s ease;
 }
 
-/* =========================================================
-   🔹 NAVBAR
-   ========================================================= */
+/* NAVBAR */
 .navbar {
   background: rgba(20, 25, 35, 0.8) !important;
   backdrop-filter: blur(15px);
@@ -42,8 +38,6 @@ body {
   background: rgba(25, 30, 45, 0.9) !important;
   box-shadow: 0 5px 35px rgba(59,130,246,0.35);
 }
-
-/* Marca principal */
 .navbar-brand {
   font-size: 1.9rem;
   font-weight: 700;
@@ -52,8 +46,6 @@ body {
   letter-spacing: 1px;
   animation: glow-pulse 3s infinite alternate;
 }
-
-/* Enlaces */
 .nav-link {
   color: #f8fafc !important;
   font-weight: 500;
@@ -91,17 +83,13 @@ body {
   color: #fff !important;
 }
 
-/* =========================================================
-   🔹 BOTONES
-   ========================================================= */
+/* BOTONES */
 .btn {
   border-radius: 10px !important;
   font-weight: 500;
   transition: all 0.3s ease;
   border: none;
 }
-
-/* Botón principal */
 .btn-primary {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: #fff !important;
@@ -111,8 +99,6 @@ body {
   transform: scale(1.05);
   box-shadow: 0 0 25px rgba(96,165,250,0.7);
 }
-
-/* Outline Light */
 .btn-outline-light {
   border: 1px solid rgba(255,255,255,0.4) !important;
   color: #f8fafc !important;
@@ -122,9 +108,7 @@ body {
   color: #fff !important;
 }
 
-/* =========================================================
-   🔹 FORMULARIOS
-   ========================================================= */
+/* FORMULARIOS */
 input, select, textarea {
   width: 100%;
   padding: 10px;
@@ -146,12 +130,10 @@ label {
   color: #e5e7eb;
 }
 
-/* =========================================================
-   🔹 GLASS CARDS
-   ========================================================= */
+/* GLASS CARDS */
 .glass-card {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(10, 20, 40, 0.85);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 20px;
   box-shadow: 0 4px 35px rgba(0,0,0,0.25);
   backdrop-filter: blur(12px);
@@ -159,15 +141,19 @@ label {
   margin: 25px auto;
   width: 95%;
   transition: transform 0.3s, box-shadow 0.3s;
+  color: #f1f5f9;
 }
 .glass-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 50px rgba(59,130,246,0.35);
 }
+.card {
+  background: rgba(20,30,50,0.85);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+}
 
-/* =========================================================
-   🔹 TITULOS Y TEXTOS
-   ========================================================= */
+/* TITULOS */
 .title-gradient {
   font-size: 2rem;
   background: linear-gradient(90deg, #60a5fa, #a5b4fc, #818cf8);
@@ -177,13 +163,11 @@ label {
   text-align: center;
   margin-bottom: 25px;
 }
-p, h1, h2, h3, h4, h5, h6, label, strong {
-  color: #f1f5f9 !important;
+h1 i, .emoji {
+  filter: brightness(2);
 }
 
-/* =========================================================
-   🔹 FOOTER
-   ========================================================= */
+/* FOOTER */
 .footer {
   text-align: center;
   padding: 25px 10px;
@@ -194,9 +178,7 @@ p, h1, h2, h3, h4, h5, h6, label, strong {
   backdrop-filter: blur(8px);
 }
 
-/* =========================================================
-   🔹 FLASH / ALERTAS
-   ========================================================= */
+/* ALERTAS */
 .flash-container {
   position: fixed;
   top: 90px;
@@ -214,9 +196,7 @@ p, h1, h2, h3, h4, h5, h6, label, strong {
   animation: fade-in 0.6s ease;
 }
 
-/* =========================================================
-   🔹 ANIMACIONES
-   ========================================================= */
+/* ANIMACIONES */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -226,32 +206,10 @@ p, h1, h2, h3, h4, h5, h6, label, strong {
   100% { text-shadow: 0 0 25px rgba(96,165,250,0.8); }
 }
 
-/* =========================================================
-   🔹 SCROLLBAR
-   ========================================================= */
+/* SCROLLBAR */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #60a5fa, #3b82f6);
   border-radius: 10px;
 }
-::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.25);
-}
-
-/* ====== CONTRASTE GLOBAL RÁPIDO ====== */
-.table, .list-group-item {
-  color: #f1f5f9 !important;
-  background: transparent !important;
-}
-
-.table thead, .table-dark {
-  color: #ffffff !important;
-}
-
-.bg-white, .card.bg-white, .glass-card.bg-white, .dropdown-menu.bg-white {
-  color: #0b1220 !important;
-}
-
-/* Utilidades por si las necesitas en algún bloque concreto */
-.text-on-dark { color: #ffffff !important; }
-.text-on-light { color: #0b1220 !important; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.25); }
