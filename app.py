@@ -682,6 +682,10 @@ def check_session_integrity():
                 "error"
             )
             return redirect(url_for("login"))
+
+# ⚙️ Debe ir justo antes de esta línea:
+# def _publicaciones_visibles_para(user):
+
 # =========================================================
 # 🌐 Parte 4 · Dashboards · Publicaciones · Carrito · Clientes · Mensajería
 # =========================================================
@@ -783,6 +787,7 @@ def dashboard_servicio():
     user = get_user()
     if not user:
         return redirect(url_for("login"))
+    # ✅ Mostrar solo publicaciones de categoría servicio
     pubs = [p for p in _publicaciones_visibles_para(user) if p.get("categoria") == "servicio"]
     return render_template("dashboard_servicio.html",
                            user=user,
@@ -794,6 +799,7 @@ def dashboard_mixto():
     user = get_user()
     if not user:
         return redirect(url_for("login"))
+    # ✅ Mixto ve todas las publicaciones (por rol combinado)
     pubs = _publicaciones_visibles_para(user)
     return render_template("dashboard_mixto.html",
                            user=user,
@@ -805,40 +811,9 @@ def dashboard_extranjero():
     user = get_user()
     if not user:
         return redirect(url_for("login"))
-    pubs = _publicaciones_visibles_para(user)
-    return render_template("dashboard_ext.html",
-                           user=user,
-                           publicaciones=pubs,
-                           titulo=t("Panel Cliente Extranjero"))
-
-@app.route("/dashboard_servicio")
-def dashboard_servicio():
-    user = get_user()
-    if not user:
-        return redirect(url_for("login"))
-    pubs = [p for p in _publicaciones_visibles_para(user) if p.get("tipo") == "servicio"]
-    return render_template("dashboard_servicio.html",
-                           user=user,
-                           publicaciones=pubs,
-                           titulo=t("Panel de Servicios"))
-
-@app.route("/dashboard_mixto")
-def dashboard_mixto():
-    user = get_user()
-    if not user:
-        return redirect(url_for("login"))
-    pubs = _publicaciones_visibles_para(user)
-    return render_template("dashboard_mixto.html",
-                           user=user,
-                           publicaciones=pubs,
-                           titulo=t("Panel Mixto"))
-
-@app.route("/dashboard_extranjero")
-def dashboard_extranjero():
-    user = get_user()
-    if not user:
-        return redirect(url_for("login"))
-    pubs = _publicaciones_visibles_para(user)
+    # ✅ Extranjero solo ve exportadores con venta
+    pubs = [p for p in _publicaciones_visibles_para(user)
+            if p.get("rol") == "Exportador" and p.get("categoria") == "venta"]
     return render_template("dashboard_ext.html",
                            user=user,
                            publicaciones=pubs,
@@ -856,11 +831,12 @@ def publicar():
         return redirect(url_for("login"))
 
     # 🚫 Validación general de permisos
-    if not puede_publicar(user):
-        flash(t("No tienes permisos para publicar.",
-                "You do not have permission to publish.",
-                "無權限發布"), "error")
-        return redirect(url_for("dashboard_router"))
+   if not puede_publicar(user):
+    flash(t("No tienes permisos para publicar.",
+            "You do not have permission to publish.",
+            "無權限發布"), "error")
+    # 🔒 Reenvía al dashboard correspondiente
+    return redirect(url_for(puede_mostrar_dashboard(user)))
 
     if request.method == "POST":
         subtipo = (request.form.get("subtipo") or "").strip().lower()      # oferta o demanda
