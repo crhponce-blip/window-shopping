@@ -19,7 +19,9 @@
       </ul>
 
       <div class="text-center">
-        <a href="{{ url_for('dashboard_ext') }}" class="btn btn-outline-light">← {{ t("Volver al Panel") }}</a>
+        <a href="{{ volver or url_for('dashboard_mixto') }}" class="btn btn-outline-light">
+          ← {{ t("Volver al Panel") }}
+        </a>
       </div>
     </div>
   </div>
