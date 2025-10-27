@@ -2,11 +2,15 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container">
-    <h2 class="title-gradient text-center mb-4">{{ t("Centro de Mensajes") }}</h2>
+    <h2 class="title-gradient text-center mb-4">
+      <i class="fa-regular fa-comments"></i> {{ t("Centro de Mensajes") }}
+    </h2>
 
     <!-- 📩 Enviar nuevo mensaje -->
     <div class="glass-card p-4 shadow-lg mb-4">
-      <h5 class="mb-3 text-light">✉️ {{ t("Enviar un mensaje") }}</h5>
+      <h5 class="mb-3 text-light">
+        <i class="fa-regular fa-envelope"></i> {{ t("Enviar un mensaje") }}
+      </h5>
       <form method="POST" action="{{ url_for('mensajes') }}">
         <div class="form-floating mb-3">
           <input type="email" name="destino" id="destinoEmail" class="form-control"
@@ -22,18 +26,22 @@
 
         <div class="d-grid">
           <button type="submit" class="btn btn-primary btn-lg">
-            📨 {{ t("Enviar mensaje") }}
+            <i class="fa-regular fa-paper-plane"></i> {{ t("Enviar mensaje") }}
           </button>
         </div>
       </form>
+      <p class="small text-muted mt-3">
+        <i class="fa-regular fa-clock"></i>
+        {{ t("Puedes volver a contactar a la misma empresa después de 3 días desde tu último mensaje.") }}
+      </p>
     </div>
 
-    <!-- 📨 Bandeja de mensajes -->
+    <!-- 📨 Bandejas -->
     <div class="row">
-      <!-- Bandeja de recibidos -->
+      <!-- Recibidos -->
       <div class="col-md-6 mb-4">
         <div class="glass-card shadow-sm p-3">
-          <h5 class="text-light">📥 {{ t("Recibidos") }}</h5>
+          <h5 class="text-light"><i class="fa-solid fa-inbox"></i> {{ t("Recibidos") }}</h5>
           {% if recibidos %}
             <ul class="list-group list-group-flush">
               {% for m in recibidos %}
@@ -50,10 +58,10 @@
         </div>
       </div>
 
-      <!-- Bandeja de enviados -->
+      <!-- Enviados -->
       <div class="col-md-6 mb-4">
         <div class="glass-card shadow-sm p-3">
-          <h5 class="text-light">📤 {{ t("Enviados") }}</h5>
+          <h5 class="text-light"><i class="fa-regular fa-paper-plane"></i> {{ t("Enviados") }}</h5>
           {% if enviados %}
             <ul class="list-group list-group-flush">
               {% for m in enviados %}
@@ -61,16 +69,6 @@
                 <strong>{{ m.destino }}</strong><br>
                 {{ m.contenido }}<br>
                 <small class="text-muted">{{ t("Enviado el") }} {{ m.fecha }}</small>
-                
-                {# 🕒 Mostrar tiempo restante si fue enviado hace menos de 3 días #}
-                {% set diff = (datetime.utcnow() - datetime.strptime(m.fecha, "%Y-%m-%d %H:%M")).total_seconds() if m.fecha else 0 %}
-                {% if diff < 259200 %}
-                  {% set horas_rest = (259200 - diff) / 3600 %}
-                  <small class="text-warning d-block mt-1">
-                    ⏳ {{ t("Podrás volver a escribir a este contacto en aproximadamente") }}
-                    {{ horas_rest|round(0) }}h.
-                  </small>
-                {% endif %}
               </li>
               {% endfor %}
             </ul>
@@ -81,20 +79,30 @@
       </div>
     </div>
 
-    <!-- 🔙 Volver al panel correcto según perfil -->
+    <!-- 🔙 Volver al panel -->
     <div class="text-center mt-4">
       {% if session.get('user') %}
         {% set u = session.get('user') %}
         {% if u.tipo == "extranjero" %}
-          <a href="{{ url_for('dashboard_extranjero') }}" class="btn btn-outline-light">← {{ t("Volver al Panel") }}</a>
+          <a href="{{ url_for('dashboard_extranjero') }}" class="btn btn-outline-light">
+            ← {{ t("Volver al Panel") }}
+          </a>
         {% elif u.tipo == "compraventa" %}
-          <a href="{{ url_for('dashboard_compra') }}" class="btn btn-outline-light">← {{ t("Volver al Panel") }}</a>
+          <a href="{{ url_for('dashboard_compra') }}" class="btn btn-outline-light">
+            ← {{ t("Volver al Panel") }}
+          </a>
         {% elif u.tipo == "mixto" %}
-          <a href="{{ url_for('dashboard_mixto') }}" class="btn btn-outline-light">← {{ t("Volver al Panel") }}</a>
+          <a href="{{ url_for('dashboard_mixto') }}" class="btn btn-outline-light">
+            ← {{ t("Volver al Panel") }}
+          </a>
         {% elif u.tipo == "servicio" %}
-          <a href="{{ url_for('dashboard_servicio') }}" class="btn btn-outline-light">← {{ t("Volver al Panel") }}</a>
+          <a href="{{ url_for('dashboard_servicio') }}" class="btn btn-outline-light">
+            ← {{ t("Volver al Panel") }}
+          </a>
         {% else %}
-          <a href="{{ url_for('dashboard_admin') }}" class="btn btn-outline-light">← {{ t("Volver al Panel") }}</a>
+          <a href="{{ url_for('dashboard_admin') }}" class="btn btn-outline-light">
+            ← {{ t("Volver al Panel") }}
+          </a>
         {% endif %}
       {% endif %}
     </div>
