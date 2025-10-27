@@ -31,7 +31,7 @@
                   {% if u.tipo in ['extranjero', 'compraventa', 'mixto'] and c.tipo in ['compraventa', 'servicio', 'mixto'] %}
                     <a href="{{ url_for('carrito_agregar', pub_id='direct-' + c.username + '-' + loop.index|string) }}"
                        class="btn btn-success btn-sm mt-2 mt-md-0">
-                      🛒 {{ t("Agregar al carrito") }}
+                      <i class="fa-solid fa-cart-plus"></i> {{ t("Agregar al carrito") }}
                     </a>
                   {% endif %}
                 {% endif %}
@@ -47,9 +47,11 @@
         <div class="col-md-4 mt-4 mt-md-0">
           <div class="card glass-card shadow-sm">
             <div class="card-body">
-              <h5 class="card-title text-center mb-2">💬 {{ t("Contacto") }}</h5>
+              <h5 class="card-title text-center mb-2">
+                <i class="fa-regular fa-message"></i> {{ t("Contacto") }}
+              </h5>
               <p class="text-center small text-muted mb-3">
-                {{ t("Envia un mensaje directo o agrégalo al carrito para negociar.") }}
+                {{ t("Envía un mensaje directo o agrégalo al carrito para negociar.") }}
               </p>
 
               {% if session.get('user') %}
@@ -62,11 +64,11 @@
                                 placeholder="{{ t('Escribe tu mensaje...') }}" required></textarea>
                     </div>
                     <button type="submit" class="btn btn-outline-primary w-100 btn-sm">
-                      📩 {{ t("Enviar mensaje") }}
+                      <i class="fa-regular fa-paper-plane"></i> {{ t("Enviar mensaje") }}
                     </button>
                   </form>
                   <p class="text-muted mt-2 small text-center">
-                    ⏳ {{ t("Puedes volver a enviar mensaje a esta empresa después de 3 días.") }}
+                    {{ t("Puedes volver a enviar mensaje a esta empresa después de 3 días.") }}
                   </p>
                 {% else %}
                   <p class="text-center text-muted">{{ t("No puedes enviarte mensajes a ti mismo.") }}</p>
@@ -74,7 +76,7 @@
               {% else %}
                 <p class="text-center">
                   <a href="{{ url_for('login') }}" class="btn btn-sm btn-primary">
-                    🔑 {{ t("Inicia sesión para contactar") }}
+                    <i class="fa-solid fa-key"></i> {{ t("Inicia sesión para contactar") }}
                   </a>
                 </p>
               {% endif %}
