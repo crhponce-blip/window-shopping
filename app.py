@@ -273,7 +273,7 @@ def register_form(tipo):
 # ---------------------------------------------------------
 # ✅ REGISTRO FINAL: POST con validaciones estrictas
 # ---------------------------------------------------------
-@app.route("/register", methods=["POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     email = (request.form.get("email") or "").strip().lower()
     password = (request.form.get("password") or "").strip()
@@ -633,7 +633,7 @@ def carrito():
     if not user:
         return redirect(url_for("login"))
     carrito = user.setdefault("carrito", [])
-    return render_template("carrito.html", user=user, cart=carrito, titulo=t("Carrito"))
+    return render_template("carrito.html", user=user, cart=carrito, titulo=t("Carrito de Compras"))
 
 @app.route("/carrito/agregar/<pub_id>")
 def carrito_agregar(pub_id):
@@ -802,7 +802,7 @@ def mensajes():
 # ---------------------------------------------------------
 # 🧩 OCULTAR EMPRESAS DE LA VISTA
 # ---------------------------------------------------------
-@app.route("/ocultar/<username>", methods=["POST", "GET"])
+@app.route("/ocultar/<username>", methods=["POST"])
 def ocultar_publicacion(username):
     user = get_user()
     if not user:
@@ -812,8 +812,8 @@ def ocultar_publicacion(username):
 
     key = user["email"]
     HIDDEN_COMPANIES.setdefault(key, set()).add(username.lower())
-    flash(t("Elemento ocultado de la vista",
-            "Item hidden from view", "已從視圖隱藏"), "info")
+    flash(t("Elemento ocultado temporalmente de tu vista",
+            "Item temporarily hidden from your view", "已暫時隱藏項目"), "info")
     return redirect(url_for("clientes"))
 
 # ---------------------------------------------------------
@@ -821,7 +821,16 @@ def ocultar_publicacion(username):
 # ---------------------------------------------------------
 @app.route("/ayuda")
 def ayuda():
-    return render_template("ayuda.html", titulo=t("Centro de Ayuda"))
+    user = get_user()
+    if not user:
+        return render_template("ayuda.html", titulo=t("Centro de Ayuda"))
+    # Redirige correctamente al dashboard correspondiente
+    return render_template(
+        "ayuda.html",
+        user=user,
+        titulo=t("Centro de Ayuda"),
+        volver=url_for(puede_mostrar_dashboard(user))
+    )
 
 @app.route("/acerca")
 def acerca():
