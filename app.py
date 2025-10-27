@@ -1016,24 +1016,55 @@ def mensajes():
     if request.method == "POST":
         destino = (request.form.get("destino") or "").strip().lower()
         contenido = (request.form.get("contenido") or "").strip()
+
+        # 🔹 Validaciones básicas
         if not destino or not contenido:
             flash(t("Completa destinatario y contenido",
                     "Fill recipient and content", "請填寫收件人與內容"), "error")
-        elif destino not in USERS:
+            return redirect(url_for("mensajes"))
+
+        if destino not in USERS:
             flash(t("El destinatario no existe",
                     "Recipient does not exist", "收件人不存在"), "error")
-        else:
-            MENSAJES.append({
-                "origen": user["email"],
-                "destino": destino,
-                "contenido": contenido,
-                "fecha": datetime.now().strftime("%Y-%m-%d %H:%M")
-            })
-            flash(t("Mensaje enviado", "Message sent", "訊息已送出"), "success")
+            return redirect(url_for("mensajes"))
+
+        if destino == user["email"]:
+            flash(t("No puedes enviarte mensajes a ti mismo",
+                    "You cannot message yourself", "無法傳送訊息給自己"), "warning")
+            return redirect(url_for("mensajes"))
+
+        # 🕒 Cooldown: 3 días (72 horas)
+        now = datetime.now()
+        tres_dias = 3 * 24 * 3600  # segundos
+        enviados_user = [m for m in MENSAJES
+                         if m["origen"] == user["email"] and m["destino"] == destino]
+
+        if enviados_user:
+            ultimo_envio = max(datetime.strptime(m["fecha"], "%Y-%m-%d %H:%M")
+                               for m in enviados_user)
+            diferencia = (now - ultimo_envio).total_seconds()
+            if diferencia < tres_dias:
+                horas_rest = int((tres_dias - diferencia) / 3600)
+                flash(t(f"Aún debes esperar {horas_rest}h para volver a contactar a esta empresa",
+                        f"You must wait {horas_rest}h before messaging this company again",
+                        f"您必須等待 {horas_rest} 小時才能再次聯絡此公司"), "warning")
+                return redirect(url_for("mensajes"))
+
+        # 📩 Registrar mensaje nuevo
+        MENSAJES.append({
+            "origen": user["email"],
+            "destino": destino,
+            "contenido": contenido,
+            "fecha": now.strftime("%Y-%m-%d %H:%M")
+        })
+        flash(t("Mensaje enviado correctamente",
+                "Message sent successfully", "訊息已送出"), "success")
         return redirect(url_for("mensajes"))
 
+    # 📬 Mostrar bandejas
     recibidos = [m for m in MENSAJES if m["destino"] == user["email"]]
     enviados = [m for m in MENSAJES if m["origen"] == user["email"]]
+
     return render_template("mensajes.html",
                            user=user,
                            recibidos=recibidos,
