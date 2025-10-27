@@ -2,28 +2,30 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container col-md-6 glass-card p-4 shadow-lg">
-    <h2 class="title-gradient text-center mb-4">📝 {{ t("Nueva Publicación") }}</h2>
+    <h2 class="title-gradient text-center mb-4">
+      <i class="fa-regular fa-rectangle-list"></i> {{ t("Nueva Publicación") }}
+    </h2>
 
     <form method="POST" action="{{ url_for('publicar') }}">
       <!-- Subtipo: Oferta o Demanda -->
       <div class="mb-3">
         <label for="subtipo" class="form-label">{{ t("Selecciona el subtipo") }}</label>
         <select class="form-select" id="subtipo" name="subtipo" required>
-          <option value="oferta">📦 {{ t("Oferta") }}</option>
-          <option value="demanda">📥 {{ t("Demanda") }}</option>
+          <option value="oferta">{{ t("Oferta") }}</option>
+          <option value="demanda">{{ t("Demanda") }}</option>
         </select>
         <small class="text-muted">
           {{ t("Define si estás ofreciendo o solicitando un producto o servicio") }}
         </small>
       </div>
 
-      <!-- Tipo de publicación: controlado según rol -->
+      <!-- Tipo de publicación -->
       <div class="mb-3">
         <label for="tipo_publicacion" class="form-label">{{ t("Tipo de publicación") }}</label>
         <select class="form-select" id="tipo_publicacion" name="tipo_publicacion" required>
-          <option value="venta">💰 {{ t("Venta") }}</option>
-          <option value="compra">🛍️ {{ t("Compra") }}</option>
-          <option value="servicio">⚙️ {{ t("Servicio") }}</option>
+          <option value="venta">{{ t("Venta") }}</option>
+          <option value="compra">{{ t("Compra") }}</option>
+          <option value="servicio">{{ t("Servicio") }}</option>
         </select>
         <small class="text-muted">
           {{ t("Solo se mostrarán opciones válidas según tu rol") }}
@@ -56,7 +58,7 @@
       <!-- Botón -->
       <div class="d-grid">
         <button type="submit" class="btn btn-primary btn-lg">
-          🚀 {{ t("Publicar") }}
+          <i class="fa-solid fa-paper-plane"></i> {{ t("Publicar") }}
         </button>
       </div>
     </form>
@@ -64,21 +66,32 @@
 </section>
 
 <script>
-  // ⚙️ Control dinámico según subtipo y tipo de cuenta (cliente, productor, etc.)
+  // ⚙️ Control dinámico según subtipo (oferta/demanda)
   document.addEventListener("DOMContentLoaded", function() {
     const subtipo = document.getElementById("subtipo");
     const tipoSelect = document.getElementById("tipo_publicacion");
 
+    const txtVenta = "{{ t('Venta') }}";
+    const txtCompra = "{{ t('Compra') }}";
+    const txtServicio = "{{ t('Servicio') }}";
+
+    function opt(value, label, icon) {
+      const o = document.createElement("option");
+      o.value = value;
+      o.textContent = label;
+      o.setAttribute("data-icon", icon);
+      return o;
+    }
+
     function actualizarOpciones() {
       const s = subtipo.value;
       tipoSelect.innerHTML = "";
-
       if (s === "oferta") {
-        tipoSelect.innerHTML += `<option value="venta">💰 {{ t("Venta") }}</option>`;
-        tipoSelect.innerHTML += `<option value="servicio">⚙️ {{ t("Servicio") }}</option>`;
+        tipoSelect.appendChild(opt("venta", txtVenta, "fa-sack-dollar"));
+        tipoSelect.appendChild(opt("servicio", txtServicio, "fa-gears"));
       } else {
-        tipoSelect.innerHTML += `<option value="compra">🛍️ {{ t("Compra") }}</option>`;
-        tipoSelect.innerHTML += `<option value="servicio">⚙️ {{ t("Servicio") }}</option>`;
+        tipoSelect.appendChild(opt("compra", txtCompra, "fa-cart-shopping"));
+        tipoSelect.appendChild(opt("servicio", txtServicio, "fa-gears"));
       }
     }
 
