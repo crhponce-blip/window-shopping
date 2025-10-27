@@ -711,8 +711,7 @@ def logout():
 # ---------------------------------------------------------
 # 🧭 REGISTRO: Router de selección de tipo
 #   (muestra botones → cliente, servicio, compraventa, mixto)
-# 
----------------------------------------------------------
+# ---------------------------------------------------------
 @app.route("/register_router")
 def register_router():
     # Solo muestra la pantalla de selección (usa tu template register_router.html)
