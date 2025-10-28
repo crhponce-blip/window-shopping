@@ -830,13 +830,12 @@ def publicar():
                 "You must log in first", "您必須先登入"), "error")
         return redirect(url_for("login"))
 
-    # 🚫 Validación general de permisos
-       if not puede_publicar(user):
-            flash(t("No tienes permisos para publicar.",
-                    "You do not have permission to publish.",
-                    "無權限發布"), "error")
-            # 🔒 Reenvía al dashboard correspondiente
-            return redirect(url_for(puede_mostrar_dashboard(user)))
+    if not puede_publicar(user):
+        flash(t("No tienes permisos para publicar.",
+                "You do not have permission to publish.",
+                "無權限發布"), "error")
+        # 🔒 Reenvía al dashboard correspondiente
+        return redirect(url_for(puede_mostrar_dashboard(user)))
 
     if request.method == "POST":
         subtipo = (request.form.get("subtipo") or "").strip().lower()      # oferta o demanda
