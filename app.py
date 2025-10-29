@@ -631,51 +631,55 @@ def puede_publicar(usuario):
 
 def puede_ver_publicacion(usuario, publicacion):
     """
-    Reglas de visibilidad:
-    - Exportadores ven DEMANDAS de clientes extranjeros (compra).
-    - Proveedores de servicio (Transporte, Extraportuarios, Aduana, etc.)
-      ven DEMANDAS de SERVICIO cuyo servicio_objetivo coincide con su ROL.
-    - Reglas originales de PERMISOS se mantienen.
+    Reglas de visibilidad mejoradas:
+    - Exportadores pueden ver DEMANDAS de clientes extranjeros.
+    - Proveedores de servicios (Transporte, Aduana, Extraportuarios, etc.)
+      pueden ver DEMANDAS DE SERVICIO cuando el 'servicio_objetivo' coincide con su rol.
+    - Los usuarios de tipo SERVICIO también pueden ver EXPORTADORES y MIXTOS
+      (ya que ofrecen servicios a ellos).
+    - Se mantiene compatibilidad con PERMISOS base.
     """
     if not usuario or not publicacion:
         return False
 
     tipo_u = usuario.get("tipo", "")
     rol_u = usuario.get("rol", "")
-    rol_pub = publicacion.get("rol", "")
     tipo_pub = publicacion.get("tipo", "")
+    rol_pub = publicacion.get("rol", "")
     subtipo = publicacion.get("subtipo", "")
     categoria = publicacion.get("categoria", "")
     objetivo = publicacion.get("servicio_objetivo")
 
     permisos_tipo = PERMISOS.get(tipo_u, {}).get(rol_u, {})
 
-    # ✅ Exportador ve DEMANDAS de compra de clientes extranjeros
+    # 🟢 1. Exportador ve DEMANDAS de compra de clientes extranjeros
     if rol_u == "Exportador" and tipo_pub == "extranjero" and subtipo == "demanda" and categoria == "compra":
         return True
 
-    # ✅ Proveedor de servicio ve DEMANDAS de servicio dirigidas a su rol
+    # 🟢 2. Proveedor de servicio ve DEMANDAS de servicio dirigidas a su rol
     if tipo_u == "servicio" and subtipo == "demanda" and categoria == "servicio" and objetivo:
-        # ejemplo: objetivo == "Extraportuarios" y rol_u == "Extraportuarios"
         if objetivo.strip().lower() == rol_u.strip().lower():
             return True
 
-    # ✅ Reglas base de compra de PRODUCTOS
-    if "puede_comprar_de" in permisos_tipo and rol_pub in permisos_tipo["puede_comprar_de"]:
+    # 🟢 3. Servicios pueden ver exportadores y mixtos (colaboración natural)
+    if tipo_u == "servicio" and tipo_pub in ["compraventa", "mixto"]:
         return True
 
-    # ✅ Reglas base de compra de SERVICIOS
-    if "puede_comprar_servicios" in permisos_tipo and rol_pub in permisos_tipo.get("puede_comprar_servicios", []):
-        return True
-
-    # ✅ Cliente extranjero viendo ofertas de exportadores (venta)
+    # 🟢 4. Cliente extranjero ve ofertas de exportadores (venta)
     if tipo_u == "extranjero" and rol_pub == "Exportador" and categoria == "venta":
         return True
 
-    # ✅ Admin
+    # 🟢 5. Reglas base de compra/servicio según PERMISOS
+    if "puede_comprar_de" in permisos_tipo and rol_pub in permisos_tipo.get("puede_comprar_de", []):
+        return True
+    if "puede_comprar_servicios" in permisos_tipo and rol_pub in permisos_tipo.get("puede_comprar_servicios", []):
+        return True
+
+    # 🟢 6. Admin ve todo
     if rol_u == "Administrador":
         return True
 
+    # 🚫 En cualquier otro caso, denegar visibilidad
     return False
 
 def puede_mostrar_dashboard(usuario):
