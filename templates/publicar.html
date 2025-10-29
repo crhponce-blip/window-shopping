@@ -2,17 +2,15 @@
 {% block content %}
 <section class="fade-in py-5">
   <div class="container col-md-6 glass-card p-4 shadow-lg">
-    <h2 class="title-gradient text-center mb-4">
-      <i class="fa-regular fa-rectangle-list"></i> {{ t("Nueva Publicación") }}
-    </h2>
+    <h2 class="title-gradient text-center mb-4">📝 {{ t("Nueva Publicación") }}</h2>
 
     <form method="POST" action="{{ url_for('publicar') }}">
       <!-- Subtipo: Oferta o Demanda -->
       <div class="mb-3">
         <label for="subtipo" class="form-label">{{ t("Selecciona el subtipo") }}</label>
         <select class="form-select" id="subtipo" name="subtipo" required>
-          <option value="oferta">{{ t("Oferta") }}</option>
-          <option value="demanda">{{ t("Demanda") }}</option>
+          <option value="oferta">📦 {{ t("Oferta") }}</option>
+          <option value="demanda">📥 {{ t("Demanda") }}</option>
         </select>
         <small class="text-muted">
           {{ t("Define si estás ofreciendo o solicitando un producto o servicio") }}
@@ -23,9 +21,9 @@
       <div class="mb-3">
         <label for="tipo_publicacion" class="form-label">{{ t("Tipo de publicación") }}</label>
         <select class="form-select" id="tipo_publicacion" name="tipo_publicacion" required>
-          <option value="venta">{{ t("Venta") }}</option>
-          <option value="compra">{{ t("Compra") }}</option>
-          <option value="servicio">{{ t("Servicio") }}</option>
+          <option value="venta">💰 {{ t("Venta") }}</option>
+          <option value="compra">🛍️ {{ t("Compra") }}</option>
+          <option value="servicio">⚙️ {{ t("Servicio") }}</option>
         </select>
         <small class="text-muted">
           {{ t("Solo se mostrarán opciones válidas según tu rol") }}
@@ -36,7 +34,7 @@
       <div class="form-floating mb-3">
         <input type="text" name="producto" id="producto"
                class="form-control"
-               placeholder="{{ t('Ej: Cereza Lapins 9.5') }}" required>
+               placeholder="{{ t('Ej: Cereza Lapins 9.5 / Flete RM-Valpo') }}" required>
         <label for="producto">{{ t("Nombre del producto o servicio") }}</label>
       </div>
 
@@ -55,10 +53,24 @@
         <label for="precio">{{ t("Precio (opcional)") }}</label>
       </div>
 
+      <!-- 🎯 Servicio objetivo (solo cuando es DEMANDA de SERVICIO) -->
+      <div class="mb-3" id="grupo_objetivo" style="display:none;">
+        <label for="servicio_objetivo" class="form-label">{{ t("Servicio objetivo") }}</label>
+        <select class="form-select" id="servicio_objetivo" name="servicio_objetivo">
+          <option value="">{{ t("Selecciona a quién buscas") }}</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Packing">Packing</option>
+          <option value="Frigorífico">Frigorífico</option>
+          <option value="Extraportuarios">Extraportuarios</option>
+          <option value="Agencia de Aduanas">Agencia de Aduanas</option>
+        </select>
+        <small class="text-muted">{{ t("Solo requerido si estás solicitando un servicio específico") }}</small>
+      </div>
+
       <!-- Botón -->
       <div class="d-grid">
         <button type="submit" class="btn btn-primary btn-lg">
-          <i class="fa-solid fa-paper-plane"></i> {{ t("Publicar") }}
+          🚀 {{ t("Publicar") }}
         </button>
       </div>
     </form>
@@ -66,36 +78,35 @@
 </section>
 
 <script>
-  // ⚙️ Control dinámico según subtipo (oferta/demanda)
   document.addEventListener("DOMContentLoaded", function() {
     const subtipo = document.getElementById("subtipo");
     const tipoSelect = document.getElementById("tipo_publicacion");
-
-    const txtVenta = "{{ t('Venta') }}";
-    const txtCompra = "{{ t('Compra') }}";
-    const txtServicio = "{{ t('Servicio') }}";
-
-    function opt(value, label, icon) {
-      const o = document.createElement("option");
-      o.value = value;
-      o.textContent = label;
-      o.setAttribute("data-icon", icon);
-      return o;
-    }
+    const grupoObjetivo = document.getElementById("grupo_objetivo");
 
     function actualizarOpciones() {
       const s = subtipo.value;
       tipoSelect.innerHTML = "";
+
+      // Extranjero: solo "demanda" de "compra" se permitirá por backend;
+      // aquí mantenemos UI genérica pero el backend valida.
       if (s === "oferta") {
-        tipoSelect.appendChild(opt("venta", txtVenta, "fa-sack-dollar"));
-        tipoSelect.appendChild(opt("servicio", txtServicio, "fa-gears"));
+        tipoSelect.innerHTML += `<option value="venta">💰 {{ t("Venta") }}</option>`;
+        tipoSelect.innerHTML += `<option value="servicio">⚙️ {{ t("Servicio") }}</option>`;
       } else {
-        tipoSelect.appendChild(opt("compra", txtCompra, "fa-cart-shopping"));
-        tipoSelect.appendChild(opt("servicio", txtServicio, "fa-gears"));
+        tipoSelect.innerHTML += `<option value="compra">🛍️ {{ t("Compra") }}</option>`;
+        tipoSelect.innerHTML += `<option value="servicio">⚙️ {{ t("Servicio") }}</option>`;
       }
+      mostrarObjetivo();
+    }
+
+    function mostrarObjetivo() {
+      const esDemanda = subtipo.value === "demanda";
+      const esServicio = tipoSelect.value === "servicio";
+      grupoObjetivo.style.display = (esDemanda && esServicio) ? "block" : "none";
     }
 
     subtipo.addEventListener("change", actualizarOpciones);
+    tipoSelect.addEventListener("change", mostrarObjetivo);
     actualizarOpciones();
   });
 </script>
