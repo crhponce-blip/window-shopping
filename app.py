@@ -865,21 +865,46 @@ def publicar():
                 "You must log in first", "您必須先登入"), "error")
         return redirect(url_for("login"))
 
-    # 🚫 Validación general de permisos para entrar al formulario
+    # 🚫 Validación general de permisos
     if not puede_publicar(user):
         flash(t("No tienes permisos para publicar.",
                 "You do not have permission to publish.",
                 "無權限發布"), "error")
         return redirect(url_for("dashboard_router"))
 
+    # 📘 Diccionario maestro de reglas de publicación
+    REGLAS_PUBLICACION = {
+        "compraventa": {
+            "Productor": {"oferta": ["venta"], "demanda": ["servicio"]},
+            "Packing": {"oferta": ["venta", "servicio"], "demanda": ["compra", "servicio"]},
+            "Frigorífico": {"oferta": ["venta", "servicio"], "demanda": ["compra", "servicio"]},
+            "Exportador": {"oferta": ["venta"], "demanda": ["servicio"]},
+        },
+        "servicio": {
+            "Transporte": {"oferta": ["servicio"], "demanda": []},
+            "Packing": {"oferta": ["servicio"], "demanda": ["servicio"]},
+            "Frigorífico": {"oferta": ["servicio"], "demanda": ["servicio"]},
+            "Extraportuarios": {"oferta": ["servicio"], "demanda": []},
+            "Agencia de Aduanas": {"oferta": ["servicio"], "demanda": []},
+        },
+        "mixto": {
+            "Packing": {"oferta": ["venta", "servicio"], "demanda": ["compra", "servicio"]},
+            "Frigorífico": {"oferta": ["venta", "servicio"], "demanda": ["compra", "servicio"]},
+        },
+        "extranjero": {
+            "Cliente Extranjero": {"oferta": [], "demanda": ["compra"]},
+        },
+    }
+
+    tipo = user.get("tipo", "")
+    rol = user.get("rol", "")
+
     if request.method == "POST":
-        subtipo = (request.form.get("subtipo") or "").strip().lower()           # oferta | demanda
-        categoria = (request.form.get("tipo_publicacion") or "").strip().lower()# compra | venta | servicio
+        subtipo = (request.form.get("subtipo") or "").strip().lower()            # oferta | demanda
+        categoria = (request.form.get("tipo_publicacion") or "").strip().lower() # venta | compra | servicio
         producto = (request.form.get("producto") or "").strip()
         descripcion = (request.form.get("descripcion") or "").strip()
         precio = (request.form.get("precio") or "").strip() or "Consultar"
-
-        # Nuevo: objetivo del servicio cuando es DEMANDA de SERVICIO
         servicio_objetivo = (request.form.get("servicio_objetivo") or "").strip()
 
         if not subtipo or not categoria or not producto or not descripcion:
@@ -887,55 +912,21 @@ def publicar():
                     "Complete all required fields", "請填寫所有必填欄位"), "error")
             return redirect(url_for("publicar"))
 
-        rol = user.get("rol", "")
-        tipo = user.get("tipo", "")
-        valido = False
+        # ✅ Validación de reglas
+        reglas_tipo = REGLAS_PUBLICACION.get(tipo, {}).get(rol, {})
+        categorias_validas = reglas_tipo.get(subtipo, [])
 
-        # --- Extranjero: SOLO DEMANDA de COMPRA ---
-        if tipo == "extranjero" and rol == "Cliente Extranjero":
-            if subtipo == "demanda" and categoria == "compra":
-                valido = True
-
-        # --- Servicio: OFERTA de servicio; DEMANDA de servicio (para buscar subcontratar) ---
-        elif tipo == "servicio":
-            if categoria == "servicio" and subtipo in ["oferta", "demanda"]:
-                # Si es DEMANDA de servicio, debe indicar a quién busca
-                if subtipo == "demanda" and not servicio_objetivo:
-                    flash(t("Debes indicar el servicio objetivo",
-                            "You must select target service", "請選擇需求服務對象"), "error")
-                    return redirect(url_for("publicar"))
-                valido = True
-
-        # --- Compraventa / Mixto ---
-        elif tipo in ["compraventa", "mixto"]:
-            if rol == "Productor":
-                # Oferta: venta de fruta propia; Demanda: servicios
-                if (subtipo == "oferta" and categoria == "venta") or \
-                   (subtipo == "demanda" and categoria == "servicio"):
-                    valido = True
-            elif rol in ["Packing", "Frigorífico"]:
-                # Pueden vender producto/servicio y demandar compra/servicio
-                if (subtipo == "oferta" and categoria in ["venta", "servicio"]) or \
-                   (subtipo == "demanda" and categoria in ["compra", "servicio"]):
-                    valido = True
-            elif rol == "Exportador":
-                # Ofertar venta de producto; demandar servicios (transporte/aduana/extraportuarios/…)
-                if (subtipo == "oferta" and categoria == "venta") or \
-                   (subtipo == "demanda" and categoria == "servicio"):
-                    if subtipo == "demanda" and not servicio_objetivo:
-                        flash(t("Debes indicar el servicio objetivo",
-                                "You must select target service", "請選擇需求服務對象"), "error")
-                        return redirect(url_for("publicar"))
-                    valido = True
-            else:
-                # Mixto con otros roles: permitido
-                valido = True
-
-        if not valido:
+        if categoria not in categorias_validas:
             flash(t("Tu rol no permite publicar este tipo de anuncio.",
                     "Your role does not allow this publication type.",
                     "您的角色無法發布此類型的公告。"), "error")
             return redirect(url_for("dashboard_router"))
+
+        # 🚧 Validación extra: si es demanda de servicio, debe elegir objetivo
+        if subtipo == "demanda" and categoria == "servicio" and not servicio_objetivo:
+            flash(t("Debes indicar el servicio objetivo",
+                    "You must select target service", "請選擇需求服務對象"), "error")
+            return redirect(url_for("publicar"))
 
         # ✅ Crear publicación
         nueva = {
@@ -958,10 +949,14 @@ def publicar():
                 "Post created successfully", "發布成功"), "success")
         return redirect(url_for("dashboard_router"))
 
-    # GET
-    return render_template("publicar.html",
-                           user=user,
-                           titulo=t("Nueva Publicación"))
+    # GET → construir contexto dinámico para template
+    opciones = REGLAS_PUBLICACION.get(tipo, {}).get(rol, {})
+    return render_template(
+        "publicar.html",
+        user=user,
+        titulo=t("Nueva Publicación"),
+        opciones=opciones
+    )
 
 @app.route("/publicacion/eliminar/<pub_id>")
 def eliminar_publicacion(pub_id):
@@ -1083,16 +1078,16 @@ def clientes():
     if not user:
         return redirect(url_for("login"))
 
-    filtro = request.args.get("filtro", "").strip().lower()
+    filtro = (request.args.get("filtro") or "").strip().lower()
     ocultos = HIDDEN_COMPANIES.get(user["email"], set())
+    visibles = []
 
-    # 🔎 Corrección: también considerar publicaciones relevantes para el usuario actual
+    # 🔎 Considerar publicaciones relevantes (demanda/oferta relacionadas con mi rol)
     relevantes_por_pub = set()
     for p in PUBLICACIONES:
         if puede_ver_publicacion(user, p):
             relevantes_por_pub.add(p["usuario"])
 
-    visibles = []
     for email, info in USERS.items():
         if info["email"] == user["email"]:
             continue
@@ -1100,39 +1095,60 @@ def clientes():
         if username in ocultos:
             continue
 
-        # Filtro UI simple (opcional)
+        # --- FILTRO UI (opcional) ---
         if filtro:
             if filtro == "venta" and info["tipo"] not in ["compraventa", "mixto"]:
                 continue
-            if filtro == "compra" and info["rol"].lower() not in ["productor", "frigorífico", "packing"]:
+            if filtro == "compra" and info["rol"].lower() not in ["productor", "frigorífico", "packing", "exportador"]:
                 continue
             if filtro == "servicio" and info["tipo"] != "servicio":
                 continue
 
-        # ✅ Mostrar si:
-        #   a) Por reglas generales puede verse ese rol/tipo
-        #   b) O el usuario tiene alguna publicación relevante para mí
-        if puede_ver_publicacion(user, {"rol": info["rol"], "tipo": info["tipo"]}) or email in relevantes_por_pub:
+        # --- VISIBILIDAD SEGÚN PERMISOS ---
+        puede_ver = puede_ver_publicacion(user, {"rol": info["rol"], "tipo": info["tipo"]})
+        # Extra: si soy proveedor de servicio, ver exportadores que pidieron mi servicio
+        relacionado = email in relevantes_por_pub
+
+        if puede_ver or relacionado:
             visibles.append(info)
+
+    # 🔧 Ordenar alfabéticamente por nombre de empresa
+    visibles.sort(key=lambda x: x.get("empresa", "").lower())
 
     return render_template(
         "clientes.html",
         user=user,
         clientes=visibles,
-        titulo=t("Empresas Registradas"),
+        titulo=t("Empresas y Servicios Disponibles"),
         filtro=filtro
     )
 
+# ---------------------------------------------------------
+# 🏢 DETALLE DE EMPRESA
+# ---------------------------------------------------------
 @app.route("/clientes/<username>")
 def cliente_detalle(username):
     username = (username or "").lower().strip()
-    email_map = {u["username"]: e for e, u in USERS.items()}
+    email_map = {u.get("username", "").lower(): e for e, u in USERS.items()}
     email = email_map.get(username)
     if not email or email not in USERS:
-        abort(404)
+        flash(t("La empresa solicitada no fue encontrada",
+                "Requested company not found", "找不到該公司"), "warning")
+        return redirect(url_for("clientes"))
 
     c = USERS[email]
     user = get_user()
+
+    # 🚫 Validación de permisos de visualización
+    if user and not puede_ver_publicacion(user, {"rol": c["rol"], "tipo": c["tipo"]}):
+        flash(t("No tienes permiso para visualizar esta empresa",
+                "You are not allowed to view this company", "您無權查看此公司"), "error")
+        return redirect(url_for("clientes"))
+
+    # 🧩 Fallback seguro: si no hay items definidos
+    if not c.get("items"):
+        c["items"] = []
+
     return render_template(
         "cliente_detalle.html",
         user=user,
