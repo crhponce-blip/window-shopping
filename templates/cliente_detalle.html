@@ -28,12 +28,10 @@
 
                 {% if session.get('user') %}
                   {% set u = session.get('user') %}
-                  {# Fallback seguro de username -> usa c.username o la parte local del email #}
                   {% set uname = (c.username or (c.email.split('@')[0] if c.email else 'empresa'))|lower %}
                   {% set idx = loop.index|string %}
                   {% if u.tipo in ['extranjero', 'compraventa', 'mixto'] and c.tipo in ['compraventa', 'servicio', 'mixto'] %}
-                    <a href="{{ url_for('carrito_agregar', pub_id='direct-' + uname + '-' + idx) }}"
-                       class="btn btn-success btn-sm mt-2 mt-md-0">
+                    <a href="{{ url_for('carrito_agregar', pub_id='direct-' + uname + '-' + idx) }}" class="btn btn-success btn-sm mt-2 mt-md-0">
                       <i class="fa-solid fa-cart-plus"></i> {{ t("Agregar al carrito") }}
                     </a>
                   {% endif %}
@@ -46,7 +44,7 @@
           {% endif %}
         </div>
 
-        <!-- 💬 Panel lateral de contacto -->
+        <!-- 💬 Panel lateral -->
         <div class="col-md-4 mt-4 mt-md-0">
           <div class="card glass-card shadow-sm">
             <div class="card-body">
@@ -87,13 +85,11 @@
           </div>
         </div>
       </div>
-
     {% else %}
       <p class="text-center text-muted fs-5">
         {{ t("No se encontró la empresa solicitada o fue eliminada de tu vista.") }}
       </p>
     {% endif %}
-
   </div>
 </section>
 {% endblock %}
