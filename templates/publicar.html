@@ -5,47 +5,48 @@
     <h2 class="title-gradient text-center mb-4">📝 {{ t("Nueva Publicación") }}</h2>
 
     <form method="POST" action="{{ url_for('publicar') }}">
-      <!-- Subtipo -->
+      <!-- 🔹 Subtipo (Oferta / Demanda) -->
       <div class="mb-3">
         <label for="subtipo" class="form-label">{{ t("Selecciona el subtipo") }}</label>
         <select class="form-select" id="subtipo" name="subtipo" required>
-          <option value="oferta">📦 {{ t("Oferta") }}</option>
-          <option value="demanda">📥 {{ t("Demanda") }}</option>
+          {% for s in subtipo_permitidos %}
+          <option value="{{ s }}">{{ "📦" if s == "oferta" else "📥" }} {{ t(s|capitalize) }}</option>
+          {% endfor %}
         </select>
         <small class="text-muted">
           {{ t("Define si estás ofreciendo o solicitando un producto o servicio") }}
         </small>
       </div>
 
-      <!-- Tipo de publicación -->
+      <!-- 🔹 Tipo de publicación -->
       <div class="mb-3">
         <label for="tipo_publicacion" class="form-label">{{ t("Tipo de publicación") }}</label>
         <select class="form-select" id="tipo_publicacion" name="tipo_publicacion" required>
-          {% if opciones %}
-            {% for subtipo, cats in opciones.items() %}
-              {% for cat in cats %}
-                <option value="{{ cat }}">{{ t(cat|capitalize) }}</option>
-              {% endfor %}
-            {% endfor %}
+          {% for tipo in tipos_publicacion %}
+          {% if tipo == "venta" %}
+          <option value="venta">💰 {{ t("Venta") }}</option>
+          {% elif tipo == "compra" %}
+          <option value="compra">🛍️ {{ t("Compra") }}</option>
+          {% elif tipo == "servicio" %}
+          <option value="servicio">⚙️ {{ t("Servicio") }}</option>
           {% else %}
-            <option value="venta">💰 {{ t("Venta") }}</option>
-            <option value="compra">🛍️ {{ t("Compra") }}</option>
-            <option value="servicio">⚙️ {{ t("Servicio") }}</option>
+          <option value="{{ tipo }}">{{ t(tipo|capitalize) }}</option>
           {% endif %}
+          {% endfor %}
         </select>
         <small class="text-muted">
-          {{ t("Solo se mostrarán opciones válidas según tu rol") }}
+          {{ t("Solo se mostrarán opciones válidas según tu tipo de cuenta") }}
         </small>
       </div>
 
-      <!-- Nombre -->
+      <!-- 🔹 Nombre -->
       <div class="form-floating mb-3">
         <input type="text" name="producto" id="producto" class="form-control"
                placeholder="{{ t('Ej: Cereza Lapins 9.5 / Flete RM-Valpo') }}" required>
         <label for="producto">{{ t("Nombre del producto o servicio") }}</label>
       </div>
 
-      <!-- Descripción -->
+      <!-- 🔹 Descripción -->
       <div class="form-floating mb-3">
         <textarea name="descripcion" id="descripcion" class="form-control"
                   placeholder="{{ t('Describe brevemente tu oferta o solicitud...') }}"
@@ -53,13 +54,13 @@
         <label for="descripcion">{{ t("Descripción") }}</label>
       </div>
 
-      <!-- Precio -->
+      <!-- 🔹 Precio -->
       <div class="form-floating mb-3">
         <input type="text" name="precio" id="precio" class="form-control" placeholder="USD 1.00/kg">
         <label for="precio">{{ t("Precio (opcional)") }}</label>
       </div>
 
-      <!-- 🎯 Servicio objetivo -->
+      <!-- 🔹 Servicio objetivo (solo si es demanda de servicio) -->
       <div class="mb-3" id="grupo_objetivo" style="display:none;">
         <label for="servicio_objetivo" class="form-label">{{ t("Servicio objetivo") }}</label>
         <select class="form-select" id="servicio_objetivo" name="servicio_objetivo">
@@ -70,10 +71,12 @@
           <option value="Extraportuarios">{{ t("Extraportuarios") }}</option>
           <option value="Agencia de Aduanas">{{ t("Agencia de Aduanas") }}</option>
         </select>
-        <small class="text-muted">{{ t("Solo requerido si estás solicitando un servicio específico") }}</small>
+        <small class="text-muted">
+          {{ t("Solo requerido si estás solicitando un servicio específico") }}
+        </small>
       </div>
 
-      <!-- Botón -->
+      <!-- 🔘 Botón de envío -->
       <div class="d-grid">
         <button type="submit" class="btn btn-primary btn-lg">🚀 {{ t("Publicar") }}</button>
       </div>
@@ -81,6 +84,7 @@
   </div>
 </section>
 
+<!-- 💡 Lógica dinámica para mostrar/ocultar campos -->
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     const subtipo = document.getElementById("subtipo");
@@ -88,7 +92,9 @@
     const grupoObjetivo = document.getElementById("grupo_objetivo");
 
     function mostrarObjetivo() {
-      grupoObjetivo.style.display = (subtipo.value === "demanda" && tipoSelect.value === "servicio") ? "block" : "none";
+      const esDemanda = subtipo.value === "demanda";
+      const esServicio = tipoSelect.value === "servicio";
+      grupoObjetivo.style.display = (esDemanda && esServicio) ? "block" : "none";
     }
 
     subtipo.addEventListener("change", mostrarObjetivo);
