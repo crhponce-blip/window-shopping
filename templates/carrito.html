@@ -32,10 +32,24 @@
         </tbody>
       </table>
 
-      <div class="text-center mt-4">
-        <form method="POST" action="{{ url_for('carrito_vaciar') }}">
+      <!-- Acciones del carrito -->
+      <div class="d-flex flex-column flex-md-row gap-2 justify-content-between align-items-center mt-3">
+        <form method="POST" action="{{ url_for('carrito_vaciar') }}" class="m-0">
           <button type="submit" class="btn btn-outline-light px-4">🧹 {{ t("Vaciar carrito") }}</button>
         </form>
+
+        <!-- Botón Comprar (mock deshabilitado) -->
+        <div class="text-end">
+          <button type="button"
+                  class="btn btn-success btn-lg"
+                  disabled
+                  title="{{ t('Requiere validación y permisos para operar') }}">
+            ✅ {{ t("Comprar") }}
+          </button>
+          <div class="form-text text-muted text-end">
+            {{ t("Botón visible a modo demostrativo. La compra requiere flujo de permisos, contrato y pago.") }}
+          </div>
+        </div>
       </div>
     {% else %}
       <p class="text-center text-muted fs-5 my-5">{{ t("Tu carrito está vacío por ahora.") }}</p>
