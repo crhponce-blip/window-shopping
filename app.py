@@ -605,40 +605,75 @@ PERMISOS = {
 # ⚙️ HELPERS DE LÓGICA GENERAL
 # ---------------------------------------------------------
 def puede_publicar(usuario):
-    """Determina si el usuario puede publicar productos o servicios."""
+    """Determina si el usuario puede publicar (reglas amplían a servicio y extranjero)."""
     if not usuario:
         return False
     rol = usuario.get("rol", "")
     tipo = usuario.get("tipo", "")
-    # Solo usuarios de compraventa o mixtos pueden publicar
-    return tipo in ["compraventa", "mixto"] or rol in ["Exportador", "Productor"]
+
+    # ✅ Compraventa y Mixto (oferta/demanda de productos y servicios)
+    if tipo in ["compraventa", "mixto"]:
+        return True
+
+    # ✅ Servicio: pueden publicar OFERTA de servicios; DEMANDA opcionalmente (según validación)
+    if tipo == "servicio":
+        return True
+
+    # ✅ Extranjero: pueden publicar DEMANDA de COMPRA (lo que buscan comprar)
+    if tipo == "extranjero" and rol == "Cliente Extranjero":
+        return True
+
+    # Admin siempre
+    if rol == "Administrador":
+        return True
+
+    return False
 
 def puede_ver_publicacion(usuario, publicacion):
-    """Valida si el usuario puede ver una publicación según su tipo y rol."""
+    """
+    Reglas de visibilidad:
+    - Exportadores ven DEMANDAS de clientes extranjeros (compra).
+    - Proveedores de servicio (Transporte, Extraportuarios, Aduana, etc.)
+      ven DEMANDAS de SERVICIO cuyo servicio_objetivo coincide con su ROL.
+    - Reglas originales de PERMISOS se mantienen.
+    """
     if not usuario or not publicacion:
         return False
 
-    tipo_usuario = usuario.get("tipo", "")
-    rol_usuario = usuario.get("rol", "")
-    rol_publicador = publicacion.get("rol", "")
-    tipo_publicador = publicacion.get("tipo", "")
+    tipo_u = usuario.get("tipo", "")
+    rol_u = usuario.get("rol", "")
+    rol_pub = publicacion.get("rol", "")
+    tipo_pub = publicacion.get("tipo", "")
+    subtipo = publicacion.get("subtipo", "")
+    categoria = publicacion.get("categoria", "")
+    objetivo = publicacion.get("servicio_objetivo")
 
-    permisos_tipo = PERMISOS.get(tipo_usuario, {}).get(rol_usuario, {})
+    permisos_tipo = PERMISOS.get(tipo_u, {}).get(rol_u, {})
 
-    # Caso 1: puede comprar productos
-    if "puede_comprar_de" in permisos_tipo and rol_publicador in permisos_tipo["puede_comprar_de"]:
+    # ✅ Exportador ve DEMANDAS de compra de clientes extranjeros
+    if rol_u == "Exportador" and tipo_pub == "extranjero" and subtipo == "demanda" and categoria == "compra":
         return True
 
-    # Caso 2: puede comprar servicios
-    if "puede_comprar_servicios" in permisos_tipo and rol_publicador in permisos_tipo["puede_comprar_servicios"]:
+    # ✅ Proveedor de servicio ve DEMANDAS de servicio dirigidas a su rol
+    if tipo_u == "servicio" and subtipo == "demanda" and categoria == "servicio" and objetivo:
+        # ejemplo: objetivo == "Extraportuarios" y rol_u == "Extraportuarios"
+        if objetivo.strip().lower() == rol_u.strip().lower():
+            return True
+
+    # ✅ Reglas base de compra de PRODUCTOS
+    if "puede_comprar_de" in permisos_tipo and rol_pub in permisos_tipo["puede_comprar_de"]:
         return True
 
-    # Caso 3: cliente extranjero
-    if tipo_usuario == "extranjero":
-        return rol_publicador in ["Exportador"]
+    # ✅ Reglas base de compra de SERVICIOS
+    if "puede_comprar_servicios" in permisos_tipo and rol_pub in permisos_tipo.get("puede_comprar_servicios", []):
+        return True
 
-    # Caso 4: admin
-    if rol_usuario == "Administrador":
+    # ✅ Cliente extranjero viendo ofertas de exportadores (venta)
+    if tipo_u == "extranjero" and rol_pub == "Exportador" and categoria == "venta":
+        return True
+
+    # ✅ Admin
+    if rol_u == "Administrador":
         return True
 
     return False
@@ -830,19 +865,22 @@ def publicar():
                 "You must log in first", "您必須先登入"), "error")
         return redirect(url_for("login"))
 
+    # 🚫 Validación general de permisos para entrar al formulario
     if not puede_publicar(user):
         flash(t("No tienes permisos para publicar.",
                 "You do not have permission to publish.",
                 "無權限發布"), "error")
-        # 🔒 Reenvía al dashboard correspondiente
-        return redirect(url_for(puede_mostrar_dashboard(user)))
+        return redirect(url_for("dashboard_router"))
 
     if request.method == "POST":
-        subtipo = (request.form.get("subtipo") or "").strip().lower()      # oferta o demanda
-        categoria = (request.form.get("tipo_publicacion") or "").strip().lower()  # compra, venta o servicio
+        subtipo = (request.form.get("subtipo") or "").strip().lower()           # oferta | demanda
+        categoria = (request.form.get("tipo_publicacion") or "").strip().lower()# compra | venta | servicio
         producto = (request.form.get("producto") or "").strip()
         descripcion = (request.form.get("descripcion") or "").strip()
         precio = (request.form.get("precio") or "").strip() or "Consultar"
+
+        # Nuevo: objetivo del servicio cuando es DEMANDA de SERVICIO
+        servicio_objetivo = (request.form.get("servicio_objetivo") or "").strip()
 
         if not subtipo or not categoria or not producto or not descripcion:
             flash(t("Completa todos los campos requeridos",
@@ -851,35 +889,47 @@ def publicar():
 
         rol = user.get("rol", "")
         tipo = user.get("tipo", "")
-
-        # 🔒 Validaciones según tipo y rol
         valido = False
 
-        # --- Productor ---
-        if rol == "Productor" and tipo == "compraventa":
-            if subtipo == "oferta" and categoria == "venta":
-                valido = True
-            elif subtipo == "demanda" and categoria == "servicio":
+        # --- Extranjero: SOLO DEMANDA de COMPRA ---
+        if tipo == "extranjero" and rol == "Cliente Extranjero":
+            if subtipo == "demanda" and categoria == "compra":
                 valido = True
 
-        # --- Packing / Frigorífico ---
-        elif rol in ["Packing", "Frigorífico"]:
-            if tipo in ["compraventa", "mixto"]:
-                if subtipo == "oferta" and categoria in ["venta", "servicio"]:
+        # --- Servicio: OFERTA de servicio; DEMANDA de servicio (para buscar subcontratar) ---
+        elif tipo == "servicio":
+            if categoria == "servicio" and subtipo in ["oferta", "demanda"]:
+                # Si es DEMANDA de servicio, debe indicar a quién busca
+                if subtipo == "demanda" and not servicio_objetivo:
+                    flash(t("Debes indicar el servicio objetivo",
+                            "You must select target service", "請選擇需求服務對象"), "error")
+                    return redirect(url_for("publicar"))
+                valido = True
+
+        # --- Compraventa / Mixto ---
+        elif tipo in ["compraventa", "mixto"]:
+            if rol == "Productor":
+                # Oferta: venta de fruta propia; Demanda: servicios
+                if (subtipo == "oferta" and categoria == "venta") or \
+                   (subtipo == "demanda" and categoria == "servicio"):
                     valido = True
-                elif subtipo == "demanda" and categoria in ["compra", "servicio"]:
+            elif rol in ["Packing", "Frigorífico"]:
+                # Pueden vender producto/servicio y demandar compra/servicio
+                if (subtipo == "oferta" and categoria in ["venta", "servicio"]) or \
+                   (subtipo == "demanda" and categoria in ["compra", "servicio"]):
                     valido = True
-
-        # --- Exportador ---
-        elif rol == "Exportador":
-            if subtipo == "oferta" and categoria == "venta":
+            elif rol == "Exportador":
+                # Ofertar venta de producto; demandar servicios (transporte/aduana/extraportuarios/…)
+                if (subtipo == "oferta" and categoria == "venta") or \
+                   (subtipo == "demanda" and categoria == "servicio"):
+                    if subtipo == "demanda" and not servicio_objetivo:
+                        flash(t("Debes indicar el servicio objetivo",
+                                "You must select target service", "請選擇需求服務對象"), "error")
+                        return redirect(url_for("publicar"))
+                    valido = True
+            else:
+                # Mixto con otros roles: permitido
                 valido = True
-            elif subtipo == "demanda" and categoria == "servicio":
-                valido = True
-
-        # --- Mixtos: todo lo anterior permitido ---
-        elif tipo == "mixto":
-            valido = True
 
         if not valido:
             flash(t("Tu rol no permite publicar este tipo de anuncio.",
@@ -899,6 +949,7 @@ def publicar():
             "producto": producto,
             "descripcion": descripcion,
             "precio": precio,
+            "servicio_objetivo": servicio_objetivo if (subtipo == "demanda" and categoria == "servicio") else "",
             "fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
         }
         PUBLICACIONES.append(nueva)
@@ -907,7 +958,7 @@ def publicar():
                 "Post created successfully", "發布成功"), "success")
         return redirect(url_for("dashboard_router"))
 
-    # Si es GET: renderizar el formulario
+    # GET
     return render_template("publicar.html",
                            user=user,
                            titulo=t("Nueva Publicación"))
@@ -1032,19 +1083,24 @@ def clientes():
     if not user:
         return redirect(url_for("login"))
 
-    # 🔽 Nuevo: filtro por tipo de empresa
     filtro = request.args.get("filtro", "").strip().lower()
     ocultos = HIDDEN_COMPANIES.get(user["email"], set())
-    visibles = []
 
-    for _, info in USERS.items():
+    # 🔎 Corrección: también considerar publicaciones relevantes para el usuario actual
+    relevantes_por_pub = set()
+    for p in PUBLICACIONES:
+        if puede_ver_publicacion(user, p):
+            relevantes_por_pub.add(p["usuario"])
+
+    visibles = []
+    for email, info in USERS.items():
         if info["email"] == user["email"]:
             continue
         username = info.get("username", "").lower()
         if username in ocultos:
             continue
 
-        # Aplica filtro si está seleccionado
+        # Filtro UI simple (opcional)
         if filtro:
             if filtro == "venta" and info["tipo"] not in ["compraventa", "mixto"]:
                 continue
@@ -1053,7 +1109,10 @@ def clientes():
             if filtro == "servicio" and info["tipo"] != "servicio":
                 continue
 
-        if puede_ver_publicacion(user, {"rol": info["rol"], "tipo": info["tipo"]}):
+        # ✅ Mostrar si:
+        #   a) Por reglas generales puede verse ese rol/tipo
+        #   b) O el usuario tiene alguna publicación relevante para mí
+        if puede_ver_publicacion(user, {"rol": info["rol"], "tipo": info["tipo"]}) or email in relevantes_por_pub:
             visibles.append(info)
 
     return render_template(
