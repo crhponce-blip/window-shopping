@@ -1052,46 +1052,102 @@ def clientes():
     ocultos = HIDDEN_COMPANIES.get(user["email"], set())
     visibles = []
 
-    # 🔎 Considerar publicaciones relevantes (demanda/oferta relacionadas con mi rol)
-    relevantes_por_pub = set()
-    for p in PUBLICACIONES:
-        if puede_ver_publicacion(user, p):
-            relevantes_por_pub.add(p["usuario"])
+    tipo_u = user.get("tipo", "")
+    rol_u = user.get("rol", "")
 
+    def incluir_empresa(info):
+        tipo = info.get("tipo", "")
+        rol = info.get("rol", "")
+
+        # 🔹 COMPRAVENTA
+        if tipo_u == "compraventa":
+            if rol_u == "Productor":
+                if filtro == "compra" and rol in ["Packing", "Frigorífico", "Exportador"]:
+                    return True
+                if filtro == "servicio" and rol in ["Transporte", "Packing", "Frigorífico"]:
+                    return True
+            elif rol_u == "Packing":
+                if filtro == "compra" and rol in ["Frigorífico", "Exportador"]:
+                    return True
+                if filtro == "venta" and rol in ["Productor", "Frigorífico"]:
+                    return True
+                if filtro == "servicio" and rol in ["Transporte", "Frigorífico"]:
+                    return True
+            elif rol_u == "Frigorífico":
+                if filtro == "compra" and rol in ["Packing", "Exportador"]:
+                    return True
+                if filtro == "venta" and rol in ["Productor", "Packing"]:
+                    return True
+                if filtro == "servicio" and rol in ["Transporte", "Packing"]:
+                    return True
+            elif rol_u == "Exportador":
+                if filtro == "compra" and rol in ["Exportador", "Cliente Extranjero"]:
+                    return True
+                if filtro == "venta" and rol in ["Productor", "Packing", "Frigorífico", "Exportador"]:
+                    return True
+                if filtro == "servicio" and rol in ["Transporte", "Packing", "Frigorífico", "Extraportuarios", "Agencia de Aduanas"]:
+                    return True
+
+        # 🔹 SERVICIOS
+        elif tipo_u == "servicio":
+            if rol_u == "Transporte":
+                if filtro == "servicio" and rol in ["Productor", "Packing", "Frigorífico", "Exportador"]:
+                    return True
+            elif rol_u == "Packing":
+                if filtro == "servicio" and rol in ["Productor", "Frigorífico", "Exportador", "Transporte"]:
+                    return True
+            elif rol_u == "Frigorífico":
+                if filtro == "servicio" and rol in ["Productor", "Packing", "Exportador", "Transporte"]:
+                    return True
+            elif rol_u in ["Extraportuarios", "Agencia de Aduanas"]:
+                if filtro == "servicio" and rol == "Exportador":
+                    return True
+
+        # 🔹 MIXTO
+        elif tipo_u == "mixto":
+            if rol_u == "Frigorífico":
+                if filtro == "servicio" and rol in ["Productor", "Packing", "Exportador", "Transporte"]:
+                    return True
+                if filtro == "compra" and rol in ["Packing", "Exportador"]:
+                    return True
+                if filtro == "venta" and rol in ["Productor", "Packing"]:
+                    return True
+            elif rol_u == "Packing":
+                if filtro == "servicio" and rol in ["Productor", "Frigorífico", "Exportador", "Transporte"]:
+                    return True
+                if filtro == "compra" and rol in ["Frigorífico", "Exportador"]:
+                    return True
+                if filtro == "venta" and rol in ["Productor", "Frigorífico"]:
+                    return True
+
+        # 🔹 CLIENTE EXTRANJERO
+        elif tipo_u == "extranjero" and rol_u == "Cliente Extranjero":
+            if filtro == "venta" and rol == "Exportador":
+                return True
+
+        return False
+
+    # 🔎 Recorrer empresas visibles
     for email, info in USERS.items():
         if info["email"] == user["email"]:
             continue
         username = info.get("username", "").lower()
         if username in ocultos:
             continue
+        if not filtro:
+            # Si no hay filtro, mostrar solo las que pueda ver por permisos básicos
+            if puede_ver_publicacion(user, {"rol": info["rol"], "tipo": info["tipo"]}):
+                visibles.append(info)
+        else:
+            if incluir_empresa(info):
+                visibles.append(info)
 
-        # --- FILTRO UI (opcional) ---
-        if filtro:
-            if filtro == "venta" and info["tipo"] not in ["compraventa", "mixto"]:
-                continue
-            if filtro == "compra" and info["rol"].lower() not in ["productor", "frigorífico", "packing", "exportador"]:
-                continue
-            if filtro == "servicio" and info["tipo"] != "servicio":
-                continue
-
-        # --- VISIBILIDAD SEGÚN PERMISOS ---
-        puede_ver = puede_ver_publicacion(user, {"rol": info["rol"], "tipo": info["tipo"]})
-        # Extra: si soy proveedor de servicio, ver exportadores que pidieron mi servicio
-        relacionado = email in relevantes_por_pub
-
-        if puede_ver or relacionado:
-            visibles.append(info)
-
-    # 🔧 Ordenar alfabéticamente por nombre de empresa
     visibles.sort(key=lambda x: x.get("empresa", "").lower())
-
-    return render_template(
-        "clientes.html",
-        user=user,
-        clientes=visibles,
-        titulo=t("Empresas y Servicios Disponibles"),
-        filtro=filtro
-    )
+    return render_template("clientes.html",
+                           user=user,
+                           clientes=visibles,
+                           titulo=t("Empresas y Servicios Disponibles"),
+                           filtro=filtro)
 
 # ---------------------------------------------------------
 # 🏢 DETALLE DE EMPRESA
