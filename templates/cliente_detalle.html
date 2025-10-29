@@ -16,9 +16,9 @@
 
           <!-- 🏷️ Productos / Servicios -->
           <h5 class="mt-4 mb-3">{{ t("Productos o Servicios disponibles") }}</h5>
-          {% if c.items and c.items|length > 0 %}
+          {% if items and items|length > 0 %}
             <div class="list-group mb-4">
-              {% for item in c.items %}
+              {% for item in items %}
               <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
                 <div>
                   <h6 class="mb-1">{{ item.nombre }}</h6>
@@ -30,14 +30,26 @@
                   {% set u = session.get('user') %}
                   {% set uname = (c.username or (c.email.split('@')[0] if c.email else 'empresa'))|lower %}
                   {% set idx = loop.index|string %}
+
                   {% if u.tipo in ['extranjero', 'compraventa', 'mixto'] and c.tipo in ['compraventa', 'servicio', 'mixto'] %}
-                    <a href="{{ url_for('carrito_agregar', pub_id='direct-' + uname + '-' + idx) }}" class="btn btn-success btn-sm mt-2 mt-md-0">
+                    <a href="{{ url_for('carrito_agregar', pub_id='direct-' + uname + '-' + idx) }}"
+                       class="btn btn-success btn-sm mt-2 mt-md-0">
                       <i class="fa-solid fa-cart-plus"></i> {{ t("Agregar al carrito") }}
                     </a>
                   {% endif %}
                 {% endif %}
               </div>
               {% endfor %}
+            </div>
+
+            <!-- 🛒 Botón de compra simbólico -->
+            <div class="text-center mt-3">
+              <button type="button" class="btn btn-outline-secondary px-4" disabled>
+                💳 {{ t("Comprar (no disponible aún)") }}
+              </button>
+              <small class="d-block text-muted mt-1">
+                {{ t("La función de compra estará disponible en futuras versiones.") }}
+              </small>
             </div>
           {% else %}
             <p class="text-muted">{{ t("No hay productos o servicios publicados por esta empresa.") }}</p>
@@ -85,6 +97,7 @@
           </div>
         </div>
       </div>
+
     {% else %}
       <p class="text-center text-muted fs-5">
         {{ t("No se encontró la empresa solicitada o fue eliminada de tu vista.") }}
